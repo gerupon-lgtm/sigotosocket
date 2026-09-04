@@ -1,0 +1,93 @@
+﻿尺度（日本語）,尺度（原文）,CISS対応（日本語）,CISS対応（原文）,Holland対応（日本語）,Holland対応（原文）,項目番号,設問（採用した日本語訳）,設問（原文）,因子負荷量（大学生サンプル・左）,因子負荷量（地域サンプル・右）
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,1,重要なことを実現する,Make important things happen,0.54,0.37
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,9,他の人を率いる,Lead other people,0.71,0.43
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,17,営業またはマーケティング部門の責任者になる,Be a sales or marketing director,0.42,0.45
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,25,大企業の最高経営責任者になる,Be the chief executive of a large company,0.63,0.52
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,33,政治キャンペーンを企画・運営する,Organize a political campaign,0.43,0.65
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,41,会議で司会を務める,Be the master of ceremonies at a meeting,0.59,0.37
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,49,広告キャンペーンを企画する,Plan an advertising campaign,0.43,0.54
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,57,公開の会合で議題について討論する,Debate topics in a public meeting,0.55,0.59
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,65,他の人に意見を変えるよう説得する,Persuade others to change their views,0.56,0.46
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,73,州知事または上院議員になる,Be a state governor or senator,0.57,0.73
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,81,公職選挙に立候補する,Run for political office,0.48,0.76
+リーダーシップ,Leadership,影響,Influencing,企業的,Enterprising,86,多くの人に影響を与える決定を下す,Make decisions that affect a lot of people,0.72,0.54
+組織化,Organization,組織化,Organizing,慣習的,Conventional,2,企業の財務担当役員になる,Be the financial officer for a company,0.56,0.63
+組織化,Organization,組織化,Organizing,慣習的,Conventional,10,オフィスの管理責任者になる,Be an office manager,0.61,0.66
+組織化,Organization,組織化,Organizing,慣習的,Conventional,18,予算を立てる,Plan budgets,0.67,0.77
+組織化,Organization,組織化,Organizing,慣習的,Conventional,26,財務に関する契約書を作成する,Prepare financial contracts,0.68,0.72
+組織化,Organization,組織化,Organizing,慣習的,Conventional,34,事務文書のファイリングシステムを構築する,Develop an office filing system,0.65,0.63
+組織化,Organization,組織化,Organizing,慣習的,Conventional,42,他の人の仕事を監督する,Supervise the work of others,0.37,0.37
+組織化,Organization,組織化,Organizing,慣習的,Conventional,50,投資戦略を立てる,Plan investment strategies,0.52,0.68
+組織化,Organization,組織化,Organizing,慣習的,Conventional,58,スケジュールを作成する,Establish time schedules,0.67,0.63
+組織化,Organization,組織化,Organizing,慣習的,Conventional,66,事業経費を継続的に確認する,Monitor business expenses,0.80,0.72
+組織化,Organization,組織化,Organizing,慣習的,Conventional,74,購買担当者になる,Be a purchasing agent,0.66,0.50
+組織化,Organization,組織化,Organizing,慣習的,Conventional,82,会社の在庫状況を把握する,Keep track of a company’s inventory,0.78,0.75
+組織化,Organization,組織化,Organizing,慣習的,Conventional,87,コンピュータのデータベースを管理する,Manage a computer data base,0.52,0.62
+組織化,Organization,組織化,Organizing,慣習的,Conventional,90,詳細な記録をつける,Keep detailed records,0.69,0.54
+利他性,Altruism,援助,Helping,社会的,Social,3,他の人が新しい考え方を学ぶのを助ける,Help others learn new ideas,0.33,0.37
+利他性,Altruism,援助,Helping,社会的,Social,11,病気の人の世話をする,Care for sick people,0.66,0.62
+利他性,Altruism,援助,Helping,社会的,Social,19,小学校の教員になる,Be an elementary-school teacher,0.52,0.51
+利他性,Altruism,援助,Helping,社会的,Social,27,ソーシャルワーカーになる,Be a social worker,0.72,0.67
+利他性,Altruism,援助,Helping,社会的,Social,35,牧師、司祭、ラビ、その他の宗教指導者になる,"Be a minister, priest, rabbi or other religious teacher",0.43,0.19
+利他性,Altruism,援助,Helping,社会的,Social,43,支援を必要とする人の相談に乗る,Counsel persons who need help,0.69,0.71
+利他性,Altruism,援助,Helping,社会的,Social,51,親に育児について指導する,Instruct parents on child care,0.65,0.71
+利他性,Altruism,援助,Helping,社会的,Social,59,医師または看護師になる,Be a doctor or nurse,0.57,0.45
+利他性,Altruism,援助,Helping,社会的,Social,67,理学療法士になる,Be a physical therapist,0.57,0.42
+利他性,Altruism,援助,Helping,社会的,Social,75,他の人を慰め、支える,Provide comfort and support to others,0.68,0.69
+利他性,Altruism,援助,Helping,社会的,Social,83,チャリティーイベントに参加する,Participate in charity events,0.48,0.51
+利他性,Altruism,援助,Helping,社会的,Social,88,人々の進路や職業選択を支援する,Help people make career decisions,0.44,0.55
+利他性,Altruism,援助,Helping,社会的,Social,91,カウンセラーまたはセラピストになる,Be a counselor or therapist,0.69,0.74
+創造性,Creativity,創造,Creating,芸術的,Artistic,4,芸術作品を制作する,Create works of art,0.68,0.71
+創造性,Creativity,創造,Creating,芸術的,Artistic,12,新しいファッションデザインを考案する,Create new fashion designs,0.64,0.54
+創造性,Creativity,創造,Creating,芸術的,Artistic,20,プロのダンサーになる,Be a professional dancer,0.59,0.42
+創造性,Creativity,創造,Creating,芸術的,Artistic,28,短編小説や長編小説を書く,Write short stories or novels,0.43,0.56
+創造性,Creativity,創造,Creating,芸術的,Artistic,36,交響楽団で楽器を演奏する,Play an instrument in a symphony,0.43,0.53
+創造性,Creativity,創造,Creating,芸術的,Artistic,44,自宅の模様替えをする,Redecorate one’s house,0.50,0.41
+創造性,Creativity,創造,Creating,芸術的,Artistic,52,美術館のために美術作品を選ぶ,Select art works for a museum,0.64,0.66
+創造性,Creativity,創造,Creating,芸術的,Artistic,60,プロとして歌う,Sing professionally,0.63,0.60
+創造性,Creativity,創造,Creating,芸術的,Artistic,68,俳優になる,Be an actor or actress,0.60,0.57
+創造性,Creativity,創造,Creating,芸術的,Artistic,76,芸術家または建築家になる,Be an artist or architect,0.71,0.71
+創造性,Creativity,創造,Creating,芸術的,Artistic,84,演劇で役を演じる,Act in a play,0.57,0.64
+創造性,Creativity,創造,Creating,芸術的,Artistic,85,Webページをデザインする,Design Internet web pages,0.30,0.41
+創造性,Creativity,創造,Creating,芸術的,Artistic,89,楽曲を作る,Write songs,0.65,0.75
+創造性,Creativity,創造,Creating,芸術的,Artistic,92,絵を描いたり、スケッチしたりする,Paint or draw,0.70,0.76
+分析,Analysis,分析,Analyzing,研究的,Investigative,5,化学者になる,Be a chemist,0.73,0.77
+分析,Analysis,分析,Analyzing,研究的,Investigative,13,実験室で行う実験を設計する,Design a laboratory experiment,0.78,0.75
+分析,Analysis,分析,Analyzing,研究的,Investigative,21,数学者になる,Be a mathematician,0.62,0.54
+分析,Analysis,分析,Analyzing,研究的,Investigative,29,科学的な概念を他の人に説明する,Explain scientific concepts to others,0.76,0.76
+分析,Analysis,分析,Analyzing,研究的,Investigative,37,物理学者になる,Be a physicist,0.80,0.61
+分析,Analysis,分析,Analyzing,研究的,Investigative,45,医学研究を行う,Carry out medical research,0.67,0.68
+分析,Analysis,分析,Analyzing,研究的,Investigative,53,科学分野の記者になる,Be a scientific reporter,0.73,0.74
+分析,Analysis,分析,Analyzing,研究的,Investigative,61,複雑なパズルを解く,Solve complex puzzles,0.38,0.42
+分析,Analysis,分析,Analyzing,研究的,Investigative,69,コンピュータプログラムを開発する,Develop a computer program,0.52,0.32
+分析,Analysis,分析,Analyzing,研究的,Investigative,77,統計学者になる,Be a statistician,0.44,0.26
+生産,Production,生産,Producing,現実的,Realistic,6,牛や馬の世話をする,Care for cattle or horses,0.40,0.54
+生産,Production,生産,Producing,現実的,Realistic,14,農家になる,Be a farmer,0.52,0.66
+生産,Production,生産,Producing,現実的,Realistic,22,新しい建物を建設する,Construct new buildings,0.44,0.30
+生産,Production,生産,Producing,現実的,Realistic,30,森林レンジャー（森林保護官）になる,Be a forest ranger,0.58,0.50
+生産,Production,生産,Producing,現実的,Realistic,38,植物を栽培する,Cultivate plants,0.57,0.40
+生産,Production,生産,Producing,現実的,Realistic,46,自然の中を散策する,Go on nature walks,0.48,0.16
+生産,Production,生産,Producing,現実的,Realistic,54,木工をする,Do woodworking,0.55,0.51
+生産,Production,生産,Producing,現実的,Realistic,62,花を育てる,Raise flowers,0.48,0.23
+生産,Production,生産,Producing,現実的,Realistic,70,自動車やトラックを修理する,Repair cars or trucks,0.37,0.53
+生産,Production,生産,Producing,現実的,Realistic,78,工具や機械を使って作業する,Work with tools and machinery,0.51,0.56
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,7,プロスポーツ選手になる,Be a professional athlete,0.57,0.70
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,15,刺激的な冒険をする,Engage in exciting adventures,0.27,0.47
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,23,人里離れた自然の中で生き抜く,Survive in the wilderness,0.41,0.49
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,31,レーシングドライバーになる,Be a racing car driver,0.54,0.48
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,39,身体的な危険に直面する,Face physical danger,0.47,0.46
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,47,軍の将校になる,Be a military officer,0.46,0.41
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,55,スポーツ競技に出場して競う,Compete in athletic events,0.58,0.71
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,63,賞金稼ぎになる,Be a bounty hunter,0.57,0.40
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,71,自転車で長距離を走る,Be a long-distance bicycle rider,0.44,0.54
+冒険,Adventure,冒険,Adventuring,現実的,Realistic,79,警察官になる,Be a police officer,0.58,0.46
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,8,翻訳者または通訳者になる,Be a translator or interpreter,0.35,0.51
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,16,図書館司書になる,Be a librarian,0.54,0.18
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,24,英語・英文学を専門とする教授になる,Be a professor of English,0.59,0.24
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,32,言葉のパズルを作る,Make up word puzzles,0.48,0.21
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,40,新聞を編集する,Edit a newspaper,0.62,0.21
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,48,多くの言語に通じる,Know many languages,0.32,0.58
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,56,海外特派員になる,Be a foreign correspondent,0.40,0.48
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,64,どんな話題についても流暢に話す,Speak fluently on any subject,0.23,0.56
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,72,多くの本を読む,Read many books,0.54,0.55
+学識,Erudition,直接対応なし,No direct counterpart,直接対応なし,No direct counterpart,80,日記や日誌をつける,Keep a diary or journal,0.48,0.33

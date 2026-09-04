@@ -1,0 +1,13 @@
+{
+  "name": "sigotosocket",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node app/dev-server.mjs",
+    "test": "node --test app/tests/*.test.js",
+    "check": "node scripts/check-static.mjs",
+    "items:build": "node scripts/items/build-items.mjs",
+    "items:check": "node scripts/items/check-items.mjs",
+    "version:check": "node scripts/version/check-version.mjs"
+  }
+}
