@@ -2,11 +2,11 @@ import { el } from "./screen-helpers.js";
 import { TOTAL_ITEM_COUNT, itemAt } from "../domain/response-state.js";
 
 const CHOICES = Object.freeze([
-  { value: 1, label: "強く嫌い" },
+  { value: 1, label: "とても嫌い" },
   { value: 2, label: "嫌い" },
   { value: 3, label: "どちらでもない" },
   { value: 4, label: "好き" },
-  { value: 5, label: "強く好き" },
+  { value: 5, label: "とても好き" },
 ]);
 
 /** 1問1画面。ココロパレア踏襲。出題順は固定でシャッフルしない。 */
