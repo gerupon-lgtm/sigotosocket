@@ -29,7 +29,7 @@ test("地色と十分に離れていれば補助を出さない", () => {
 
 test("片側だけ沈むときは明暗二重の縁取りと影（プレートは出さない）", () => {
   // 現行のカード地色。むっくんのクリーム色の顔が溶ける。
-  const aid = resolveVisibilityAid("#f3f7f4", DEFAULT_SUBJECT_TONES);
+  const aid = resolveVisibilityAid("#f4f6fa", DEFAULT_SUBJECT_TONES);
   assert.equal(aid.level, AID_LEVEL.OUTLINE);
   assert.ok(aid.lightContrast < OUTLINE_THRESHOLD, "明側は地色へ沈む");
   assert.ok(aid.strongest >= PLATE_THRESHOLD, "暗側は残っている");
@@ -55,13 +55,13 @@ test("プレートは地色の明暗と反対側の中立色になる", () => {
 });
 
 test("同じ入力なら常に同じ結果（プレビューと保存画像が食い違わない）", () => {
-  const a = resolveVisibilityAid("#f3f7f4", DEFAULT_SUBJECT_TONES);
-  const b = resolveVisibilityAid("#f3f7f4", DEFAULT_SUBJECT_TONES);
+  const a = resolveVisibilityAid("#f4f6fa", DEFAULT_SUBJECT_TONES);
+  const b = resolveVisibilityAid("#f4f6fa", DEFAULT_SUBJECT_TONES);
   assert.deepEqual(a, b);
 });
 
 test("キャラクターの色そのものは返さない（再配色しない方針）", () => {
-  const aid = resolveVisibilityAid("#f3f7f4", DEFAULT_SUBJECT_TONES);
+  const aid = resolveVisibilityAid("#f4f6fa", DEFAULT_SUBJECT_TONES);
   const values = JSON.stringify(aid);
   assert.ok(!values.includes(DEFAULT_SUBJECT_TONES.light));
   assert.ok(!values.includes(DEFAULT_SUBJECT_TONES.dark));

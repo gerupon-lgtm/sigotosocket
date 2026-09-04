@@ -7,10 +7,10 @@ import { resolveVisibilityAid, AID_LEVEL, DEFAULT_SUBJECT_TONES } from "../domai
 export const CARD_SIZE = Object.freeze({ width: 1080, height: 1350 });
 
 const PALETTE = Object.freeze({
-  background: "#f3f7f4",
-  ink: "#19332f",
-  sub: "#496b62",
-  line: "#c9d8d2",
+  background: "#f4f6fa",
+  ink: "#1b2a44",
+  sub: "#4a5b7a",
+  line: "#ccd6e4",
 });
 
 /**
@@ -34,11 +34,6 @@ function containRect(image, x, y, w, h) {
   const dw = image.width * scale;
   const dh = image.height * scale;
   return { x: x + ((w - dw) / 2), y: y + ((h - dh) / 2), w: dw, h: dh };
-}
-
-function drawContain(ctx, image, x, y, w, h) {
-  const r = containRect(image, x, y, w, h);
-  ctx.drawImage(image, r.x, r.y, r.w, r.h);
 }
 
 /**
@@ -96,7 +91,7 @@ function drawWithVisibilityAid(ctx, image, frame, aid) {
 
   ctx.save();
   if (aid.shadow) {
-    ctx.shadowColor = "rgba(25, 51, 47, 0.28)";
+    ctx.shadowColor = "rgba(27, 42, 68, 0.28)";
     ctx.shadowBlur = 18;
     ctx.shadowOffsetY = 8;
   }

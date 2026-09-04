@@ -1,0 +1,22 @@
+{
+  "name": "シゴトソケット",
+  "short_name": "シゴトソケット",
+  "lang": "ja",
+  "start_url": "../#/start",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#f4f6fa",
+  "theme_color": "#f4f6fa",
+  "icons": [
+    {
+      "src": "../assets/brand/sigotosocket-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../assets/brand/sigotosocket-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

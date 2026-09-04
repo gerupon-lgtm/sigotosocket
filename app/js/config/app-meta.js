@@ -10,6 +10,8 @@ const diagnosticVersions = Object.freeze({
 export const appMeta = Object.freeze({
   appId: "sigotosocket",
   appVersion: "v0.1.0",
+  // 【仮】サブドメイン未確定（検討事項21）。index.html の canonical / og:url と一致させること。
+  siteOrigin: "https://sigotosocket.sikumilab.com",
   storageSchemaVersion: 1,
   storageKey: "sigotosocket:v1",
   cardTemplateVersion: "card-template-v1",

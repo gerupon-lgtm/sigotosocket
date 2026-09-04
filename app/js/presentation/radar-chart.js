@@ -11,8 +11,8 @@ function normalize(raw) {
 export function drawRadar(ctx, scaleScores, options = {}) {
   const {
     cx, cy, radius,
-    labelColor = "#405a52", gridColor = "#c9d8d2",
-    fillColor = "rgba(93, 156, 137, 0.30)", strokeColor = "#4f8f7c",
+    labelColor = "#4a5b7a", gridColor = "#ccd6e4",
+    fillColor = "rgba(47, 84, 134, 0.24)", strokeColor = "#2f5486",
     labelFont = "14px system-ui, sans-serif", showLabels = true,
   } = options;
 

@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { writeFileSync } from "node:fs";
 const W = 1080, H = 1350, CX = 540;
-const BG = "#f3f7f4", INK = "#19332f", SUB = "#496b62", LINE = "#c9d8d2";
+const BG = "#f4f6fa", INK = "#1b2a44", SUB = "#4a5b7a", LINE = "#ccd6e4";
 const NAVY = "#1f3a5f", CREAM = "#f4ecdd", WARM = ["#F0B06C", "#DF7F68"];
 const LABELS = ["統率","段取り","支援","創造","探究","手仕事","挑戦","言葉"];
 const SCORES = [1.35, 0.2, -0.6, 0.4, 1.05, -1.2, -0.35, -0.85]; // 1位=統率 2位=探究
@@ -30,7 +30,7 @@ function radar(cx, cy, R) {
   }
   for (let i = 0; i < 8; i += 1) g.push(`<line x1="${cx}" y1="${cy}" x2="${(cx + Math.cos(ang(i)) * R).toFixed(1)}" y2="${(cy + Math.sin(ang(i)) * R).toFixed(1)}" stroke="${LINE}"/>`);
   const p = SCORES.map((s, i) => { const r = R * (0.5 + s / 4); return `${(cx + Math.cos(ang(i)) * r).toFixed(1)},${(cy + Math.sin(ang(i)) * r).toFixed(1)}`; });
-  g.push(`<polygon points="${p.join(" ")}" fill="rgba(93,156,137,0.30)" stroke="#4f8f7c" stroke-width="3"/>`);
+  g.push(`<polygon points="${p.join(" ")}" fill="rgba(47,84,134,0.24)" stroke="#2f5486" stroke-width="3"/>`);
   for (let i = 0; i < 8; i += 1) {
     const r = R + 34;
     g.push(t((cx + Math.cos(ang(i)) * r).toFixed(1), (cy + Math.sin(ang(i)) * r + 9).toFixed(1), LABELS[i], 26, SUB));
