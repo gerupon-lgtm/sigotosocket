@@ -2,8 +2,8 @@ import { el } from "./screen-helpers.js";
 import { TOTAL_ITEM_COUNT, itemAt } from "../domain/response-state.js";
 
 const CHOICES = Object.freeze([
-  { value: 1, label: "とても嫌い" },
-  { value: 2, label: "嫌い" },
+  { value: 1, label: "絶対にいや" },
+  { value: 2, label: "いや" },
   { value: 3, label: "どちらでもない" },
   { value: 4, label: "好き" },
   { value: 5, label: "とても好き" },

@@ -24,13 +24,15 @@
 | フィールド | 型 | 必須 | 説明 |
 |---|---|---|---|
 | scaleId | string | ○ | 上記8種のいずれか |
-| labelJa | string | ○ | 表示名（リーダーシップ／組織化／利他性／創造性／分析／生産／冒険／学識） |
+| labelJa | string | ○ | 画面に出す表示名（統率／段取り／支援／創造／探究／手仕事／挑戦／言葉） |
 | labelEn | string | ○ | 原文名（Leadership 他） |
 | hollandCode | string | ○ | 対応するHollandタイプ（表示用。判定には使わない） |
 | itemCount | number | ○ | 短縮版での採用項目数 |
 | order | number | ○ | 正準順の位置（1〜8） |
 
-短縮版の採用数: リーダーシップ5／組織化4／利他性6／創造性6／分析4／生産7／冒険6／学識7 ＝ **45**
+短縮版の採用数: 統率5／段取り4／支援6／創造6／探究4／手仕事7／挑戦6／言葉7 ＝ **45**
+
+**表示名と原典の尺度名は別物として扱う。** 原典（ORVIS）の尺度名は Leadership / Organization / Altruism / Creativity / Analysis / Production / Adventure / Erudition で、選定リストCSVもこの日本語直訳（リーダーシップ／組織化／利他性／創造性／分析／生産／冒険／学識）を使っている。CSVの列は `scaleId` への対応付けにのみ使い、**画面に出す名前は `scale-definitions.js` の `labelJa` だけが正典**。CSVの尺度名を書き換えるとビルドが壊れる。
 
 ## 3. 項目マスタ（`app/js/data/item-master.js`・生成物）
 
