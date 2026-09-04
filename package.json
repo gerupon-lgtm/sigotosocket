@@ -7,6 +7,7 @@
     "test": "node --test app/tests/*.test.js",
     "check": "node scripts/check-static.mjs",
     "items:build": "node scripts/items/build-items.mjs",
+    "types:export": "node scripts/types/export-types.mjs",
     "items:check": "node scripts/items/check-items.mjs",
     "version:check": "node scripts/version/check-version.mjs",
     "character:alpha": "node scripts/characters/alpha-from-white.mjs",
