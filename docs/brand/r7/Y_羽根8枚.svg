@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="シゴトソケット">
+  <rect x="2" y="2" width="116" height="116" rx="28" fill="#2f6f5c"/>
+  <g transform="rotate(0 60 60)"><path d="M60 16 C50 16 46 29 49.5 39 C52 47 60 55 60 55 C60 55 68 47 70.5 39 C74 29 70 16 60 16Z" fill="#F0B06C"/></g>
+  <g transform="rotate(45 60 60)"><path d="M60 16 C50 16 46 29 49.5 39 C52 47 60 55 60 55 C60 55 68 47 70.5 39 C74 29 70 16 60 16Z" fill="#E5945F"/></g>
+  <g transform="rotate(90 60 60)"><path d="M60 16 C50 16 46 29 49.5 39 C52 47 60 55 60 55 C60 55 68 47 70.5 39 C74 29 70 16 60 16Z" fill="#DF7F68"/></g>
+  <g transform="rotate(135 60 60)"><path d="M60 16 C50 16 46 29 49.5 39 C52 47 60 55 60 55 C60 55 68 47 70.5 39 C74 29 70 16 60 16Z" fill="#C57F8E"/></g>
+  <g transform="rotate(180 60 60)"><path d="M60 16 C50 16 46 29 49.5 39 C52 47 60 55 60 55 C60 55 68 47 70.5 39 C74 29 70 16 60 16Z" fill="#A98DB5"/></g>
+  <g transform="rotate(225 60 60)"><path d="M60 16 C50 16 46 29 49.5 39 C52 47 60 55 60 55 C60 55 68 47 70.5 39 C74 29 70 16 60 16Z" fill="#8B93B8"/></g>
+  <g transform="rotate(270 60 60)"><path d="M60 16 C50 16 46 29 49.5 39 C52 47 60 55 60 55 C60 55 68 47 70.5 39 C74 29 70 16 60 16Z" fill="#6B98AB"/></g>
+  <g transform="rotate(315 60 60)"><path d="M60 16 C50 16 46 29 49.5 39 C52 47 60 55 60 55 C60 55 68 47 70.5 39 C74 29 70 16 60 16Z" fill="#82AD90"/></g>
+  <circle cx="60" cy="60" r="11" fill="#FFF9ED"/>
+</svg>
