@@ -9,6 +9,8 @@ import { appMeta } from "../app/js/config/app-meta.js";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const APP = join(ROOT, "app");
 
+// 許可してよいのは「出典」だけ。職業サイトなど利用者を先へ送る導線は載せない。
+// 理由は要件定義書 §7-3（職業を提示しないという方針を外部委託で越えないため）。
 export const ALLOWED_LINK_URLS = Object.freeze([
   "https://projects.ori.org/lrg/PDFs_papers/Pozzebon_etal_2009_ORVIS_JPA.pdf",
   "https://ipip.ori.org/",

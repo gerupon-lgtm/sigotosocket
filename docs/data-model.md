@@ -26,11 +26,17 @@
 | scaleId | string | ○ | 上記8種のいずれか |
 | labelJa | string | ○ | 画面に出す表示名（統率／段取り／支援／創造／探究／手仕事／挑戦／言葉） |
 | labelEn | string | ○ | 原文名（Leadership 他） |
-| hollandCode | string | ○ | 対応するHollandタイプ（表示用。判定には使わない） |
+| hollandType | string \| null | ○ | 対応するホランド型（表示用。判定には使わない）。**「言葉」だけ `null`** — 6類型に含まれない領域のため。出典と表示規則は要件定義書 §7-3（ORVIS原典 Pozzebon et al., 2009 の引用つき） |
+| hollandNote | string \| null | | 型を持たない領域に添える説明。「言葉」のみ値を持つ |
 | itemCount | number | ○ | 短縮版での採用項目数 |
 | order | number | ○ | 正準順の位置（1〜8） |
 
 短縮版の採用数: 統率5／段取り4／支援6／創造6／探究4／手仕事7／挑戦6／言葉7 ＝ **45**
+
+ホランド型の対応（要件定義書 §7-3 が正典。ORVIS原典に基づく）:
+統率＝企業的／段取り＝慣習的／支援＝社会的／創造＝芸術的／探究＝研究的／手仕事・挑戦＝現実的（原典が「Realisticの分割」と明記）／**言葉＝型なし**。
+
+なお実装の現行フィールド名は `holland`（値は表示文字列、「言葉」は `"直接対応なし"`）。**F-024の実装時に上表の形へ移す。**
 
 **表示名と原典の尺度名は別物として扱う。** 原典（ORVIS）の尺度名は Leadership / Organization / Altruism / Creativity / Analysis / Production / Adventure / Erudition で、選定リストCSVもこの日本語直訳（リーダーシップ／組織化／利他性／創造性／分析／生産／冒険／学識）を使っている。CSVの列は `scaleId` への対応付けにのみ使い、**画面に出す名前は `scale-definitions.js` の `labelJa` だけが正典**。CSVの尺度名を書き換えるとビルドが壊れる。
 
