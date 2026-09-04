@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="シゴトソケット">
+  <rect x="2" y="2" width="116" height="116" rx="28" fill="#2f6f5c"/>
+  <mask id="bite">
+    <rect x="0" y="0" width="120" height="120" fill="#000"/>
+    <circle cx="56" cy="60" r="38" fill="#fff"/>
+    <circle cx="88" cy="60" r="22" fill="#000"/>
+  </mask>
+  <rect x="0" y="0" width="120" height="120" fill="#f4f8f5" mask="url(#bite)"/>
+  <circle cx="88" cy="60" r="15" fill="#e09a52"/>
+</svg>
