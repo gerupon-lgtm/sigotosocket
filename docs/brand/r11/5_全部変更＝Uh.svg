@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="比較">
+  <rect x="2" y="2" width="116" height="116" rx="28" fill="#1f3a5f"/>
+  <circle cx="60.0" cy="26.0" r="12.0" fill="#DF7F68"/>
+  <circle cx="84.0" cy="36.0" r="12.0" fill="#f4ecdd"/>
+  <circle cx="94.0" cy="60.0" r="12.0" fill="#f4ecdd"/>
+  <circle cx="84.0" cy="84.0" r="12.0" fill="#f4ecdd"/>
+  <circle cx="60.0" cy="94.0" r="12.0" fill="#f4ecdd"/>
+  <circle cx="36.0" cy="84.0" r="12.0" fill="#f4ecdd"/>
+  <circle cx="26.0" cy="60.0" r="12.0" fill="#f4ecdd"/>
+  <circle cx="36.0" cy="36.0" r="12.0" fill="#F0B06C"/>
+</svg>
