@@ -88,3 +88,11 @@ table.scores .num { text-align: right; width: 4em; }
 }
 
 a { color: var(--accent); }
+
+/* 結果画面の称号ブロック */
+.title-label { color: var(--sub); font-size: 0.8rem; letter-spacing: 0.08em; margin: 0 0 2px; }
+.type-subtitle { color: var(--sub); font-size: 0.95rem; margin: 0 0 4px; }
+.observation { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; margin: 0 0 14px; }
+.observation-head { font-weight: 700; margin: 0 0 2px; }
+.observation-body { margin: 0; }
+.disclaimer p { margin: 0 0 6px; }

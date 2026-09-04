@@ -2,8 +2,11 @@ import { ScaleById } from "../data/scale-definitions.js";
 import { TypeById, UNDETERMINED_TEXT } from "../data/type-definitions.js";
 
 /**
- * 結果文は、そのまま画面に出せる完成品としてアプリ側で組み立てる。
+ * 結果文はアプリ側で、そのまま画面に出せる完成品まで組み立てる。
  * LLMは後段で言い回しを整えるだけで、判定も文章の骨格もここで確定させる。
+ *
+ * 構成はココロパレアを踏襲する。
+ *   称号 → 中立副題 → 称号理由 → 各領域の観察文 → 読み方の注記
  *
  * 変更禁止事項2: 集団比較の表現を出力に含めない。
  * 規範データが存在しないため「あなたの中で相対的に」以上のことは言えない。
@@ -13,13 +16,14 @@ export const FORBIDDEN_PHRASES = Object.freeze([
   "苦手", "向いていない", "向いている職業", "適職",
 ]);
 
-const RELATIVE_NOTE =
-  "ここでの高い・低いは、あなたの8領域どうしを比べた結果です。ほかの人と比べたものではありません。";
+const READING_NOTE =
+  "ここでの高い・低いは、あなたの8つの領域どうしを比べたものです。ほかの人と比べた結果ではありません。";
 
-function typeParagraph(typeId) {
-  const type = TypeById[typeId];
-  if (!type) throw new TypeError(`RESULT_TYPE_UNKNOWN: ${typeId}`);
-  return `${type.name}。${type.lead}`;
+const TITLE_NOTE =
+  "称号は結果を振り返りやすくするためのもので、心理学上の正式なタイプ名ではありません。";
+
+function label(scaleId) {
+  return ScaleById[scaleId].labelJa;
 }
 
 export function composeResultText(classification) {
@@ -29,36 +33,45 @@ export function composeResultText(classification) {
 
   if (!classification.standardizable) {
     return Object.freeze({
-      headline: UNDETERMINED_TEXT.name,
-      alternativeHeadline: null,
-      paragraphs: Object.freeze([UNDETERMINED_TEXT.lead, UNDETERMINED_TEXT.detail]),
+      title: UNDETERMINED_TEXT.name,
+      subtitle: UNDETERMINED_TEXT.subtitle,
+      alternativeTitle: null,
+      reason: Object.freeze([UNDETERMINED_TEXT.reason, UNDETERMINED_TEXT.detail]),
+      observations: Object.freeze([]),
+      notes: Object.freeze([READING_NOTE]),
     });
   }
 
   const { rank, primaryTypeId, alternativeTypeId } = classification;
+  const type = TypeById[primaryTypeId];
+  if (!type) throw new TypeError(`RESULT_TYPE_UNKNOWN: ${primaryTypeId}`);
   const [first, second] = rank;
   const lowest = rank[rank.length - 1];
 
-  const paragraphs = [typeParagraph(primaryTypeId)];
+  const reason = [
+    `今回の回答では、8つの領域のうち「${label(first)}」と「${label(second)}」が高いほうに出ました。`
+    + `${type.reason}この2つの並びから「${type.name}」という称号になりました。`,
+  ];
   if (alternativeTypeId) {
-    paragraphs.push(
-      `2位と3位の差がごくわずかだったので、もうひとつの読み方も置いておきます。${typeParagraph(alternativeTypeId)}`,
+    const alternative = TypeById[alternativeTypeId];
+    reason.push(
+      `ただし3番目の「${label(rank[2])}」もほとんど差がありません。`
+      + `そちらを2つ目に取ると「${alternative.name}」になります。どちらの読み方もできる結果です。`,
     );
   }
-  paragraphs.push(
-    `あなたの中でいちばん高かったのは「${ScaleById[first].labelJa}」です。${ScaleById[first].highNote}`,
-  );
-  paragraphs.push(
-    `次に高かったのは「${ScaleById[second].labelJa}」です。${ScaleById[second].highNote}`,
-  );
-  paragraphs.push(
-    `いちばん低かったのは「${ScaleById[lowest].labelJa}」でした。${ScaleById[lowest].lowNote}`,
-  );
-  paragraphs.push(RELATIVE_NOTE);
+
+  const observations = [
+    { scaleId: first, position: "いちばん高かった領域", text: ScaleById[first].highNote },
+    { scaleId: second, position: "次に高かった領域", text: ScaleById[second].highNote },
+    { scaleId: lowest, position: "いちばん低かった領域", text: ScaleById[lowest].lowNote },
+  ].map((entry) => Object.freeze({ ...entry, label: label(entry.scaleId) }));
 
   return Object.freeze({
-    headline: TypeById[primaryTypeId].name,
-    alternativeHeadline: alternativeTypeId ? TypeById[alternativeTypeId].name : null,
-    paragraphs: Object.freeze(paragraphs),
+    title: type.name,
+    subtitle: type.subtitle,
+    alternativeTitle: alternativeTypeId ? TypeById[alternativeTypeId].name : null,
+    reason: Object.freeze(reason),
+    observations: Object.freeze(observations),
+    notes: Object.freeze([READING_NOTE, TITLE_NOTE]),
   });
 }

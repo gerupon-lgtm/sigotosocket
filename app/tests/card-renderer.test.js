@@ -41,7 +41,7 @@ test("カードは規定サイズで、タイプ名と免責を描く", async ()
 test("判定不能でもカードは生成できる", async () => {
   const { canvas, texts } = stubCanvas();
   await renderCard(canvas, snapshotFor(uniformAnswers(3)));
-  assert.ok(texts.join("|").includes("判定できませんでした"));
+  assert.ok(texts.join("|").includes("称号を決められませんでした"));
 });
 
 test("キャラクター画像が未制作でもカードが壊れない", async () => {

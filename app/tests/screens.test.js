@@ -79,7 +79,7 @@ test("結果画面はタイプ名・数値・免責を出す", () => {
   const node = renderResultScreen({ snapshot, onCard() {}, onRestart() {}, onAbout() {} });
   const text = node.textContent;
   assert.ok(text.includes("医学的・心理学的な検査ではありません"));
-  assert.ok(text.includes("ほかの人と比べたものではありません"));
+  assert.ok(text.includes("ほかの人と比べた結果ではありません"));
   assert.ok(node.querySelectorAll("tbody")[0].children.length === 8);
 });
 
@@ -87,7 +87,7 @@ test("判定不能でも結果画面が壊れず、カードへ進める", () =>
   const snapshot = snapshotFor(uniformAnswers(3));
   assert.equal(snapshot.standardizable, false);
   const node = renderResultScreen({ snapshot, onCard() {}, onRestart() {}, onAbout() {} });
-  assert.ok(node.textContent.includes("判定できませんでした"));
+  assert.ok(node.textContent.includes("称号を決められませんでした"));
   assert.ok(node.textContent.includes("カードを見る"));
 });
 

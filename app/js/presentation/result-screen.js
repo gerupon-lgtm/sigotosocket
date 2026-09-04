@@ -28,12 +28,12 @@ function scoreTable(scaleScores, rank) {
     return el("tr", {}, [
       el("td", { class: "num", text: rank ? String(i + 1) : "-" }),
       el("td", { text: ScaleById[scaleId].labelJa }),
-      el("td", { class: "num", text: score.raw.toFixed(2) }),
+      el("td", { class: "num", text: score.raw.toFixed(1) }),
     ]);
   });
   return el("table", { class: "scores" }, [
     el("thead", {}, [el("tr", {}, [
-      el("th", { text: "順位" }), el("th", { text: "領域" }), el("th", { text: "素点" }),
+      el("th", { text: "順位" }), el("th", { text: "領域" }), el("th", { text: "点数" }),
     ])]),
     el("tbody", {}, rows),
   ]);
@@ -47,24 +47,28 @@ export function renderResultScreen({ snapshot, onCard, onRestart, onAbout }) {
     alternativeTypeId: snapshot.alternativeTypeId,
   });
 
-  const head = [el("h1", { class: "type-name", text: text.headline })];
-  if (text.alternativeHeadline) {
-    head.push(el("p", { class: "alt-type", text: `または「${text.alternativeHeadline}」` }));
-  }
+  const observations = text.observations.map((entry) => el("div", { class: "observation" }, [
+    el("p", { class: "observation-head", text: `${entry.position}：${entry.label}` }),
+    el("p", { class: "observation-body", text: entry.text }),
+  ]));
 
   return el("section", { class: "screen result" }, [
-    ...head,
+    el("p", { class: "title-label", text: "あなたの称号" }),
+    el("h1", { class: "type-name", text: text.title }),
+    el("p", { class: "type-subtitle", text: text.subtitle }),
     el("p", { class: "meta", text: formatDateTime(snapshot.createdAt) }),
     radarBlock(snapshot.scaleScores),
-    el("div", { class: "prose" }, text.paragraphs.map((p) => el("p", { text: p }))),
+    el("div", { class: "prose" }, text.reason.map((p) => el("p", { text: p }))),
+    ...(observations.length > 0 ? [el("h2", { text: "回答から見えたこと" }), ...observations] : []),
+    el("h2", { text: "8つの領域の点数" }),
     scoreTable(snapshot.scaleScores, snapshot.rank),
     el("div", { class: "actions" }, [
       el("button", { class: "primary", type: "button", onClick: onCard }, "カードを見る"),
-      el("button", { class: "secondary", type: "button", onClick: onRestart }, "もう一度やる"),
+      el("button", { class: "secondary", type: "button", onClick: onRestart }, "はじめから答え直す"),
     ]),
-    el("p", { class: "disclaimer" }, [
-      "この診断は医学的・心理学的な検査ではありません。ここでの高い・低いは、あなたの8領域どうしを比べた結果です。",
-      el("br"),
+    el("div", { class: "disclaimer" }, [
+      ...text.notes.map((note) => el("p", { text: note })),
+      el("p", { text: "この診断は医学的・心理学的な検査ではありません。" }),
       el("button", { class: "link", type: "button", onClick: onAbout }, "出典・免責・データの扱い"),
     ]),
   ]);
