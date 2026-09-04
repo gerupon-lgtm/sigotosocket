@@ -15,7 +15,7 @@ export const ItemMaster = Object.freeze([
   { id: "orvis-14", order: 8, scaleId: "production", textJa: "農家になる", keyedDirection: "positive", sourceItemId: 14, loadingCollege: 0.52, loadingCommunity: 0.66, localized: false },
   { id: "orvis-18", order: 9, scaleId: "organization", textJa: "予算を立てる", keyedDirection: "positive", sourceItemId: 18, loadingCollege: 0.67, loadingCommunity: 0.77, localized: false },
   { id: "orvis-24", order: 10, scaleId: "erudition", textJa: "大学で文学を教える", keyedDirection: "positive", sourceItemId: 24, loadingCollege: 0.59, loadingCommunity: 0.24, localized: true },
-  { id: "orvis-25", order: 11, scaleId: "leadership", textJa: "大きな会社の経営トップになる", keyedDirection: "positive", sourceItemId: 25, loadingCollege: 0.63, loadingCommunity: 0.52, localized: true },
+  { id: "orvis-25", order: 11, scaleId: "leadership", textJa: "大企業のCEOになる", keyedDirection: "positive", sourceItemId: 25, loadingCollege: 0.63, loadingCommunity: 0.52, localized: true },
   { id: "orvis-26", order: 12, scaleId: "organization", textJa: "お金に関わる契約書をつくる", keyedDirection: "positive", sourceItemId: 26, loadingCollege: 0.68, loadingCommunity: 0.72, localized: true },
   { id: "orvis-27", order: 13, scaleId: "altruism", textJa: "福祉の相談員になる", keyedDirection: "positive", sourceItemId: 27, loadingCollege: 0.72, loadingCommunity: 0.67, localized: true },
   { id: "orvis-29", order: 14, scaleId: "analysis", textJa: "科学のしくみを人に説明する", keyedDirection: "positive", sourceItemId: 29, loadingCollege: 0.76, loadingCommunity: 0.76, localized: true },
