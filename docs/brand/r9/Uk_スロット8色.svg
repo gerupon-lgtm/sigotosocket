@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="シゴトソケット">
+  <rect x="2" y="2" width="116" height="116" rx="28" fill="#1f3a5f"/>
+  <g transform="rotate(0 60 60)"><rect x="52.6" y="16.0" width="14.9" height="24.0" rx="7.4" fill="#F0B06C"/></g>
+  <g transform="rotate(45 60 60)"><rect x="54.4" y="19.0" width="11.2" height="18.0" rx="5.6" fill="#E5945F"/></g>
+  <g transform="rotate(90 60 60)"><rect x="54.4" y="19.0" width="11.2" height="18.0" rx="5.6" fill="#DF7F68"/></g>
+  <g transform="rotate(135 60 60)"><rect x="54.4" y="19.0" width="11.2" height="18.0" rx="5.6" fill="#C57F8E"/></g>
+  <g transform="rotate(180 60 60)"><rect x="54.4" y="19.0" width="11.2" height="18.0" rx="5.6" fill="#A98DB5"/></g>
+  <g transform="rotate(225 60 60)"><rect x="54.4" y="19.0" width="11.2" height="18.0" rx="5.6" fill="#8B93B8"/></g>
+  <g transform="rotate(270 60 60)"><rect x="54.4" y="19.0" width="11.2" height="18.0" rx="5.6" fill="#6B98AB"/></g>
+  <g transform="rotate(315 60 60)"><rect x="52.6" y="16.0" width="14.9" height="24.0" rx="7.4" fill="#82AD90"/></g>
+  <circle cx="60" cy="60" r="13" fill="#f4ecdd"/>
+  <circle cx="60" cy="60" r="6" fill="#132844"/>
+</svg>

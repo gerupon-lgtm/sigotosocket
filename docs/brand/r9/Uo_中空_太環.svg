@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="シゴトソケット">
+  <rect x="2" y="2" width="116" height="116" rx="28" fill="#1f3a5f"/>
+  <circle cx="60.0" cy="26.0" r="12.5" fill="#DF7F68"/>
+  <circle cx="84.0" cy="36.0" r="9.3" fill="none" stroke="#f4ecdd" stroke-width="6.5"/>
+  <circle cx="94.0" cy="60.0" r="9.3" fill="none" stroke="#f4ecdd" stroke-width="6.5"/>
+  <circle cx="84.0" cy="84.0" r="9.3" fill="none" stroke="#f4ecdd" stroke-width="6.5"/>
+  <circle cx="60.0" cy="94.0" r="9.3" fill="none" stroke="#f4ecdd" stroke-width="6.5"/>
+  <circle cx="36.0" cy="84.0" r="9.3" fill="none" stroke="#f4ecdd" stroke-width="6.5"/>
+  <circle cx="26.0" cy="60.0" r="9.3" fill="none" stroke="#f4ecdd" stroke-width="6.5"/>
+  <circle cx="36.0" cy="36.0" r="12.5" fill="#F0B06C"/>
+</svg>
