@@ -2,6 +2,7 @@ import { appMeta } from "../config/app-meta.js";
 import { ScaleById } from "../data/scale-definitions.js";
 import { TypeById, UNDETERMINED_TEXT } from "../data/type-definitions.js";
 import { drawRadar } from "../presentation/radar-chart.js";
+import { resolveVisibilityAid, AID_LEVEL, DEFAULT_SUBJECT_TONES } from "../domain/visibility-aid.js";
 
 export const CARD_SIZE = Object.freeze({ width: 1080, height: 1350 });
 
@@ -27,12 +28,80 @@ async function loadImage(src) {
   });
 }
 
-function drawContain(ctx, image, x, y, w, h) {
+function containRect(image, x, y, w, h) {
   // 縦横比を維持する。引き伸ばさない。トリミングもしない。
   const scale = Math.min(w / image.width, h / image.height);
   const dw = image.width * scale;
   const dh = image.height * scale;
-  ctx.drawImage(image, x + ((w - dw) / 2), y + ((h - dh) / 2), dw, dh);
+  return { x: x + ((w - dw) / 2), y: y + ((h - dh) / 2), w: dw, h: dh };
+}
+
+function drawContain(ctx, image, x, y, w, h) {
+  const r = containRect(image, x, y, w, h);
+  ctx.drawImage(image, r.x, r.y, r.w, r.h);
+}
+
+/**
+ * 地色にキャラクターが沈まないようにする視認性補助。
+ * キャラクターを再配色せず、地色も差し替えない（ココロパレアの方針を踏襲）。
+ * 判定は resolveVisibilityAid が決定的に行うので、プレビューと保存画像が食い違わない。
+ */
+function drawSilhouette(ctx, image, rect, color, spread) {
+  // 画像を塗りつぶしたシルエットを、周囲8方向へずらして重ねる＝縁取り。
+  const offsets = [];
+  for (let dx = -1; dx <= 1; dx += 1) {
+    for (let dy = -1; dy <= 1; dy += 1) {
+      if (dx !== 0 || dy !== 0) offsets.push([dx * spread, dy * spread]);
+    }
+  }
+  ctx.save();
+  ctx.globalCompositeOperation = "source-over";
+  for (const [dx, dy] of offsets) {
+    ctx.save();
+    ctx.translate(rect.x + dx, rect.y + dy);
+    ctx.drawImage(image, 0, 0, rect.w, rect.h);
+    ctx.globalCompositeOperation = "source-atop";
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, rect.w, rect.h);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function drawWithVisibilityAid(ctx, image, frame, aid) {
+  const rect = containRect(image, frame.x, frame.y, frame.w, frame.h);
+
+  if (aid.level === AID_LEVEL.PLATE && aid.plateColor) {
+    // 両側とも地色へ溶ける場合だけ、彩度を持たない中立のプレートを敷く。
+    const pad = 28;
+    ctx.save();
+    ctx.fillStyle = aid.plateColor;
+    ctx.beginPath();
+    const [px, py, pw, ph, r] = [rect.x - pad, rect.y - pad, rect.w + (pad * 2), rect.h + (pad * 2), 32];
+    ctx.moveTo(px + r, py);
+    ctx.arcTo(px + pw, py, px + pw, py + ph, r);
+    ctx.arcTo(px + pw, py + ph, px, py + ph, r);
+    ctx.arcTo(px, py + ph, px, py, r);
+    ctx.arcTo(px, py, px + pw, py, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  if (aid.outline) {
+    // 明暗の二重。地色が明るくても暗くても、どちらかの線が輪郭を立てる。
+    drawSilhouette(ctx, image, rect, aid.outline.dark, 7);
+    drawSilhouette(ctx, image, rect, aid.outline.light, 4);
+  }
+
+  ctx.save();
+  if (aid.shadow) {
+    ctx.shadowColor = "rgba(25, 51, 47, 0.28)";
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 8;
+  }
+  ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
+  ctx.restore();
 }
 
 export async function renderCard(canvas, snapshot) {
@@ -62,9 +131,13 @@ export async function renderCard(canvas, snapshot) {
   const pose = poseSrc ? await loadImage(poseSrc) : null;
   const prop = propSrc ? await loadImage(propSrc) : null;
   const frame = { x: 240, y: 220, w: 600, h: 480 };
+  const aid = resolveVisibilityAid(PALETTE.background, DEFAULT_SUBJECT_TONES);
   if (pose) {
-    drawContain(ctx, pose, frame.x, frame.y, frame.w, frame.h);
-    if (prop) drawContain(ctx, prop, frame.x + frame.w - 190, frame.y + frame.h - 190, 180, 180);
+    drawWithVisibilityAid(ctx, pose, frame, aid);
+    if (prop) {
+      drawWithVisibilityAid(ctx, prop,
+        { x: frame.x + frame.w - 190, y: frame.y + frame.h - 190, w: 180, h: 180 }, aid);
+    }
   } else {
     ctx.strokeStyle = PALETTE.line;
     ctx.setLineDash([12, 10]);
@@ -94,5 +167,5 @@ export async function renderCard(canvas, snapshot) {
   ctx.fillText("ORVIS（IPIP収録・パブリックドメイン）に基づく参考ツールです", CARD_SIZE.width / 2, 1285);
   ctx.fillText(`医学的・心理学的な診断ではありません　${appMeta.appVersion}`, CARD_SIZE.width / 2, 1318);
 
-  return canvas;
+  return { canvas, aid };
 }

@@ -14,12 +14,15 @@ const { uniformAnswers, answersWith } = await import("./helpers.js");
 /** 描画命令を記録するだけの2Dコンテキスト。文字とサイズの検証に使う。 */
 function stubCanvas() {
   const texts = [];
+  const ops = [];
   const ctx = new Proxy({
     fillText: (t) => texts.push(String(t)),
     save() {}, restore() {}, beginPath() {}, closePath() {}, moveTo() {}, lineTo() {},
-    fill() {}, stroke() {}, fillRect() {}, strokeRect() {}, setLineDash() {}, drawImage() {},
+    arcTo() {}, translate() {}, fill() { ops.push("fill"); }, stroke() {},
+    fillRect() { ops.push("fillRect"); }, strokeRect() {}, setLineDash() {},
+    drawImage() { ops.push("drawImage"); },
   }, { get: (target, prop) => (prop in target ? target[prop] : undefined), set: () => true });
-  return { canvas: { width: 0, height: 0, getContext: () => ctx }, texts };
+  return { canvas: { width: 0, height: 0, getContext: () => ctx }, texts, ops };
 }
 
 function snapshotFor(answers) {
@@ -48,4 +51,13 @@ test("キャラクター画像が未制作でもカードが壊れない", async
   const { canvas, texts } = stubCanvas();
   await renderCard(canvas, snapshotFor(answersWith((_, i) => (i % 5) + 1)));
   assert.ok(texts.join("|").includes("キャラクター画像は準備中です"));
+});
+
+test("地色に対する視認性補助が決定的に決まる", async () => {
+  const { canvas } = stubCanvas();
+  const { aid } = await renderCard(canvas, snapshotFor(answersWith((_, i) => (i % 5) + 1)));
+  // 現行の地色は淡いので、クリーム色の顔が沈む。縁取りと影が出るのが正しい。
+  assert.equal(aid.level, "outline");
+  assert.equal(aid.shadow, true);
+  assert.equal(aid.plateColor, null, "片側だけ沈む場合はプレートを敷かない");
 });
