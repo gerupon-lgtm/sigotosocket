@@ -5,7 +5,7 @@ import { writeFileSync } from "node:fs";
 import { MARK, holeCenter } from "../../app/js/presentation/mark.js";
 
 const W = 1080, H = 1350, CX = W / 2;
-const BG = "#f4f6fa", INK = "#1b2a44", SUB = "#4a5b7a", LINE = "#ccd6e4";
+const BG = process.env.CARD_BG || "#f4f6fa", INK = "#1b2a44", SUB = "#4a5b7a", LINE = "#ccd6e4";
 const SANS = 'system-ui, "Noto Sans CJK JP", "Hiragino Sans", sans-serif';
 const MINCHO = '"Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", serif';
 const LABELS = ["統率", "段取り", "支援", "創造", "探究", "手仕事", "挑戦", "言葉"];
@@ -72,5 +72,5 @@ const body = [
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="${BG}"/>${body}</svg>`;
 writeFileSync("/tmp/card2.svg", svg);
-await sharp(Buffer.from(svg)).png().toFile("docs/brand/card/カード改案.png");
+await sharp(Buffer.from(svg)).png().toFile(process.env.CARD_OUT || "docs/brand/card/カード改案.png");
 console.log("ok");
