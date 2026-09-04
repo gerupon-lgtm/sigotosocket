@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="シゴトソケット">
+  <rect x="2" y="2" width="116" height="116" rx="28" fill="#2f6f5c"/>
+  <defs><clipPath id="cl"><rect x="20" y="34" width="50" height="50" rx="14"/></clipPath></defs>
+  <rect x="20" y="34" width="50" height="50" rx="14" fill="#f4f8f5"/>
+  <rect x="50" y="34" width="50" height="50" rx="14" fill="#e09a52"/>
+  <g clip-path="url(#cl)"><rect x="50" y="34" width="50" height="50" rx="14" fill="#f0c48f"/></g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="シゴトソケット">
+  <rect x="2" y="2" width="116" height="116" rx="28" fill="#2f6f5c"/>
+  <path d="M24 84 C24 52 44 34 68 34 C90 34 102 52 102 68 C102 78 98 84 98 84 Z" fill="#e09a52"/>
+  <path d="M24 84 C24 66 34 56 48 56 C58 56 64 62 66 70 C68 78 62 84 62 84 Z" fill="#f4f8f5"/>
+  <circle cx="30" cy="74" r="5" fill="#2f6f5c"/>
+  <circle cx="47" cy="68" r="4" fill="#2f6f5c"/>
+</svg>

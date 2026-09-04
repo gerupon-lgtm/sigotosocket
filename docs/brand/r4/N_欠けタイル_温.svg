@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="シゴトソケット">
+  <mask id="bite"><rect x="2" y="2" width="116" height="116" rx="28" fill="#fff"/><circle cx="118" cy="60" r="26" fill="#000"/></mask>
+  <rect x="2" y="2" width="116" height="116" rx="28" fill="#9c5f3f" mask="url(#bite)"/>
+  <circle cx="62" cy="60" r="22" fill="#f7efe1"/>
+  <circle cx="104" cy="60" r="13" fill="#3f7d68"/>
+</svg>
