@@ -30,7 +30,7 @@ async function main() {
   const text = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   <rect width="${W}" height="${H}" fill="${BG}"/>
   <text x="${W / 2}" y="430" font-family='${FONT}' font-size="76" font-weight="bold" fill="${INK}" text-anchor="middle">シゴトソケット</text>
-  <text x="${W / 2}" y="500" font-family='${FONT}' font-size="32" fill="${SUB}" text-anchor="middle">8つの領域から、興味のかたちを見る</text>
+  <text x="${W / 2}" y="500" font-family='${FONT}' font-size="32" fill="${SUB}" text-anchor="middle">やってみたいことのかたちを見る</text>
 </svg>`;
   const mark = await sharp(markSvg, { density: 384 }).resize(M, M).png().toBuffer();
   await sharp(Buffer.from(text))

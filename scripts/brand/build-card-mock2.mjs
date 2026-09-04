@@ -52,7 +52,7 @@ const body = [
   // ヘッダーのロックアップ
   markSvg(300, 48, 92, [7, 0]),
   txt(412, 100, "シゴトソケット", 54, INK, { weight: "bold", anchor: "start", spacing: 4 }),
-  txt(CX, 160, "〜 ORVIS 職業興味の自己理解ツール 〜", 26, SUB),
+  txt(CX, 160, "〜ORVIS 職業興味の自己理解支援ツール〜", 26, SUB),
   `<line x1="200" y1="192" x2="480" y2="192" stroke="${LINE}"/><circle cx="540" cy="192" r="4" fill="${LINE}"/><line x1="600" y1="192" x2="880" y2="192" stroke="${LINE}"/>`,
   // 称号
   pill(CX, 238, 260, 54, "あなたの称号", 26),
