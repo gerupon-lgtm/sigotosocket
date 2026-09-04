@@ -8,6 +8,11 @@
     "check": "node scripts/check-static.mjs",
     "items:build": "node scripts/items/build-items.mjs",
     "items:check": "node scripts/items/check-items.mjs",
-    "version:check": "node scripts/version/check-version.mjs"
+    "version:check": "node scripts/version/check-version.mjs",
+    "character:alpha": "node scripts/characters/alpha-from-white.mjs",
+    "character:check": "node scripts/characters/check-character-assets.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.3"
   }
 }
