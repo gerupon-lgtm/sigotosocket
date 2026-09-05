@@ -25,7 +25,12 @@ createServer(async (req, res) => {
   if (!target.startsWith(ROOT)) { res.writeHead(403).end("forbidden"); return; }
   try {
     const body = await readFile(target);
-    res.writeHead(200, { "content-type": TYPES[extname(target)] ?? "application/octet-stream" });
+    res.writeHead(200, {
+      "content-type": TYPES[extname(target)] ?? "application/octet-stream",
+      // 開発用。編集したのにブラウザが古いモジュールを使い続けると、直したはずの
+      // 不具合が残って見え、原因を取り違える。配信本体（GitHub Pages）には関係しない。
+      "cache-control": "no-store",
+    });
     res.end(body);
   } catch {
     res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });

@@ -7,7 +7,7 @@ import {
 import { scoreScales } from "./domain/scoring.js";
 import { standardize } from "./domain/standardize.js";
 import { classify } from "./domain/type-classifier.js";
-import { createResultSnapshot, isValidSnapshot } from "./domain/result-snapshot.js";
+import { createResultSnapshot, attachBigFive, isValidSnapshot } from "./domain/result-snapshot.js";
 import { createStore } from "./infrastructure/progress-storage.js";
 import { receiveBigFive } from "./infrastructure/linkage-intake.js";
 import { resolveRoute, hashFor } from "./infrastructure/router.js";
@@ -40,7 +40,8 @@ function persist() {
 function finish() {
   const standardized = standardize(scoreScales({ items: ItemMaster, answers: response.answers }));
   const classification = classify(standardized);
-  snapshot = createResultSnapshot({ standardized, classification });
+  // 先に連携してから45問に答えた人も、結果に連携が乗った状態で保存する（F-011の裏側）。
+  snapshot = attachBigFive(createResultSnapshot({ standardized, classification }), store.load().bigFive);
   store.saveResult(snapshot);
   response = createResponseState(null);
   go("result");

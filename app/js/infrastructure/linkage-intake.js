@@ -1,5 +1,6 @@
 import { appMeta } from "../config/app-meta.js";
 import { readBigFiveCodeFromHash, parseBigFiveCode } from "../domain/big-five-link.js";
+import { attachBigFive, isValidSnapshot } from "../domain/result-snapshot.js";
 import { CANONICAL_HASH } from "./router.js";
 
 /**
@@ -21,7 +22,13 @@ export function receiveBigFive({
   if (code === null) return null;
 
   const link = enabled ? parseBigFiveCode(code, { now }) : null;
-  if (link) store.saveBigFive(link);
+  if (link) {
+    store.saveBigFive(link);
+    // 既に結果があるなら、その結果へ結び付ける（F-011）。**再回答させない。**
+    // 新しい結果を作ると履歴が増え、同じ回答の結果が2件並ぶことになる。
+    const latest = store.latestResult();
+    if (isValidSnapshot(latest)) store.replaceLatestResult(attachBigFive(latest, link));
+  }
 
   // 履歴APIが使えない環境（古いブラウザ・厳しい設定）でも受け取り自体は成立させる。
   try {

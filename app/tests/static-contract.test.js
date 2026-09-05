@@ -33,3 +33,10 @@ test("ブラウザが読みに行くファイルの拡張子を、devサーバ�
     assert.ok(known.has(ext), `${ext}（${example}）が dev-server.mjs の MIME 表に無い`);
   }
 });
+
+test("devサーバーはキャッシュさせない（古いモジュールで確認して勘違いしないため）", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../dev-server.mjs", import.meta.url), "utf8");
+  assert.match(source, /cache-control["']?\s*:\s*["']no-store/i,
+    "no-store を返していない。編集したのに古いJSが動いて原因を取り違える");
+});

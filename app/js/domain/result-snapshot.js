@@ -40,6 +40,17 @@ export function createResultSnapshot({ standardized, classification, now = new D
   });
 }
 
+/**
+ * 結果に連携を後付けする（F-011・T-026）。**新しい結果を作らない。**
+ * ORVISの回答をやり直させないための機能なので、resultId も createdAt も
+ * 判定結果もそのまま持ち越し、`bigFive` だけを差し替える。
+ * @param {object} snapshot
+ * @param {object|null} bigFive 外すときは null
+ */
+export function attachBigFive(snapshot, bigFive) {
+  return Object.freeze({ ...snapshot, bigFive });
+}
+
 export function isValidSnapshot(value) {
   return Boolean(value)
     && typeof value === "object"
