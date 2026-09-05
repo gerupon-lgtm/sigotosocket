@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>open</title>
+<base href="../"><link rel="stylesheet" href="css/style.css"></head>
+<body><div id="app"></div>
+<script type="module">
+import { renderStartScreen } from "./js/presentation/start-screen.js";
+import { createResponseState } from "./js/domain/response-state.js";
+import { STORAGE_STATUS } from "./js/infrastructure/progress-storage.js";
+const node = renderStartScreen({
+  progressState: createResponseState(null), latestResult: null,
+  storageStatus: STORAGE_STATUS.OK,
+  onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+});
+document.getElementById("app").append(node);
+if (1) node.querySelector(".tool-intro").open = true;
+document.title = "ready";
+</script></body></html>

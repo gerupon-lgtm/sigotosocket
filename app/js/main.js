@@ -57,6 +57,15 @@ function answer(itemId, value) {
   render();
 }
 
+// 出典・免責を開く前にいた画面。**結果の有無ではなく、来た道で戻す。**
+// 結果があるからという理由で結果画面へ送ると、トップから開いた人が別の場所へ飛ぶ。
+let aboutReturnRoute = "start";
+
+function openAbout(from) {
+  aboutReturnRoute = from;
+  go("about");
+}
+
 function screenFor(route) {
   if (route === "answer") {
     return renderQuestionnaireScreen({
@@ -81,7 +90,7 @@ function screenFor(route) {
       onCard: () => go("card"),
       onRestart: () => { response = createResponseState(null); store.clearProgress(); go("answer"); },
       onHome: () => go("start"),
-      onAbout: () => go("about"),
+      onAbout: () => openAbout("result"),
     });
   }
   if (route === "card") {
@@ -90,7 +99,7 @@ function screenFor(route) {
   }
   if (route === "about") {
     return renderAboutScreen({
-      onBack: () => go(snapshot ? "result" : "start"),
+      onBack: () => go(aboutReturnRoute === "result" && snapshot ? "result" : "start"),
       onClearAll: () => {
         if (!globalThis.confirm("この端末に保存した回答と結果をすべて削除します。よろしいですか。")) return;
         store.clearAll();
@@ -107,7 +116,7 @@ function screenFor(route) {
     onStart: () => { response = createResponseState(null); store.clearProgress(); go("answer"); },
     onResume: () => { response = withIndex(response, firstUnansweredIndex(response)); go("answer"); },
     onShowResult: () => go("result"),
-    onAbout: () => go("about"),
+    onAbout: () => openAbout("start"),
   });
 }
 

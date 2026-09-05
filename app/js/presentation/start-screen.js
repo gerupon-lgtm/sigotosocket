@@ -23,7 +23,12 @@ function toolIntro() {
 
   return el("details", { class: "tool-intro" }, [
     el("summary", {}, [
-      el("span", { class: "intro-summary-mark", "aria-hidden": "true", text: "？" }),
+      el("img", {
+        class: "intro-summary-mark",
+        src: "assets/brand/mukkun-face.webp",
+        alt: "",          // 装飾。読み上げは隣の文言が担う
+        width: "44", height: "44",
+      }),
       el("span", { class: "intro-summary-copy" }, [
         el("span", { text: "このツールのこと。" }),
         el("br"),
@@ -56,9 +61,6 @@ function toolIntro() {
 
       topic("むっくんについて", [
         "案内役のハリネズミです。8つの領域を、道具と所作の違いで見せ分けます。",
-        "職業の恰好はさせません。「やってみたいこと」は仕事の名前ではなく、"
-        + "手の動かし方や向き合い方として描いています。",
-        "ココロパレアの猫とは、どちらが上ということのない並びで登場します。",
       ]),
     ]),
   ]);
@@ -93,10 +95,11 @@ export function renderStartScreen({ progressState, latestResult, storageStatus, 
       screenHeading({ kicker: "INTEREST CHECK", title: "やってみたいことのかたちを見る" }),
       el("p", { class: "lead", text: "8つの領域から、あなたが「やってみたい」と感じる方向を見つけます。" }),
       el("p", { class: "meta", text: `全${TOTAL_ITEM_COUNT}問・所要およそ5分` }),
+      // 説明は「はじめる」の上に置く（ココロパレアと同じ並び）
+      toolIntro(),
       ...notices,
       el("div", { class: "actions" }, actions),
     ]),
-    toolIntro(),
     el("p", { class: "disclaimer" }, [
       "この診断は医学的・心理学的な検査ではありません。結果は自己理解の手がかりとしてお使いください。",
       el("br"),

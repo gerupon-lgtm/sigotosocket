@@ -162,7 +162,7 @@ body {
 
 /* 閉じたまま置く説明。ココロパレアの .start-introduction に倣う。 */
 .tool-intro {
-  margin-top: 24px;
+  margin: 24px 0;
   border: 1.5px solid var(--line);
   border-radius: 20px;
   background: linear-gradient(135deg, #fbfcfe, #eef2f8);
@@ -198,14 +198,13 @@ body {
 .tool-intro[open] > summary::after { transform: rotate(90deg); }
 
 .intro-summary-mark {
-  display: grid;
+  display: block;
   width: 44px;
   height: 44px;
-  place-items: center;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 2px 8px rgb(27 42 68 / 10%);
-  font-size: 1.1rem;
+  object-fit: cover;
 }
 
 .intro-body {
