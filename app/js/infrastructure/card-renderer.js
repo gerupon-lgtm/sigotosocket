@@ -189,7 +189,8 @@ export async function renderCard(canvas, snapshot) {
   // キャラクター（ポーズ＝1位、小物＝2位）
   const c = L.character;
   // パスは manifest が正典。文字列で組み立てない（アセットを入れ替えたら目録が追う）。
-  const poseEntry = snapshot.poseScaleId ? poseFor(snapshot.poseScaleId) : null;
+  // 判定不能で順位が無いときは中立ポーズ。小物は2位の領域なので出さない（T-015）。
+  const poseEntry = poseFor(snapshot.poseScaleId ?? "neutral");
   const propEntry = snapshot.propScaleId ? propFor(snapshot.propScaleId) : null;
   const pose = poseEntry ? await loadImage(poseEntry.imagePath) : null;
   const prop = poseEntry && propEntry ? await loadImage(propEntry.imagePath) : null;

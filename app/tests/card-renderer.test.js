@@ -189,3 +189,21 @@ test("画像を出せなかったときは、居ないキャラクターをalt�
   assert.ok(!alt.includes("ハリネズミ"), `描いていないのに説明している: ${alt}`);
   assert.ok(alt.includes("シゴトソケット"), "カードの説明になっていない");
 });
+
+test("判定不能のカードは中立ポーズを描く（小物は無し）", async () => {
+  const { poseFor } = await import("../js/data/character-manifest.js");
+  const requested = [];
+  const restore = withImage(requested);
+  try {
+    const { canvas, texts } = stubCanvas();
+    const snapshot = snapshotFor(uniformAnswers(3));
+    assert.equal(snapshot.poseScaleId, null, "判定不能の前提が崩れている");
+    const { alt } = await renderCard(canvas, snapshot);
+    assert.deepEqual(requested, [poseFor("neutral").imagePath], "中立ポーズを描いていない");
+    assert.ok(!texts.join("|").includes("準備中"),
+      "アセットがあるのに「準備中」の枠を出している");
+    assert.ok(alt.includes(poseFor("neutral").alt));
+  } finally {
+    restore();
+  }
+});
