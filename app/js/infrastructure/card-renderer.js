@@ -6,6 +6,7 @@ import { drawRadar } from "../presentation/radar-chart.js";
 import { drawMark, roundedRectPath } from "../presentation/mark.js";
 import { CARD, LAYOUT, TEXT, verticalPlan, headerLockup } from "../presentation/card-layout.js";
 import { hollandCardLine } from "../domain/holland.js";
+import { poseFor, propFor } from "../data/character-manifest.js";
 
 export const CARD_SIZE = CARD;
 
@@ -187,8 +188,11 @@ export async function renderCard(canvas, snapshot) {
 
   // キャラクター（ポーズ＝1位、小物＝2位）
   const c = L.character;
-  const pose = snapshot.poseScaleId ? await loadImage(`assets/characters/character-pose-${snapshot.poseScaleId}.webp`) : null;
-  const prop = snapshot.propScaleId ? await loadImage(`assets/props/prop-${snapshot.propScaleId}.webp`) : null;
+  // パスは manifest が正典。文字列で組み立てない（アセットを入れ替えたら目録が追う）。
+  const poseEntry = snapshot.poseScaleId ? poseFor(snapshot.poseScaleId) : null;
+  const propEntry = snapshot.propScaleId ? propFor(snapshot.propScaleId) : null;
+  const pose = poseEntry ? await loadImage(poseEntry.imagePath) : null;
+  const prop = poseEntry && propEntry ? await loadImage(propEntry.imagePath) : null;
   const charBox = { x: CX - c.size / 2, y: plan.charTop, w: c.size, h: c.size };
   if (pose) {
     ctx.drawImage(pose, ...Object.values(containRect(pose, charBox.x, charBox.y, charBox.w, charBox.h)));
@@ -252,5 +256,20 @@ export async function renderCard(canvas, snapshot) {
   ctx.fillText(appMeta.appVersion, CX, f.versionBaseline);
   ctx.restore();
 
-  return { canvas };
+  return { canvas, alt: cardAltText({ title, snapshot, pose: pose ? poseEntry : null, prop: prop ? propEntry : null }) };
+}
+
+/**
+ * カードの読み上げ文。**描けたものだけを言う。**画像が出せなかったときに
+ * 居ないキャラクターを説明すると、読み上げだけが実物と食い違う。
+ */
+function cardAltText({ title, snapshot, pose, prop }) {
+  const parts = [`シゴトソケットの結果カード。称号は「${title}」。`];
+  if (snapshot.rank) {
+    parts.push(`高かった領域は${snapshot.rank.slice(0, 2).map((id) => ScaleById[id].labelJa).join("と")}。`);
+    const holland = hollandCardLine(snapshot.rank);
+    if (holland) parts.push(`${holland}。`);
+  }
+  if (pose) parts.push(`絵は${pose.alt}${prop ? `と、${prop.alt}` : ""}。`);
+  return parts.join("");
 }

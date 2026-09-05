@@ -19,10 +19,11 @@ export function renderCardScreen({ snapshot, onBack }) {
   (async () => {
     try {
       const canvas = document.createElement("canvas");
-      await renderCard(canvas, snapshot);
+      // alt は描けたものだけを言う（card-renderer.js の cardAltText）。
+      const { alt } = await renderCard(canvas, snapshot);
       canvas.className = "card-canvas";
       canvas.setAttribute("role", "img");
-      canvas.setAttribute("aria-label", "診断結果のカード画像");
+      canvas.setAttribute("aria-label", alt);
       holder.appendChild(canvas);
       status.textContent = "画像として保存したり、共有したりできます。";
 

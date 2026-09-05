@@ -13,6 +13,7 @@
     "version:check": "node scripts/version/check-version.mjs",
     "character:alpha": "node scripts/characters/alpha-from-white.mjs",
     "character:build": "node scripts/characters/build-character-assets.mjs",
+    "character:manifest": "node scripts/characters/build-manifest.mjs",
     "character:check": "node scripts/characters/check-character-assets.mjs",
     "character:tones": "node scripts/characters/measure-tones.mjs",
     "fonts:build": "node scripts/fonts/build-mincho-subset.mjs"

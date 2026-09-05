@@ -151,3 +151,41 @@ test("フォントの読み込みに失敗してもカードは描ける", async
     restore();
   }
 });
+
+/** 画像が読めた体にする。読み込みを求められたパスを記録する。 */
+function withImage(requested) {
+  const had = "Image" in globalThis;
+  const previous = globalThis.Image;
+  globalThis.Image = class {
+    constructor() { this.width = 1024; this.height = 1024; }
+    set src(value) { requested.push(value); queueMicrotask(() => this.onload?.()); }
+  };
+  return () => { if (had) globalThis.Image = previous; else delete globalThis.Image; };
+}
+
+test("アセットのパスとキャラクターの説明を manifest から引く", async () => {
+  const { poseFor, propFor } = await import("../js/data/character-manifest.js");
+  const requested = [];
+  const restore = withImage(requested);
+  try {
+    const { canvas, ops } = stubCanvas();
+    const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
+    const { alt } = await renderCard(canvas, snapshot);
+    const pose = poseFor(snapshot.poseScaleId);
+    const prop = propFor(snapshot.propScaleId);
+    assert.deepEqual(requested, [pose.imagePath, prop.imagePath]);
+    assert.ok(ops.includes("drawImage"), "画像を描いていない");
+    assert.ok(alt.includes(pose.alt), `altにポーズの説明がない: ${alt}`);
+    assert.ok(alt.includes(prop.alt), `altに小物の説明がない: ${alt}`);
+  } finally {
+    restore();
+  }
+});
+
+test("画像を出せなかったときは、居ないキャラクターをaltで説明しない", async () => {
+  const { canvas } = stubCanvas();
+  const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
+  const { alt } = await renderCard(canvas, snapshot);  // Image が無い環境
+  assert.ok(!alt.includes("ハリネズミ"), `描いていないのに説明している: ${alt}`);
+  assert.ok(alt.includes("シゴトソケット"), "カードの説明になっていない");
+});
