@@ -33,7 +33,7 @@ export const UNIQUE_INTEREST_SCALES = Object.freeze(["production", "adventure"])
 export const UNIQUE_INTEREST_TOP_N = 2;
 
 /**
- * ③固有性。**該当が無ければ null。**無理に何かを見つけない（変更禁止事項4と同じ姿勢）。
+ * ③固有性。**該当が無ければ null。**無理に何かを見つけない（決めごとB-3と同じ姿勢）。
  *
  * @param {{rank: string[]|null, bigFive: object|null}} input
  * @returns {{scaleIds: string[], lines: string[]}|null}
@@ -113,7 +113,7 @@ function positionsByZ(entries) {
 }
 
 /**
- * ②整合／不整合。**該当が無くても null にしない**（変更禁止事項4）。
+ * ②整合／不整合。**該当が無くても null にしない**（決めごとB-3）。
  * null になるのは、そもそも判定の材料が無いときだけ。
  *
  * @param {{scaleScores: {scaleId: string, z: number|null}[], bigFive: object|null}} input

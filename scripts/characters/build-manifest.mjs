@@ -58,7 +58,7 @@ async function collect(dir, prefix, altTable) {
 
 const poses = await collect("characters", "character-pose-", PoseAlt);
 const props = await collect("props", "prop-", PropAlt);
-// ゲスト（F-022）。**自オリジンに置く**（変更禁止事項8：他オリジンの画像はcanvasを汚染する）
+// ゲスト（F-022）。**自オリジンに置く**（決めごとA-3：他オリジンの画像はcanvasを汚染する）
 const guests = await collect("guest", "guest-", GuestAlt);
 
 const render = (entries) => entries.map((e) => `  Object.freeze({\n`

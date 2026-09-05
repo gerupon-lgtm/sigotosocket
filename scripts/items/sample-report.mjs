@@ -15,7 +15,7 @@ import { cronbachAlpha, pearson } from "./statistics.mjs";
  * 早合点しないための但し書きを、レポート側が必ず持つ。
  */
 
-/** §8 の6ペアだけ。**増やさない**（変更禁止事項3）。 */
+/** §8 の6ペアだけ。**増やさない**（決めごとB-2）。 */
 export const SIGN_CHECK_PAIRS = Object.freeze([
   { factorId: "intellectImagination", scaleId: "creativity", reference: 0.30 },
   { factorId: "intellectImagination", scaleId: "erudition", reference: 0.34 },
@@ -121,7 +121,7 @@ export function buildSampleReport(respondents) {
   if (paired.length < SAMPLE_TARGET) {
     cautions.push(`Big5とペアで揃ったのは${paired.length}人。符号の再現はこの人数で断定できません`);
   }
-  cautions.push("相関の値は判定に掛け合わせません。使うのは符号と大小だけです（変更禁止事項3）");
+  cautions.push("相関の値は判定に掛け合わせません。使うのは符号と大小だけです（決めごとB-2）");
   const weak = alpha.filter((a) => a.alpha !== null && a.alpha < 0.72);
   if (weak.length > 0) {
     cautions.push(`推定値（.72以上）に届かない尺度: ${weak.map((a) => a.labelJa).join("・")}`);

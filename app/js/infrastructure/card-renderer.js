@@ -132,7 +132,7 @@ async function ensureMinchoLoaded() {
  *
  * **接地線をそろえ、猫だけ `lift` ぶん上げる。**上げることで奥に居るように見える。
  * 猫は先に描くので、順序としては奥になる。ただし矩形は `gap` ぶん離すので重ならない
- * （変更禁止事項7の残す4項目のうち「覗き込み・前足を伸ばす所作」は絵の側で担保）。
+ * （決めごとC-1の残す4項目のうち「覗き込み・前足を伸ばす所作」は絵の側で担保）。
  */
 function drawGuestGroup(ctx, { pose, poseBody, prop, propBody, guest, guestBody, plan, CX }) {
   const c = LAYOUT.character;

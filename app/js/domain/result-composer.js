@@ -8,7 +8,7 @@ import { TypeById, UNDETERMINED_TEXT } from "../data/type-definitions.js";
  * 構成はココロパレアを踏襲する。
  *   称号 → 中立副題 → 称号理由 → 各領域の観察文 → 読み方の注記
  *
- * 変更禁止事項2: 集団比較の表現を出力に含めない。
+ * 決めごとB-1: 集団比較の表現を出力に含めない。
  * 規範データが存在しないため「あなたの中で相対的に」以上のことは言えない。
  */
 export const FORBIDDEN_PHRASES = Object.freeze([
