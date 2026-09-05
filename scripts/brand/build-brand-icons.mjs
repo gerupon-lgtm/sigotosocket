@@ -15,8 +15,11 @@ const FONT = 'system-ui, "Noto Sans CJK JP", "Hiragino Sans", sans-serif';
 
 async function main() {
   await mkdir(BRAND, { recursive: true });
-  const markSvg = Buffer.from(buildMarkSvg([7, 0]));
-  await writeFile(join(BRAND, "sigotosocket-mark.svg"), buildMarkSvg([7, 0]));
+  // アプリアイコンには判定が関わらないため、点灯の順序に意味はない。
+  // MARK.lit の並びを変えても見た目が変わらないよう [0, 7] で固定する（従来と同一の画になる）。
+  const ICON_LIT = [0, 7];
+  const markSvg = Buffer.from(buildMarkSvg(ICON_LIT));
+  await writeFile(join(BRAND, "sigotosocket-mark.svg"), buildMarkSvg(ICON_LIT));
 
   for (const size of [180, 192, 512]) {
     await sharp(markSvg, { density: 384 })
