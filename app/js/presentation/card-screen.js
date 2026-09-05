@@ -1,5 +1,6 @@
 import { el } from "./screen-helpers.js";
 import { appHeader } from "./app-header.js";
+import { screenHeading } from "./screen-heading.js";
 import { renderCard } from "../infrastructure/card-renderer.js";
 
 /**
@@ -43,8 +44,8 @@ export function renderCardScreen({ snapshot, onBack, onHome, shareUrl }) {
   ]);
 
   const section = el("section", { class: "screen card" }, [
-    appHeader({ screenLabel: "結果カード" }),
-    el("h1", { text: "結果カード" }),
+    appHeader({ action: { label: "結果へ戻る", onClick: onBack } }),
+    screenHeading({ kicker: "RESULT CARD", title: "結果カード" }),
     holder,
     status,
     actions,

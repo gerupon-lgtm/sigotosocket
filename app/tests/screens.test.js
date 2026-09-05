@@ -169,28 +169,31 @@ test("連携済みなら予告は消え、本文に入れ替わる", async () =>
   assert.ok(text.includes("予測できるものではありません"), "本文が出ていない");
 });
 
-test("全画面にヘッダーがあり、画面名が入る（ココロパレアに合わせた導線）", () => {
+test("全画面にヘッダーがあり、見出しは本文側が持つ（ココロパレア踏襲）", () => {
   const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
   const screens = [
-    ["はじめる", renderStartScreen({
+    ["INTEREST CHECK", renderStartScreen({
       progressState: createResponseState(null), latestResult: null,
       storageStatus: STORAGE_STATUS.OK,
       onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
     })],
-    ["回答中", renderQuestionnaireScreen({
+    [null, renderQuestionnaireScreen({
       state: createResponseState(null), onAnswer() {}, onBack() {}, onQuit() {},
     })],
-    ["詳細結果", renderResultScreen({
+    ["DETAIL RESULT", renderResultScreen({
       snapshot, bigFive: null, onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
     })],
-    ["出典・免責", renderAboutScreen({ onBack() {}, onClearAll() {} })],
+    ["ABOUT", renderAboutScreen({ onBack() {}, onClearAll() {} })],
   ];
-  for (const [label, node] of screens) {
+  for (const [kicker, node] of screens) {
     const header = node.querySelectorAll(".app-header")[0];
-    assert.ok(header, `${label}: ヘッダーが無い`);
-    assert.equal(header.querySelectorAll(".app-brand-part").length, 2, `${label}: ブランドが無い`);
-    assert.equal(header.querySelectorAll(".app-screen-label")[0]?.textContent, label,
-      `${label}: 画面名が違う`);
+    assert.ok(header, "ヘッダーが無い");
+    assert.equal(header.querySelectorAll(".app-mark").length, 1, "アイコンが無い");
+    assert.equal(header.querySelectorAll(".app-brand-name")[0].textContent, "シゴトソケット");
+    assert.equal(header.querySelectorAll(".app-screen-label").length, 0, "画面名をヘッダーに置いている");
+    const kickers = node.querySelectorAll(".screen-kicker");
+    if (kicker) assert.equal(kickers[0].textContent, kicker);
+    else assert.equal(kickers.length, 0, "設問画面にキッカーは置かない");
   }
 });
 

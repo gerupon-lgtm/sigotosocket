@@ -28,6 +28,13 @@ const FROM_BOTTOM = Object.freeze({
 });
 const B = (key) => H - FROM_BOTTOM[key];
 
+/**
+ * ヘッダー〜称号の塊を、確定値からさらに下へずらす量。
+ * 上の枠との間隔が詰まって見えるため（2026-09-05 本人指摘）。
+ * **個々のyを書き換えず、ここ1か所で動かす。**
+ */
+const HEADER_DROP = 18;
+
 export const LAYOUT = Object.freeze({
   palette: Object.freeze({
     background: "#f4f6fa",
@@ -47,27 +54,27 @@ export const LAYOUT = Object.freeze({
 
   header: Object.freeze({
     markSize: 94,
-    markTop: 61.9,
+    markTop: 61.9 + HEADER_DROP,
     gap: 22,
     nameSize: 48,
-    nameBaseline: 111.9,
+    nameBaseline: 111.9 + HEADER_DROP,
     subtitleSize: 23,
-    subtitleBaseline: 148.4,
+    subtitleBaseline: 148.4 + HEADER_DROP,
     // アプリ名の幅の下限。副題がこれより狭ければ字間を詰めない
     nameMinWidth: 360,
-    divider: Object.freeze({ y: 167.9, left: [300, 488], right: [592, 780], dotRadius: 5 }),
+    divider: Object.freeze({ y: 167.9 + HEADER_DROP, left: [300, 488], right: [592, 780], dotRadius: 5 }),
   }),
 
   title: Object.freeze({
-    pill: Object.freeze({ x: (W - 344) / 2, y: 192.2, w: 344, h: 52, r: 26 }),
+    pill: Object.freeze({ x: (W - 344) / 2, y: 192.2 + HEADER_DROP, w: 344, h: 52, r: 26 }),
     pillTextSize: 27,
-    pillTextBaseline: 227.3,
-    baseline: 305.6,
+    pillTextBaseline: 227.3 + HEADER_DROP,
+    baseline: 305.6 + HEADER_DROP,
     size: 47,          // 比率90%（52 × 0.9）
     minSize: 34,       // 自動縮小の下限
     maxWidth: 890,
     neutralSize: 29,
-    neutralBaseline: 350.1,
+    neutralBaseline: 350.1 + HEADER_DROP,
   }),
 
   /** キャラクターとレーダーが入る帯 */

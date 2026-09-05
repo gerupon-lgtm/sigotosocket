@@ -29,7 +29,8 @@ const render = (extra = {}) => renderCardScreen({
 
 test("カード画面にヘッダーと戻る導線がある", () => {
   const node = render();
-  assert.equal(node.querySelectorAll(".app-screen-label")[0].textContent, "結果カード");
+  assert.equal(node.querySelectorAll(".app-brand-name")[0].textContent, "シゴトソケット");
+  assert.equal(node.querySelectorAll(".screen-kicker")[0].textContent, "RESULT CARD");
   const labels = [...node.querySelectorAll("button")].map((b) => b.textContent);
   assert.ok(labels.includes("結果へ戻る"));
   assert.ok(labels.includes("トップへ戻る"));

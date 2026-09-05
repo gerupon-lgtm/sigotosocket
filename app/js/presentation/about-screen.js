@@ -1,11 +1,12 @@
 import { el } from "./screen-helpers.js";
 import { appHeader } from "./app-header.js";
+import { screenHeading } from "./screen-heading.js";
 import { appMeta } from "../config/app-meta.js";
 
 export function renderAboutScreen({ onBack, onClearAll }) {
   return el("section", { class: "screen about" }, [
-    appHeader({ screenLabel: "出典・免責" }),
-    el("h1", { text: "この診断について" }),
+    appHeader({ action: { label: "戻る", onClick: onBack } }),
+    screenHeading({ kicker: "ABOUT", title: "この診断について" }),
 
     el("h2", { text: "医学的・心理学的な検査ではありません" }),
     el("p", { text: "結果は自己理解の手がかりであり、能力や適性を判定するものではありません。診断名や適職を示すものでもありません。" }),

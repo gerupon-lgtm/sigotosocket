@@ -10,11 +10,14 @@ import { poseFor, propFor } from "../data/character-manifest.js";
 
 export const CARD_SIZE = CARD;
 
-const SANS = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif';
+// カードの書体はココロパレアの share-card-renderer.js に合わせる。
+const SANS = '"Noto Sans JP", "Yu Gothic", sans-serif';
 // 先頭は同梱のサブセット（style.css の @font-face）。称号に使う161字だけを持つので、
 // それ以外の字は後ろの端末フォントへ落ちる。豆腐にはならない。
 const MINCHO_SUBSET_FAMILY = "Sigotosocket Mincho";
-const MINCHO = `"${MINCHO_SUBSET_FAMILY}", "Noto Serif CJK JP", "Hiragino Mincho ProN", "Yu Mincho", serif`;
+// 明朝も同じ並びにするが、**先頭は同梱のサブセット**を残す。ココロパレアは同梱して
+// いないため、明朝を持たないAndroidではゴシックに落ちる。そこはこちらの改善点。
+const MINCHO = `"${MINCHO_SUBSET_FAMILY}", "Noto Serif JP", "Yu Mincho", serif`;
 
 /**
  * キャラクターは背景透過で、**余白を切り落とした状態で配置する前提**。

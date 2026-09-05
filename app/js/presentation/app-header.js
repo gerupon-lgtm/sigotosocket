@@ -1,22 +1,34 @@
 import { el } from "./screen-helpers.js";
+import { appMeta } from "../config/app-meta.js";
 
 /**
  * 全画面共通のヘッダー。**組み立てはココロパレアの `app-header.js` に合わせている**
- * （ブランドを2つに割る／画面名／右に操作1つ／設問画面だけ sticky）。
+ * ——アイコン＋（名称／副題の2行）、右端に操作を1つ、設問画面だけ sticky。
+ * **画面名はここに置かない。**本文側の `screen-heading.js` が持つ。
  *
  * **配色は合わせない。**要件定義書 v1.8 で、ココロパレアと並べて見分けがつかないため
  * 緑系から紺系へ移した。構造と導線だけを揃え、色は分けたままにする。
  */
-const BRAND_PARTS = Object.freeze(["シゴトソケット｜", "ORVIS 自己理解支援ツール"]);
+export function appHeader({ action = null, sticky = false } = {}) {
+  const mark = el("img", {
+    class: "app-mark",
+    src: appMeta.brand.iconPath,
+    alt: "",           // 装飾。名称は隣のテキストが読み上げる
+    width: "38", height: "38",
+  });
 
-export function appHeader({ screenLabel = "", action = null, sticky = false } = {}) {
   return el("header", { class: sticky ? "app-header is-sticky" : "app-header" }, [
-    el("div", { class: "app-brand" },
-      BRAND_PARTS.map((part) => el("span", { class: "app-brand-part", text: part }))),
-    screenLabel ? el("span", { class: "app-screen-label", text: screenLabel }) : null,
+    el("div", { class: "app-brand" }, [
+      mark,
+      el("span", { class: "app-brand-copy" }, [
+        el("span", { class: "app-brand-name", text: appMeta.brand.name }),
+        el("span", { class: "app-brand-subtitle", text: appMeta.brand.subtitle }),
+      ]),
+    ]),
     action
-      ? el("button", { class: "app-header-action", type: "button", onClick: action.onClick },
-        action.label)
+      ? (action.href
+        ? el("a", { class: "app-header-action", href: action.href }, action.label)
+        : el("button", { class: "app-header-action", type: "button", onClick: action.onClick }, action.label))
       : null,
   ]);
 }

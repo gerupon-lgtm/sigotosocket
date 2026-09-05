@@ -25,8 +25,7 @@ export function renderQuestionnaireScreen({ state, onAnswer, onBack, onQuit }) {
 
   return el("section", { class: "screen question" }, [
     // 設問画面だけ sticky。長い一覧を送っても中断の導線が視界から消えない（ココロパレア踏襲）。
-    appHeader({ screenLabel: "回答中", sticky: true,
-      action: { label: "中断してトップへ", onClick: onQuit } }),
+    appHeader({ sticky: true, action: { label: "中断してトップへ", onClick: onQuit } }),
     el("div", { class: "progress", role: "progressbar", "aria-valuemin": "1",
       "aria-valuemax": String(TOTAL_ITEM_COUNT), "aria-valuenow": String(state.currentIndex + 1) }, [
       el("div", { class: "progress-bar", style: `width:${progress}%` }),

@@ -55,7 +55,7 @@
 | T-015 キャラクターアセット | **完了**（2026-09-05）。ポーズ10種＋小物8点を `npm run character:build` で1024×1024のwebpへ変換し組み込み済み。`character:check` 通過。`npm run character:manifest` で目録（characterId / imagePath / alt / 寸法 / sha256）を生成。altは `scripts/characters/character-alt.js` が手書きの正典。カードの画像パスと読み上げ文は目録から引く |
 | T-016 カード生成 | **完了**（2026-09-05にレイアウト全面刷新）。1080×1800、座標は `app/js/presentation/card-layout.js` が正典。文字被りを `card-layout.test.js` が機械的に検査する。判定不能のときは中立ポーズを描く（小物は無し）。「準備中」の枠が出るのはアセットの読み込みに失敗したときだけ |
 | T-017 S-004 カード画面・共有 | **完了** |
-| T-018 フォント・アイコンの確定 | **完了**（2026-09-05）。Noto Serif JP（SIL OFL 1.1）を明朝で描く**161字**に絞って同梱（38.9KB）。`npm run fonts:subset` で生成、`@font-face` は `style.css`、CSPへ `font-src 'self'` を明示。許諾全文は `app/assets/fonts/OFL.txt`、出典は S-005 に表示 |
+| T-018 フォント・アイコンの確定 | **完了**（2026-09-05）。画面の書体はココロパレアと同じ並び（`"Sawarabi Gothic", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui`）。**同梱も外部読み込みもしない**ので外部通信ゼロを保つ。カードの書体も同社に合わせた（`docs/brand/card-layout.md`）。Noto Serif JP（SIL OFL 1.1）を明朝で描く**161字**に絞って同梱（38.9KB）。`npm run fonts:subset` で生成、`@font-face` は `style.css`、CSPへ `font-src 'self'` を明示。許諾全文は `app/assets/fonts/OFL.txt`、出典は S-005 に表示 |
 | T-019 タイプ命名表28件 | **完了**（本人レビュー反映済み。決定ログ D-15） |
 | T-020 端値テスト | **完了** |
 | T-021 PC・スマホのスモーク | **実機確認を実施（2026-09-05・Pixel 6a とPC）。**指摘4件は対応済み（結果画面の称号／URL共有／トップへの導線／ヘッダー）。以下はその前の記録。**ブラウザ幅での確認は完了**（2026-09-05）。375×812 と 1280×900 で S-001→S-002→S-003→S-004 を完走。横スクロール 0px、選択肢のタップ領域は最小53px、`toBlob()` は 478KB のPNGを返す。判定不能の経路も確認。**実機（実端末）での確認は未実施。**エミュレートした画面幅であって実機ではない。手順は `docs/実機確認手順_T-021.md`（Pixel 6a / Chrome とPC） |

@@ -7,7 +7,15 @@ const diagnosticVersions = Object.freeze({
   resultTextVersion: "result-text-v1",
 });
 
+/** 画面とカードで使うブランドの文言。**1か所で持つ**（ココロパレアの appMeta.brand に倣う）。 */
+const brand = Object.freeze({
+  name: "シゴトソケット",
+  subtitle: "ORVIS 自己理解支援ツール",
+  iconPath: "assets/brand/sigotosocket-mark.svg",
+});
+
 export const appMeta = Object.freeze({
+  brand,
   appId: "sigotosocket",
   appVersion: "v0.1.0",
   // 公開URL（2026-09-05 確定・要確認21を解消）。index.html の canonical / og:url と一致させること。

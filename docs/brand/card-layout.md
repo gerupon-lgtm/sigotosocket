@@ -149,3 +149,21 @@ R成分そのものは `#F0B06C` のほうが大きい（240 対 223）が、見
 ②レイアウトは一通り確定。残りは③実装。
 `scripts/brand/build-card-full.mjs` の座標を `app/js/presentation/card-layout.js` へ移し、
 `card-renderer.js` をそこから描くように書き換える。
+
+## 確定：ヘッダーの塊を下げる（2026-09-05）
+
+**ヘッダー〜中立副題の塊を、確定値からさらに +18px 下げた。**上の内枠との間隔が
+詰まって見えるため（本人指摘）。`card-layout.js` の `HEADER_DROP` 1か所で動かしており、
+個々のyは書き換えていない。次に動かすときもここだけを触ること。
+
+## 確定：カードの書体（2026-09-05）
+
+ココロパレアの `share-card-renderer.js` に合わせる。
+
+| 用途 | スタック |
+|---|---|
+| ゴシック | `"Noto Sans JP", "Yu Gothic", sans-serif` |
+| 明朝 | `"Sigotosocket Mincho", "Noto Serif JP", "Yu Mincho", serif` |
+
+明朝の**先頭は同梱のサブセット**を残す。ココロパレアはフォントを同梱していないため、
+明朝を持たないAndroidではゴシックに落ちる。そこは本アプリ側の改善点として維持する。

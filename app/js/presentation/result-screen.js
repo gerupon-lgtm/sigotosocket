@@ -1,5 +1,6 @@
 import { el, formatDateTime } from "./screen-helpers.js";
 import { appHeader } from "./app-header.js";
+import { screenHeading } from "./screen-heading.js";
 import { drawRadar, radarTextFallback } from "./radar-chart.js";
 import { ScaleById } from "../data/scale-definitions.js";
 import { composeResultText } from "../domain/result-composer.js";
@@ -62,9 +63,10 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
   ]));
 
   return el("section", { class: "screen result" }, [
-    appHeader({ screenLabel: "詳細結果" }),
+    appHeader({ action: { label: "トップへ戻る", onClick: onHome } }),
+    screenHeading({ kicker: "DETAIL RESULT", title: "45問の詳細結果" }),
     el("p", { class: "title-label", text: "あなたの称号" }),
-    el("h1", { class: "type-name", text: text.title }),
+    el("h2", { class: "type-name", text: text.title }),
     el("p", { class: "type-subtitle", text: text.subtitle }),
     el("p", { class: "meta", text: formatDateTime(snapshot.createdAt) }),
     radarBlock(snapshot.scaleScores),
