@@ -49,8 +49,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: 配信物を組み立てる（開発用のものを除く）
+        # app/ には開発用のものが同居している。そのまま上げると
+        # テスト・devサーバー・検討用モックまで公開されてしまう。
+        run: |
+          mkdir -p dist
+          cp -r app/. dist/
+          rm -rf dist/__mock dist/tests
+          rm -f dist/dev-server.mjs
+          echo "配信するもの:"; ls dist
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: app
+          path: dist
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>real</title>
+<!-- レンダラは assets/... を文書相対で読む。実アプリ（app/index.html）と同じ基準にする -->
+<base href="../">
+<link rel="stylesheet" href="css/style.css">
+<style>body{margin:0;background:#fff;display:flex;gap:10px;padding:10px;align-items:flex-start}
+figure{margin:0;flex:0 0 var(--w,360px);min-width:0}figcaption{font:600 15px system-ui;text-align:center;padding:4px 0}
+canvas{width:100%;display:block;box-shadow:0 1px 6px rgba(0,0,0,.18)}</style>
+</head><body>
+<script type="module">
+// 実装そのままを描く（合成は一切しない）。連携あり／なしを並べて見る。
+import { renderCard } from "../js/infrastructure/card-renderer.js";
+import { ItemMaster } from "../js/data/item-master.js";
+import { scoreScales } from "../js/domain/scoring.js";
+import { standardize } from "../js/domain/standardize.js";
+import { classify } from "../js/domain/type-classifier.js";
+import { createResultSnapshot, attachBigFive } from "../js/domain/result-snapshot.js";
+import { parseBigFiveCode } from "../js/domain/big-five-link.js";
+import { LAYOUT } from "../js/presentation/card-layout.js";
+
+const answers = Object.fromEntries(ItemMaster.map((it, i) => [it.id, ((i * 3) % 5) + 1]));
+const std = standardize(scoreScales({ items: ItemMaster, answers }));
+const base = createResultSnapshot({ standardized: std, classification: classify(std) });
+const link = parseBigFiveCode("v1-342288401195267");
+
+const q = new URLSearchParams(location.search);
+document.documentElement.style.setProperty("--w", (q.get("w") ?? "360") + "px");
+const only = q.get("linked");
+const typeOverride = q.get("type");   // 称号を差し替えて長さの検証に使う
+const pairs = only === "1" ? [[attachBigFive(base, link), "連携あり"]]
+  : only === "0" ? [[base, "連携なし"]]
+  : [[attachBigFive(base, link), "連携あり"], [base, "連携なし"]];
+for (let [snap, label] of pairs) {
+  if (typeOverride) snap = Object.freeze({ ...snap, primaryTypeId: typeOverride });
+  const canvas = document.createElement("canvas");
+  await renderCard(canvas, snap);
+  if (q.get("guide") === "1") {
+    // 内枠の上端からマークの上端までを測って描く（相談用の目印）
+    const x = LAYOUT.frame.inner.x, top = LAYOUT.frame.inner.y, mark = LAYOUT.header.markTop;
+    const ctx = canvas.getContext("2d");
+    ctx.save();
+    ctx.strokeStyle = "#d0463b"; ctx.fillStyle = "#d0463b"; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x + 40, top); ctx.lineTo(x + 40, mark);
+    ctx.moveTo(x + 20, top); ctx.lineTo(x + 60, top);
+    ctx.moveTo(x + 20, mark); ctx.lineTo(x + 60, mark);
+    ctx.stroke();
+    ctx.font = "bold 30px sans-serif";
+    ctx.fillText(`${Math.round((mark - top) * 10) / 10}px`, x + 74, (top + mark) / 2 + 10);
+    ctx.restore();
+  }
+  const fig = document.createElement("figure");
+  const cap = document.createElement("figcaption");
+  cap.textContent = label;
+  fig.append(cap, canvas);
+  document.body.append(fig);
+}
+document.title = "ready";
+</script></body></html>

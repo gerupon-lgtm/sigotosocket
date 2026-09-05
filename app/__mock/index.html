@@ -21,6 +21,9 @@ const cat = params.get("cat") ?? "guest-cat-b.webp";
 const ratio = Number(params.get("ratio") ?? 0.75);
 const gap = Number(params.get("gap") ?? 10);
 const shifts = (params.get("shifts") ?? "0,60,120").split(",").map(Number);
+const lift = Number(params.get("lift") ?? 0);   // 猫の接地線を上げる＝奥に見せる
+const flip = params.get("flip") === "1";        // 猫を左右反転（むっくん側を向かせる）
+const poseOverride = params.get("pose");        // ポーズを固定して総当たりで見る
 document.documentElement.style.setProperty("--w", (params.get("w") ?? "360") + "px");
 
 const load = (src) => new Promise((res, rej) => {
@@ -48,7 +51,7 @@ const snap = createResultSnapshot({ standardized: std, classification: classify(
 const plan = verticalPlan(), C = LAYOUT.character;
 
 const [poseImg, propImg, catImg] = await Promise.all([
-  load(`../assets/characters/character-pose-${snap.poseScaleId}.webp`),
+  load(`../assets/characters/character-pose-${poseOverride ?? snap.poseScaleId}.webp`),
   load(`../assets/props/prop-${snap.propScaleId}.webp`),
   load(`../assets/guest/${cat}`),
 ]);
@@ -70,7 +73,15 @@ for (const shift of shifts) {
   const left = plan.centerX - groupW / 2 + shift;
   const poseX = left + catW + gap;
 
-  ctx.drawImage(catImg, catR.x, catR.y, catR.w, catR.h, left, base - catH, catW, catH);
+  if (flip) {
+    ctx.save();
+    ctx.translate(left + catW, base - catH - lift);
+    ctx.scale(-1, 1);
+    ctx.drawImage(catImg, catR.x, catR.y, catR.w, catR.h, 0, 0, catW, catH);
+    ctx.restore();
+  } else {
+    ctx.drawImage(catImg, catR.x, catR.y, catR.w, catR.h, left, base - catH - lift, catW, catH);
+  }
   ctx.drawImage(poseImg, poseR.x, poseR.y, poseR.w, poseR.h, poseX, base - poseH, poseW, poseH);
   ctx.drawImage(propImg, propR.x, propR.y, propR.w, propR.h,
     poseX + poseW - propW * 0.45, base - propH, propW, propH);

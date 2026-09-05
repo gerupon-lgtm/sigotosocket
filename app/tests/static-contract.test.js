@@ -40,3 +40,20 @@ test("devサーバーはキャッシュさせない（古いモジュールで�
   assert.match(source, /cache-control["']?\s*:\s*["']no-store/i,
     "no-store を返していない。編集したのに古いJSが動いて原因を取り違える");
 });
+
+test("公開物に開発用のものを混ぜない（Pagesへ配信するのは dist）", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const workflow = await readFile(new URL("../../.github/workflows/pages.yml", import.meta.url), "utf8");
+
+  // アップロードするのは app ではなく、開発用を除いた dist
+  assert.match(workflow, /upload-pages-artifact[\s\S]*?path:\s*dist/,
+    "app をそのまま公開している（tests や dev-server まで配信される）");
+
+  // 除外の対象は app/ に実在するものだけを書く。消えた名前が残っていると気づけない
+  const { existsSync } = await import("node:fs");
+  for (const dev of ["__mock", "tests", "dev-server.mjs"]) {
+    assert.ok(workflow.includes(dev), `${dev} を除外していない`);
+    assert.ok(existsSync(new URL(`../${dev}`, import.meta.url)),
+      `app/${dev} が無いのに除外指定が残っている`);
+  }
+});
