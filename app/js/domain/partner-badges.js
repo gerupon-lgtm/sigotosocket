@@ -1,4 +1,4 @@
-import { BIG_FIVE_FACTOR_ORDER } from "./big-five-link.js";
+import { BIG_FIVE_FACTOR_ORDER, BIG_FIVE_FACTOR_LABEL } from "./big-five-link.js";
 
 /**
  * 相手アプリ（ココロパレア）の結果を記号として出す（F-020・第2フェーズ）。
@@ -23,15 +23,6 @@ export const BAND_LOW = 2.5;
 export const MAX_BADGES = 2;
 
 const MIDDLE = 3.0;
-
-/** ココロパレアの `diagnostic-definition.js` の `displayName` と同じ表記。 */
-const FACTOR_LABEL = Object.freeze({
-  intellectImagination: "知性・想像力",
-  conscientiousness: "勤勉性",
-  extraversion: "外向性",
-  agreeableness: "協調性",
-  emotionalStability: "情緒安定性",
-});
 
 /**
  * ココロパレアのカードと同じ0〜100の表示値。
@@ -60,7 +51,7 @@ export function partnerBadges(bigFive) {
   const standout = BIG_FIVE_FACTOR_ORDER
     .map((factorId) => ({
       factorId,
-      label: FACTOR_LABEL[factorId],
+      label: BIG_FIVE_FACTOR_LABEL[factorId],
       band: bandOf(bigFive.factors[factorId]),
       distance: Math.abs(bigFive.factors[factorId] - MIDDLE),
     }))

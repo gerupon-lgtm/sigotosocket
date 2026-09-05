@@ -321,3 +321,11 @@ a { color: var(--accent); }
 .observation-head { font-weight: 700; margin: 0 0 2px; }
 .observation-body { margin: 0; }
 .disclaimer p { margin: 0 0 6px; }
+
+/* 連携の節（②整合／不整合・③固有性）。観察ブロックと同じ見た目にそろえる */
+h3 { font-size: 1rem; margin: 20px 0 6px; }
+.linkage-preamble p { color: var(--sub); font-size: 0.9rem; }
+.consistency-item { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; margin: 0 0 18px; }
+.consistency-head { margin: 0 0 4px; }
+.consistency-body { margin: 0 0 8px; }
+.consistency-body:last-child { margin-bottom: 0; }

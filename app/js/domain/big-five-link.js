@@ -20,6 +20,18 @@ export const BIG_FIVE_FACTOR_ORDER = Object.freeze([
   "emotionalStability",
 ]);
 
+/**
+ * 因子の表示名。**ココロパレアの `diagnostic-definition.js` の `displayName` と同じ表記。**
+ * バッジ（F-020）と②整合／不整合（F-012）の両方が使うので、ここに1本だけ置く。
+ */
+export const BIG_FIVE_FACTOR_LABEL = Object.freeze({
+  intellectImagination: "知性・想像力",
+  conscientiousness: "勤勉性",
+  extraversion: "外向性",
+  agreeableness: "協調性",
+  emotionalStability: "情緒安定性",
+});
+
 /** 受け取れる結果コードの版。称号IDを載せる案は v2 として別に採番する（§1-2の【要確認】）。 */
 export const BIG_FIVE_CODE_VERSIONS = Object.freeze(["v1"]);
 

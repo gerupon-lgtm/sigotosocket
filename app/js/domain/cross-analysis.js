@@ -1,16 +1,22 @@
 import { ScaleById } from "../data/scale-definitions.js";
+import { BIG_FIVE_FACTOR_ORDER, BIG_FIVE_FACTOR_LABEL } from "./big-five-link.js";
+import {
+  CONSISTENCY_PAIRS, CONSISTENCY_PREAMBLE, CONSISTENCY_NONE, positionPhrase, echoPhrase,
+} from "./cross-analysis-text.js";
 
 /**
- * 掛け合わせの層（第2フェーズ）。いまは③固有性（F-013）だけを持つ。
+ * 掛け合わせの層（第2フェーズ）。②整合／不整合（F-012）と③固有性（F-013）を持つ。
  *
- * ②整合／不整合（F-012）はここへ足す予定だが、**まだ実装しない。**
- * processing-design §10-2 が「友人サンプルで6ペアの符号が再現しなければ②層を落とす」と
- * 定めており、そのデータがまだない。閾値も決まっていない。
+ * ②は**並置型**で出す（processing-design §8-1）。「特性からはこう予想されるが実際は違った」
+ * とは書かない。本人の2つの事実と、原典で報告された結びつきの強さを別々に書き、
+ * 両者を結ぶ推論は読み手に返す。
+ *
+ * §10-2 の検証ゲートは「②を出すか出さないか」ではなく「**言い切りの強さ**」を決めるものへ
+ * 変えた（2026-09-05・要件定義書 v1.21）。友人サンプルで符号が再現したら残差型へ格上げしてよい。
  * 実測は `npm run sample:check`（T-035）で行う。
  *
- * ③がその前に出せるのは、依拠するものが違うからである。②は「相関があること」に
- * 寄りかかるが、③は「**相関がないこと**」に寄りかかる。関係が無いという事実は、
- * 日本語訳や短縮で関係の強さが変わっても揺らがない。
+ * ②と③は依拠するものが違う。②は「相関があること」に寄りかかるので、原典のrとその限界を必ず添える。
+ * ③は「**相関がないこと**」に寄りかかるので、日本語訳や短縮で関係の強さが変わっても揺らがない。
  */
 
 /**
@@ -61,28 +67,124 @@ export function uniqueInterest({ rank, bigFive }) {
 /**
  * ロック予告（F-014・T-028）。未連携の結果画面に出す。
  *
- * **出せるものがある人にだけ出す。**②（整合／不整合）はまだ無いので、いま連携して
- * 増えるのは③だけである。③が出ない人に予告を見せると、連携したあとに何も増えず、
- * 約束を破ったことになる。判定は `uniqueInterest` と同じ `targetsInTop` を通す。
+ * **②が入ったので全員へ出す**（2026-09-05・要件定義書 v1.21）。②は6ペアのうち
+ * 向きの出たものを拾うので、③が出ない人にも渡せるものがある。
  *
- * ②を入れたときは、ここも全員へ広げられる。
+ * **件数も内容も約束しない。**連携前は相手の5因子が無く、何件出るか分からない。
+ * **「判定」の語を使わない。**出典・免責画面の「判定するものではありません」と衝突する。
+ *
+ * 順位が無い（判定不能）ときだけ null。そのときはORVIS側のzが無く、②も③も出せない。
  */
 export function lockPreview({ rank, bigFive }) {
   // 連携済みなら役目が終わっている。
   if (bigFive) return null;
+  if (!Array.isArray(rank) || rank.length === 0) return null;
 
+  const lines = [
+    "ココロパレアの結果を連携すると、ORVISの原典で結びつきが報告されている6つの組み合わせを照らし合わせます。"
+    + "その結果に応じて、追加の説明が出ます。",
+  ];
+
+  // ③は本人の順位に紐づけて具体的に言える。言えることが多い人から減らさない。
   const scaleIds = targetsInTop(rank);
-  if (scaleIds.length === 0) return null;
+  if (scaleIds.length > 0) {
+    const phrase = scaleIds
+      .map((scaleId) => `${rank.indexOf(scaleId) + 1}位の「${ScaleById[scaleId].labelJa}」`)
+      .join("と");
+    lines.push(`${phrase}は、ビッグファイブの5因子とはほとんど関係が見られない領域です。`
+      + "性格特性からは予測できない興味として、ここも結果に加えられます。");
+  }
 
-  const phrase = scaleIds
-    .map((scaleId) => `${rank.indexOf(scaleId) + 1}位の「${ScaleById[scaleId].labelJa}」`)
-    .join("と");
+  return Object.freeze({ scaleIds: Object.freeze(scaleIds), lines: Object.freeze(lines) });
+}
+
+/* ---- ②整合／不整合（F-012・processing-design §8） ---- */
+
+/** 本人の中で「真ん中あたり」のものについて、向きの話をしない（§8-2）。 */
+export const CONSISTENCY_MIN_Z = 0.3;
+
+/** 提示する上限。増やすと同じ話が並び、画面が文章で埋まる。 */
+export const CONSISTENCY_MAX_ITEMS = 2;
+
+/** z の降順で1始まりの順位を返す。**同値は先に来たほうを上位にする**（実行ごとに変わらない）。 */
+function positionsByZ(entries) {
+  const sorted = [...entries].sort((a, b) => b.z - a.z);
+  return new Map(sorted.map((entry, index) => [entry.id, index + 1]));
+}
+
+/**
+ * ②整合／不整合。**該当が無くても null にしない**（変更禁止事項4）。
+ * null になるのは、そもそも判定の材料が無いときだけ。
+ *
+ * @param {{scaleScores: {scaleId: string, z: number|null}[], bigFive: object|null}} input
+ * @returns {{preamble: readonly string[], items: readonly object[],
+ *   noneLines: readonly string[]|null}|null}
+ */
+export function consistencyPairs({ scaleScores, bigFive }) {
+  if (!bigFive?.z) return null;
+  if (!Array.isArray(scaleScores) || scaleScores.length === 0) return null;
+
+  // ORVIS側が判定不能（全尺度が同値）なら z が null。5因子が全部同値のときも同じ。
+  const scaleZ = new Map(scaleScores.map(({ scaleId, z }) => [scaleId, z]));
+  if ([...scaleZ.values()].some((z) => !Number.isFinite(z))) return null;
+  if (BIG_FIVE_FACTOR_ORDER.some((factorId) => !Number.isFinite(bigFive.z[factorId]))) return null;
+
+  const factorPosition = positionsByZ(
+    BIG_FIVE_FACTOR_ORDER.map((factorId) => ({ id: factorId, z: bigFive.z[factorId] })));
+  const scalePosition = positionsByZ(
+    scaleScores.map(({ scaleId, z }) => ({ id: scaleId, z })));
+
+  const candidates = [];
+  CONSISTENCY_PAIRS.forEach((pair, order) => {
+    const zf = bigFive.z[pair.factorId];
+    const zs = scaleZ.get(pair.scaleId);
+    if (Math.abs(zf) < CONSISTENCY_MIN_Z || Math.abs(zs) < CONSISTENCY_MIN_Z) return;
+    const aligned = (zf > 0) === (zs > 0);
+    // 揃った＝両側ともはっきり出ている度合い／分かれた＝隔たり。
+    // **順番を決めるための目安であって、指標ではない。**値そのものを画面に出さない。
+    const strength = aligned ? Math.min(Math.abs(zf), Math.abs(zs)) : Math.abs(zs - zf);
+    candidates.push({ pair, order, aligned, zf, strength });
+  });
+  candidates.sort((a, b) => b.strength - a.strength || a.order - b.order);
+
+  // 同じ因子・同じ尺度は1回まで。intellectImagination は3ペア、leadership は2ペアに出てくる
+  const picked = [];
+  const usedFactors = new Set();
+  const usedScales = new Set();
+  for (const candidate of candidates) {
+    if (picked.length >= CONSISTENCY_MAX_ITEMS) break;
+    if (usedFactors.has(candidate.pair.factorId) || usedScales.has(candidate.pair.scaleId)) continue;
+    picked.push(candidate);
+    usedFactors.add(candidate.pair.factorId);
+    usedScales.add(candidate.pair.scaleId);
+  }
+
+  const items = picked.map(({ pair, aligned, zf }) => {
+    const factorLabel = BIG_FIVE_FACTOR_LABEL[pair.factorId];
+    const scaleLabel = ScaleById[pair.scaleId].labelJa;
+    const factorPhrase = positionPhrase(
+      factorPosition.get(pair.factorId), BIG_FIVE_FACTOR_ORDER.length);
+    const scalePhrase = positionPhrase(scalePosition.get(pair.scaleId), scaleScores.length);
+    // 揃っていて位置づけの語まで同じなら、2文目を言い換える。同じ語を2回繰り返さない
+    const second = !aligned
+      ? `いっぽう「${scaleLabel}」は、8領域の中では${scalePhrase}。`
+      : factorPhrase === scalePhrase
+        ? `「${scaleLabel}」は、8領域の中で${echoPhrase(scalePhrase)}。`
+        : `「${scaleLabel}」も、8領域の中で${scalePhrase}。`;
+    const first = `${factorLabel}は、あなたの5因子の中で${factorPhrase}。${second}${pair.note}`;
+    const key = aligned ? (zf > 0 ? "alignedHigh" : "alignedLow") : "crossed";
+    return Object.freeze({
+      factorId: pair.factorId,
+      scaleId: pair.scaleId,
+      aligned,
+      heading: `${factorLabel} × ${scaleLabel} ― ${aligned ? "向きが揃いました" : "向きが分かれました"}`,
+      lines: Object.freeze([first, pair.text[key]]),
+    });
+  });
 
   return Object.freeze({
-    scaleIds: Object.freeze(scaleIds),
-    lines: Object.freeze([
-      `${phrase}は、ビッグファイブの5因子とはほとんど関係が見られない領域です。`,
-      "ココロパレアの結果を連携すると、性格特性からは予測できない興味として、ここを結果に加えられます。",
-    ]),
+    preamble: CONSISTENCY_PREAMBLE,
+    items: Object.freeze(items),
+    noneLines: items.length === 0 ? CONSISTENCY_NONE : null,
   });
 }
