@@ -9,6 +9,7 @@ import { standardize } from "./domain/standardize.js";
 import { classify } from "./domain/type-classifier.js";
 import { createResultSnapshot, isValidSnapshot } from "./domain/result-snapshot.js";
 import { createStore } from "./infrastructure/progress-storage.js";
+import { receiveBigFive } from "./infrastructure/linkage-intake.js";
 import { resolveRoute, hashFor } from "./infrastructure/router.js";
 import { renderStartScreen } from "./presentation/start-screen.js";
 import { renderQuestionnaireScreen } from "./presentation/questionnaire-screen.js";
@@ -18,6 +19,9 @@ import { renderAboutScreen } from "./presentation/about-screen.js";
 import { clear, el } from "./presentation/screen-helpers.js";
 
 const store = createStore();
+// ココロパレアから #b5= で来たときは、画面を組み立てる前に受け取ってURLから消す（F-010）。
+// 受け取れなくても何も表示しない。単体の結果へそのまま進む。
+receiveBigFive({ location: globalThis.location, history: globalThis.history, store });
 let response = createResponseState(store.load().progress);
 let snapshot = null;
 const initial = store.latestResult();
@@ -111,7 +115,12 @@ function render() {
   if (footer) footer.textContent = appMeta.appVersion;
 }
 
-globalThis.addEventListener?.("hashchange", render);
+// ページを読み込み直さずにハッシュだけが変わって来る経路もある（タブが開いたまま
+// 連携リンクを開いた場合など）。起動時と同じ受け取りをここでも通す。#b5= でなければ何もしない。
+globalThis.addEventListener?.("hashchange", () => {
+  receiveBigFive({ location: globalThis.location, history: globalThis.history, store });
+  render();
+});
 if (typeof document !== "undefined") {
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", render);

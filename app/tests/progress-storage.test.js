@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createStore, STORAGE_KEY, STORAGE_STATUS } from "../js/infrastructure/progress-storage.js";
 import { createMemoryStorage } from "./helpers.js";
+import { parseBigFiveCode } from "../js/domain/big-five-link.js";
 
 test("進捗と結果を保存・復元できる", () => {
   const storage = createMemoryStorage();
@@ -44,4 +45,33 @@ test("全削除で初期状態へ戻る", () => {
   store.clearAll();
   assert.equal(store.latestResult(), null);
   assert.equal(storage.getItem(STORAGE_KEY), null);
+});
+
+test("ココロパレアの結果を保存し、読み直せる（F-010）", () => {
+  const storage = createMemoryStorage();
+  const store = createStore({ storage });
+  assert.equal(store.load().bigFive, null, "初期は未連携");
+
+  const link = parseBigFiveCode("v1-342288401195267", { now: new Date("2026-09-05T02:30:00Z") });
+  store.saveBigFive(link);
+  assert.deepEqual(createStore({ storage }).load().bigFive, link, "別インスタンスから読めない");
+});
+
+test("連携だけを解除でき、回答と結果は残る", () => {
+  const storage = createMemoryStorage();
+  const store = createStore({ storage });
+  store.saveProgress({ answers: { "orvis-04": 3 }, currentIndex: 0 });
+  store.saveBigFive(parseBigFiveCode("v1-342288401195267"));
+
+  store.clearBigFive();
+  assert.equal(store.load().bigFive, null);
+  assert.deepEqual(store.load().progress, { answers: { "orvis-04": 3 }, currentIndex: 0 });
+});
+
+test("全削除で連携も消える", () => {
+  const storage = createMemoryStorage();
+  const store = createStore({ storage });
+  store.saveBigFive(parseBigFiveCode("v1-342288401195267"));
+  store.clearAll();
+  assert.equal(store.load().bigFive, null);
 });

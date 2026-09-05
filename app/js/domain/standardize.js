@@ -7,6 +7,21 @@ import { SCALE_ORDER } from "../data/scale-order.js";
  */
 export const STANDARD_DEVIATION_EPSILON = 1e-9;
 
+/**
+ * 数値の並びを個人内標準化する。8尺度でも5因子（ココロパレア）でも同じ式を使うため、
+ * ここに1本だけ置く。**式を2か所に書かない。**片方だけ直して値が食い違うのを防ぐ。
+ * ばらつきが無いときは z を null にして、ゼロ除算を起こさない。
+ */
+export function standardizeValues(values) {
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const variance = values.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / values.length;
+  const sd = Math.sqrt(variance);
+  if (!(sd > STANDARD_DEVIATION_EPSILON)) {
+    return { standardizable: false, mean, sd, z: values.map(() => null) };
+  }
+  return { standardizable: true, mean, sd, z: values.map((value) => (value - mean) / sd) };
+}
+
 export function standardize(scaleScores) {
   if (!Array.isArray(scaleScores) || scaleScores.length !== SCALE_ORDER.length) {
     throw new TypeError("STANDARDIZE_INPUT_INVALID");
@@ -16,26 +31,15 @@ export function standardize(scaleScores) {
     throw new TypeError("STANDARDIZE_INPUT_INVALID");
   }
 
-  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-  const variance = values.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / values.length;
-  const sd = Math.sqrt(variance);
-
   // 全尺度が同値だとゼロ除算になる。例外にせず「判定不能」として扱い、
   // 結果画面はレーダーと専用メッセージへ分岐する（行き止まりを作らない）。
-  if (!(sd > STANDARD_DEVIATION_EPSILON)) {
-    return Object.freeze({
-      standardizable: false,
-      mean,
-      sd,
-      scaleScores: Object.freeze(scaleScores.map((score) => Object.freeze({ ...score, z: null }))),
-    });
-  }
+  const { standardizable, mean, sd, z } = standardizeValues(values);
 
   return Object.freeze({
-    standardizable: true,
+    standardizable,
     mean,
     sd,
-    scaleScores: Object.freeze(scaleScores.map((score) =>
-      Object.freeze({ ...score, z: (score.raw - mean) / sd }))),
+    scaleScores: Object.freeze(scaleScores.map((score, index) =>
+      Object.freeze({ ...score, z: z[index] }))),
   });
 }

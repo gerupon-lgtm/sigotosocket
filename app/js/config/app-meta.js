@@ -18,6 +18,8 @@ export const appMeta = Object.freeze({
   characterManifestVersion: "character-manifest-v1",
   diagnosticVersions,
   releasedAt: null,
-  linkageEnabled: false,
+  // ココロパレアの結果コードの受け取り（F-010・T-025）。受け取りと保存までを実装済み。
+  // 掛け合わせの表示（F-012〜F-014）はまだ無い。止めたいときはここを false にする。
+  linkageEnabled: true,
   llmEndpoint: null,
 });

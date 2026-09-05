@@ -90,6 +90,9 @@ export function createStore({ storage: injected, now = () => new Date().toISOStr
       write({ ...env, progress: null, results: [snapshot, ...env.results].slice(0, 50) });
     },
     latestResult() { return read().results[0] ?? null; },
+    // 連携（F-010）。回答・結果とは独立に足し引きできるようにしておく。
+    saveBigFive(bigFive) { const env = read(); write({ ...env, bigFive }); },
+    clearBigFive() { const env = read(); write({ ...env, bigFive: null }); },
     clearAll() {
       memory = emptyEnvelope(now());
       schemaMismatch = false;

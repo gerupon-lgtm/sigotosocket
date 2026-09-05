@@ -14,7 +14,9 @@ test("版数の形式と反映先が一致する", () => {
   assert.equal(pkg.name, appMeta.appId);
 });
 
-test("連携はまだ無効（第2フェーズ。着手前に確認が必要）", () => {
-  assert.equal(appMeta.linkageEnabled, false);
+test("連携の受け取りは有効。LLM推敲はまだ無効（着手前に確認が必要）", () => {
+  // 受け取り（F-010・T-025）は 2026-09-05 に本人の許可を得て実装した。
+  assert.equal(appMeta.linkageEnabled, true);
+  // 推敲（F-007・T-031）は未着手。エンドポイントを置くと外部通信が生まれる。
   assert.equal(appMeta.llmEndpoint, null);
 });
