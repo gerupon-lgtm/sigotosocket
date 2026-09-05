@@ -10,7 +10,10 @@ import { hollandCardLine } from "../domain/holland.js";
 export const CARD_SIZE = CARD;
 
 const SANS = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif';
-const MINCHO = '"Noto Serif CJK JP", "Hiragino Mincho ProN", "Yu Mincho", serif';
+// 先頭は同梱のサブセット（style.css の @font-face）。称号に使う161字だけを持つので、
+// それ以外の字は後ろの端末フォントへ落ちる。豆腐にはならない。
+const MINCHO_SUBSET_FAMILY = "Sigotosocket Mincho";
+const MINCHO = `"${MINCHO_SUBSET_FAMILY}", "Noto Serif CJK JP", "Hiragino Mincho ProN", "Yu Mincho", serif`;
 
 /**
  * キャラクターは背景透過で、**余白を切り落とした状態で配置する前提**。
@@ -92,7 +95,29 @@ export function litIndexesFor(rank) {
   return rank.slice(0, 2).map((id) => SCALE_ORDER.indexOf(id)).filter((i) => i >= 0);
 }
 
+
+/**
+ * 同梱の明朝（style.css の @font-face）を、描く前に読み終える。
+ *
+ * canvas は「いま使えるフォント」で即座に焼き付けるため、待たずに描くと初回だけ
+ * 端末の明朝で保存されてしまう。フォントAPIが無い・読み込みに失敗する環境では
+ * MINCHO の後ろに並べた端末フォントで描く。カードを出さない理由にはしない。
+ */
+async function ensureMinchoLoaded() {
+  const fonts = globalThis.document?.fonts;
+  if (typeof fonts?.load !== "function") return false;
+  try {
+    await Promise.all([LAYOUT.title.size, LAYOUT.title.pillTextSize, LAYOUT.footer.pillTextSize]
+      .map((size) => fonts.load(`${size}px "${MINCHO_SUBSET_FAMILY}"`)));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function renderCard(canvas, snapshot) {
+  await ensureMinchoLoaded();
+
   canvas.width = CARD.width;
   canvas.height = CARD.height;
   const ctx = canvas.getContext("2d");

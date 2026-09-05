@@ -100,3 +100,54 @@ test("マークの点灯位置とレーダーの上位2領域が同じ配列か�
   assert.deepEqual(litIndexesFor(snapshot.rank), expected);
   assert.deepEqual(litIndexesFor(null), []);
 });
+
+/** document.fonts を差し替える。戻り値を呼ぶと元に戻る。 */
+function withFonts(fonts) {
+  const had = "fonts" in document;
+  const previous = document.fonts;
+  document.fonts = fonts;
+  return () => { if (had) document.fonts = previous; else delete document.fonts; };
+}
+
+test("同梱の明朝を読み込んでから描く（1文字目が端末の明朝で焼き付くのを防ぐ）", async () => {
+  const log = [];
+  const restore = withFonts({
+    load: async (spec) => { log.push(`load:${spec}`); return []; },
+  });
+  try {
+    const { canvas, texts } = stubCanvas();
+    const original = texts.push.bind(texts);
+    texts.push = (value) => { log.push("fillText"); return original(value); };
+    await renderCard(canvas, snapshotFor(answersWith((_, i) => (i % 5) + 1)));
+    const loads = log.filter((entry) => entry.startsWith("load:"));
+    assert.ok(loads.length > 0, "フォントを読み込んでいない");
+    assert.ok(loads.every((entry) => entry.includes("Sigotosocket Mincho")),
+      `同梱フォントを指していない: ${loads.join(" / ")}`);
+    assert.ok(log.indexOf("fillText") > log.lastIndexOf(loads.at(-1)),
+      "フォントの読み込みより先に文字を描いている");
+  } finally {
+    restore();
+  }
+});
+
+test("フォントAPIが無い環境でもカードは描ける", async () => {
+  const restore = withFonts(undefined);
+  try {
+    const { canvas, texts } = stubCanvas();
+    await renderCard(canvas, snapshotFor(answersWith((_, i) => (i % 5) + 1)));
+    assert.ok(texts.join("|").includes("医学的・心理学的な診断ではありません"));
+  } finally {
+    restore();
+  }
+});
+
+test("フォントの読み込みに失敗してもカードは描ける", async () => {
+  const restore = withFonts({ load: async () => { throw new Error("NETWORK"); } });
+  try {
+    const { canvas, texts } = stubCanvas();
+    await renderCard(canvas, snapshotFor(answersWith((_, i) => (i % 5) + 1)));
+    assert.ok(texts.join("|").includes("医学的・心理学的な診断ではありません"));
+  } finally {
+    restore();
+  }
+});

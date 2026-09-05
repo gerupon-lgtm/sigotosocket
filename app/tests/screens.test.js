@@ -117,6 +117,12 @@ test("判定不能ならホランド型の節を出さない", () => {
   assert.ok(!text.includes("ホランド"), "順位が無いのにホランド型が出ている");
 });
 
+test("出典・免責画面に同梱フォントの出典がある（SIL OFL 1.1）", () => {
+  const text = renderAboutScreen({ onBack() {}, onClearAll() {} }).textContent;
+  assert.ok(text.includes("Noto Serif JP"), "元フォント名が無い");
+  assert.ok(text.includes("SIL Open Font License"), "許諾の名前が無い");
+});
+
 test("出典・免責画面に出典とデータ削除がある", () => {
   const node = renderAboutScreen({ onBack() {}, onClearAll() {} });
   const text = node.textContent;

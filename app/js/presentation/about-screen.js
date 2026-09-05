@@ -19,6 +19,10 @@ export function renderAboutScreen({ onBack, onClearAll }) {
     el("h2", { text: "得点の読み方" }),
     el("p", { text: "高い・低いは、あなたの8領域どうしを比べた結果です。ほかの人と比べたものではありません。日本語版の規範データが存在しないため、集団との比較は行いません。" }),
 
+    el("h2", { text: "使っているフォント" }),
+    el("p", { text: "称号の表示に Noto Serif JP（© 2017-2023 Adobe）を、必要な文字だけに絞って同梱しています。SIL Open Font License 1.1 で提供されているものです。" }),
+    el("p", { class: "meta", text: "許諾の全文は assets/fonts/OFL.txt に同梱しています。" }),
+
     el("h2", { text: "データの扱い" }),
     el("p", { text: "回答と結果はこの端末のブラウザにのみ保存されます。サーバーへは送信しません。" }),
     el("div", { class: "actions" }, [
