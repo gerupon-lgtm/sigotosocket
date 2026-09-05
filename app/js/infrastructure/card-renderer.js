@@ -4,7 +4,7 @@ import { TypeById, UNDETERMINED_TEXT } from "../data/type-definitions.js";
 import { drawRadar } from "../presentation/radar-chart.js";
 import { resolveVisibilityAid, AID_LEVEL, DEFAULT_SUBJECT_TONES } from "../domain/visibility-aid.js";
 
-export const CARD_SIZE = Object.freeze({ width: 1080, height: 1350 });
+export const CARD_SIZE = Object.freeze({ width: 1080, height: 1800 });
 
 const PALETTE = Object.freeze({
   background: "#f4f6fa",
