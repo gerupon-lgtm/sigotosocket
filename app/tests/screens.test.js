@@ -322,3 +322,31 @@ test("結果画面の③は、結果に紐づいた連携を見る（カード�
   }).textContent;
   assert.ok(!without.includes("予測できるものではありません"));
 });
+
+test("トップの見出しは「やってみたいことを知る」（2026-09-05 本人決定）", () => {
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  assert.equal(node.querySelectorAll(".screen-title")[0].textContent, "やってみたいことを知る");
+});
+
+test("結果画面にキャラクターが出る（ココロパレア踏襲・F-019）", () => {
+  const snapshot = snapshotFor(answersByScale({ altruism: 5, creativity: 4 }));
+  const node = renderResultScreen({
+    snapshot, bigFive: null, onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
+  });
+  const figure = node.querySelectorAll(".character-figure")[0];
+  assert.ok(figure, "結果画面にキャラクターが無い");
+  assert.equal(figure.querySelectorAll(".character-pose").length, 1, "ポーズが無い");
+  assert.equal(figure.querySelectorAll(".character-prop").length, 1, "小物が無い");
+});
+
+test("判定不能でも結果画面のキャラクターは出る", () => {
+  const node = renderResultScreen({
+    snapshot: snapshotFor(uniformAnswers(3)), bigFive: null,
+    onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
+  });
+  assert.equal(node.querySelectorAll(".character-figure").length, 1);
+});

@@ -6,6 +6,8 @@ class StubNode {
     this.attributes = {};
     this.listeners = {};
     this.className = "";
+    // CSPで style 属性が無視されるため、実装は CSSOM で入れる。同じ形をここでも持つ
+    this.style = {};
     this._text = "";
   }
   get textContent() {

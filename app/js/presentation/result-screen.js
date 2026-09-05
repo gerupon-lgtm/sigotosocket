@@ -1,6 +1,7 @@
 import { el, formatDateTime } from "./screen-helpers.js";
 import { appHeader } from "./app-header.js";
 import { screenHeading } from "./screen-heading.js";
+import { characterFigure } from "./character-figure.js";
 import { drawRadar, radarTextFallback } from "./radar-chart.js";
 import { ScaleById } from "../data/scale-definitions.js";
 import { composeResultText } from "../domain/result-composer.js";
@@ -101,6 +102,8 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
       el("h2", { class: "type-name", text: text.title }),
       el("p", { class: "type-subtitle", text: text.subtitle }),
       el("p", { class: "meta", text: formatDateTime(snapshot.createdAt) }),
+      // カードと同じ順（称号 → キャラクター → レーダー）。画面とカードで姿が食い違わない
+      characterFigure(snapshot),
       radarBlock(snapshot.scaleScores),
     ]),
     el("div", { class: "prose" }, text.reason.map((p) => el("p", { text: p }))),

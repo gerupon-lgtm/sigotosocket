@@ -132,7 +132,14 @@ function render() {
 // ページを読み込み直さずにハッシュだけが変わって来る経路もある（タブが開いたまま
 // 連携リンクを開いた場合など）。起動時と同じ受け取りをここでも通す。#b5= でなければ何もしない。
 globalThis.addEventListener?.("hashchange", () => {
-  receiveBigFive({ location: globalThis.location, history: globalThis.history, store });
+  const link = receiveBigFive({ location: globalThis.location, history: globalThis.history, store });
+  // 受け取れたら、結び付け直された結果をメモリへ読み直す（F-011）。
+  // **これが無いと、開いたままのタブでは連携が結果画面にもカードにも出ない。**
+  // 起動時の経路は受け取りのあとに読み込むので問題にならないが、ここは別経路である。
+  if (link) {
+    const latest = store.latestResult();
+    if (isValidSnapshot(latest)) snapshot = latest;
+  }
   render();
 });
 if (typeof document !== "undefined") {

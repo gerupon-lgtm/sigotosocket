@@ -92,7 +92,7 @@ export function renderStartScreen({ progressState, latestResult, storageStatus, 
   return el("section", { class: "screen start" }, [
     appHeader({}),
     el("div", { class: "panel" }, [
-      screenHeading({ kicker: "INTEREST CHECK", title: "やってみたいことのかたちを見る" }),
+      screenHeading({ kicker: "INTEREST CHECK", title: "やってみたいことを知る" }),
       el("p", { class: "lead", text: "8つの領域から、あなたが「やってみたい」と感じる方向を見つけます。" }),
       el("p", { class: "meta", text: `全${TOTAL_ITEM_COUNT}問・所要およそ5分` }),
       // 説明は「はじめる」の上に置く（ココロパレアと同じ並び）
