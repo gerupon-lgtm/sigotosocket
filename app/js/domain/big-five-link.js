@@ -32,7 +32,7 @@ export const BIG_FIVE_FACTOR_LABEL = Object.freeze({
   emotionalStability: "情緒安定性",
 });
 
-/** 受け取れる結果コードの版。称号IDを載せる案は v2 として別に採番する（§1-2の【要確認】）。 */
+/** 受け取れる結果コードの版。称号IDを載せる場合は v2 として別に採番する（§1-2）。 */
 export const BIG_FIVE_CODE_VERSIONS = Object.freeze(["v1"]);
 
 const DIGITS_PER_FACTOR = 3;

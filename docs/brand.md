@@ -43,9 +43,8 @@ npm run brand:icons
 ## 3. HTMLに置くもの
 
 `app/index.html` に canonical・webmanifest・favicon(SVG)・apple-touch-icon・OGP・CSPを持つ。
-URLの正典は `appMeta.siteOrigin`。**サブドメインが未確定（検討事項21）なので現在は【仮】**で、
-確定したら `app/js/config/app-meta.js` の1箇所を直せば `npm run check` と
-`app/tests/brand-assets.test.js` が index.html との食い違いを検出する。
+URLの正典は `appMeta.siteOrigin`。**`https://sigotosocket.sikumilab.com/` に確定し、公開済み**（要確認21・v1.17）。
+`npm run check` と `app/tests/brand-assets.test.js` が `index.html` との食い違いを検出する。
 
 公開文言は2026-09-04に確定（要確認24を解消）。
 

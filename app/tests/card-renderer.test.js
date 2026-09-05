@@ -15,6 +15,7 @@ const { uniformAnswers, answersWith } = await import("./helpers.js");
 function stubCanvas() {
   const texts = [];
   const ops = [];
+  const images = [];
   const shadows = [];
   const store = {};
   const ctx = new Proxy({
@@ -27,7 +28,7 @@ function stubCanvas() {
     save() {}, restore() {}, beginPath() {}, closePath() {}, moveTo() {}, lineTo() {},
     arcTo() {}, arc() {}, translate() {}, fill() { ops.push("fill"); }, stroke() {},
     fillRect() { ops.push("fillRect"); }, strokeRect() { ops.push("strokeRect"); }, setLineDash() {},
-    drawImage() { ops.push("drawImage"); },
+    drawImage(...args) { ops.push("drawImage"); images.push(args); },
   }, {
     get: (target, prop) => (prop in target ? target[prop] : store[prop]),
     set: (target, prop, value) => {
@@ -36,7 +37,7 @@ function stubCanvas() {
       return true;
     },
   });
-  return { canvas: { width: 0, height: 0, getContext: () => ctx }, texts, ops, shadows };
+  return { canvas: { width: 0, height: 0, getContext: () => ctx }, texts, ops, shadows, images };
 }
 
 function snapshotFor(answers) {
@@ -158,7 +159,8 @@ function withImage(requested) {
   const previous = globalThis.Image;
   globalThis.Image = class {
     constructor() { this.width = 1024; this.height = 1024; }
-    set src(value) { requested.push(value); queueMicrotask(() => this.onload?.()); }
+    set src(value) { this._src = value; requested.push(value); queueMicrotask(() => this.onload?.()); }
+    get src() { return this._src; }
   };
   return () => { if (had) globalThis.Image = previous; else delete globalThis.Image; };
 }
@@ -285,11 +287,38 @@ test("連携済みなら、相手の因子バッジをカードに描く（F-020
   assert.ok(text.includes("情緒安定性"), "低い因子が出ていない");
 });
 
-test("未連携ならバッジを描かない", async () => {
+test("未連携でも見出しと未連携バッジを描く", async () => {
   const c = stubCanvas();
   const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
   await renderCard(c.canvas, snapshot);
-  assert.ok(!c.texts.join("|").includes("ココロパレアの結果"), "未連携なのにバッジが出ている");
+  const text = c.texts.join("|");
+  assert.ok(text.includes("ココロパレアの結果"), `見出しが無い: ${text}`);
+  assert.ok(text.includes("未連携"), `未連携バッジが無い: ${text}`);
+});
+
+test("連携前後でむっくんと小物の描画サイズを変えない", async () => {
+  const { poseFor, propFor } = await import("../js/data/character-manifest.js");
+  const requested = [];
+  const restore = withImage(requested);
+  try {
+    const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
+    const plain = stubCanvas();
+    const linked = stubCanvas();
+    await renderCard(plain.canvas, snapshot);
+    await renderCard(linked.canvas, { ...snapshot, bigFive: LINKED });
+
+    const destination = (calls, src) => {
+      const call = calls.find(([image]) => image.src === src);
+      assert.ok(call, `${src} を描いていない`);
+      return call.length === 5 ? call.slice(1) : call.slice(5);
+    };
+    const posePath = poseFor(snapshot.poseScaleId).imagePath;
+    const propPath = propFor(snapshot.propScaleId).imagePath;
+    assert.deepEqual(destination(linked.images, posePath).slice(2), destination(plain.images, posePath).slice(2));
+    assert.deepEqual(destination(linked.images, propPath).slice(2), destination(plain.images, propPath).slice(2));
+  } finally {
+    restore();
+  }
 });
 
 test("バッジは確保した帯の中に収める（下の注記に食い込まない）", async () => {
@@ -304,4 +333,19 @@ test("バッジは確保した帯の中に収める（下の注記に食い込�
   const pillBottom = top + band.badge.pillTop + band.badge.pillHeight;
   assert.ok(labelY > top && labelY < bottom, `見出しが帯の外: ${labelY}`);
   assert.ok(pillBottom <= bottom, `ピルが帯の下へはみ出す: ${pillBottom} > ${bottom}`);
+});
+
+test("確定したカード配置値を使う", async () => {
+  const { LAYOUT, verticalPlan } = await import("../js/presentation/card-layout.js");
+  const plan = verticalPlan();
+  assert.equal(LAYOUT.character.topGap, 44, "キャラクターは16px上へ移動する");
+  assert.equal(LAYOUT.guest.gap, 2);
+  assert.equal(LAYOUT.guest.lift, 50);
+  assert.equal(LAYOUT.guest.offsetX, 34);
+  assert.equal(LAYOUT.radar.downFromMiddleBottom, -17, "レーダーは下部32px＋単独15px上へ移動する");
+  assert.equal(LAYOUT.reservedBand.badge.labelSize, 30);
+  assert.equal(LAYOUT.reservedBand.badge.labelWeight, "bold");
+  assert.equal(LAYOUT.reservedBand.badge.textSize, 28);
+  assert.equal(LAYOUT.reservedBand.badge.pillHeight, 60);
+  assert.equal(plan.bandTop, 1507);
 });

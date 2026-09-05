@@ -20,18 +20,19 @@ const brand = Object.freeze({
 export const appMeta = Object.freeze({
   brand,
   appId: "sigotosocket",
-  appVersion: "v0.1.0",
+  appVersion: "v0.1.1",
   // 公開URL（2026-09-05 確定・要確認21を解消）。index.html の canonical / og:url と一致させること。
   siteOrigin: "https://sigotosocket.sikumilab.com",
   storageSchemaVersion: 1,
   storageKey: "sigotosocket:v1",
-  // v2: 連携済みのときゲストの猫を加える構成（F-022・D-20）
-  cardTemplateVersion: "card-template-v2",
+  // v3: 連携前後の構図とココロパレア表示帯を統一（F-018・F-020・F-022、D-25）
+  cardTemplateVersion: "card-template-v3",
   characterManifestVersion: "character-manifest-v1",
   diagnosticVersions,
   releasedAt: null,
-  // ココロパレアの結果コードの受け取り（F-010・T-025）。受け取りと保存までを実装済み。
-  // 掛け合わせの表示（F-012〜F-014）はまだ無い。止めたいときはここを false にする。
+  // ココロパレアの結果コード受け取りと掛け合わせ表示（F-010〜F-014）を実装済み。
+  // 連携を止めたいときはここを false にする。
   linkageEnabled: true,
+  // T-031でローカルLLMは不採用。外部通信ゼロを維持する。
   llmEndpoint: null,
 });

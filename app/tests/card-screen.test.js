@@ -23,7 +23,7 @@ const SNAPSHOT = (() => {
 })();
 
 const render = (extra = {}) => renderCardScreen({
-  snapshot: SNAPSHOT, shareUrl: ORIGIN,
+  snapshot: SNAPSHOT,
   onBack() {}, onHome() {}, ...extra,
 });
 
@@ -36,28 +36,37 @@ test("カード画面にヘッダーと戻る導線がある", () => {
   assert.ok(labels.includes("トップへ戻る"));
 });
 
-test("共有するURLを、選んでコピーできる文字として画面に出す", () => {
+test("カード画面にURL表示とURLコピーを出さない", () => {
   const node = render();
-  const shown = node.querySelectorAll(".share-url")[0];
-  assert.ok(shown, "URLが画面に出ていない（どこを共有すればよいか分からない）");
-  assert.equal(shown.textContent, ORIGIN);
+  assert.equal(node.querySelectorAll(".share-url").length, 0);
+  const labels = [...node.querySelectorAll("button")].map((b) => b.textContent);
+  assert.ok(!labels.includes("URLをコピー"), labels.join("/"));
+  assert.ok(!node.textContent.includes(ORIGIN), "アプリURLを表示している");
 });
 
-test("URLに回答や得点が含まれないことを書く", () => {
-  const text = render().textContent;
-  assert.ok(text.includes("回答や点数は含まれません"), `注記が無い: ${text}`);
-});
-
-test("URLをコピーする操作がある", () => {
+test("結果画面の内容をコピーする操作がある", () => {
   const labels = [...render().querySelectorAll("button")].map((b) => b.textContent);
-  assert.ok(labels.includes("URLをコピー"), `コピー操作が無い: ${labels.join("/")}`);
+  assert.ok(labels.includes("テキストをコピー"), `テキスト共有が無い: ${labels.join("/")}`);
 });
 
-test("共有するのは得点の入らないURL（フラグメントを持ち込まない）", () => {
-  const node = renderCardScreen({
-    snapshot: SNAPSHOT, shareUrl: `${ORIGIN}#b5=v1-342288401195267`,
-    onBack() {}, onHome() {},
+test("テキストをコピーすると結果画面の内容がクリップボードへ渡る", async () => {
+  const written = [];
+  const previous = globalThis.navigator;
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: { clipboard: { writeText: async (text) => written.push(text) } },
   });
-  const shown = node.querySelectorAll(".share-url")[0].textContent;
-  assert.ok(!shown.includes("b5="), `連携コードがURLに残っている: ${shown}`);
+  try {
+    const node = render();
+    const button = [...node.querySelectorAll("button")].find((item) => item.textContent === "テキストをコピー");
+    button.click();
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.equal(written.length, 1);
+    assert.ok(written[0].includes("シゴトソケット｜45問の詳細結果"));
+    assert.ok(written[0].includes("8つの領域の点数"));
+    assert.ok(!written[0].includes("http"));
+  } finally {
+    Object.defineProperty(globalThis, "navigator", { configurable: true, value: previous });
+  }
 });

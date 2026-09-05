@@ -138,28 +138,50 @@ function drawGuestGroup(ctx, { pose, poseBody, prop, propBody, guest, guestBody,
   const c = LAYOUT.character;
   const g = LAYOUT.guest;
 
-  const poseH = c.size;
-  const poseW = (poseBody.w / poseBody.h) * poseH;
-  const catH = poseH * g.ratio;
-  const catW = (guestBody.w / guestBody.h) * catH;
+  // むっくんと小物は未連携時と同じ画像サイズ・描画方式を使う。
+  const poseSide = c.size;
+  const poseBodyW = (poseBody.w / pose.width) * poseSide;
+  const poseBodyH = (poseBody.h / pose.height) * poseSide;
+  const catSide = (poseBodyH * g.ratio) / (guestBody.h / guest.height);
+  const catBodyW = (guestBody.w / guest.width) * catSide;
+  const poseBodyLeft = catBodyW + g.gap;
 
-  const groupW = catW + g.gap + poseW;
-  const left = CX - groupW / 2;
-  const poseX = left + catW + g.gap;
-  const base = plan.charBottom;
-
-  ctx.drawImage(guest, guestBody.x, guestBody.y, guestBody.w, guestBody.h,
-    left, base - catH - g.lift, catW, catH);
-  ctx.drawImage(pose, poseBody.x, poseBody.y, poseBody.w, poseBody.h,
-    poseX, base - poseH, poseW, poseH);
-
+  let rightMost = poseBodyLeft + poseBodyW;
+  let propBoxFromPose = null;
   if (prop && propBody) {
-    const propH = c.prop.size * g.prop.scale;
-    const propW = (propBody.w / propBody.h) * propH;
-    drawWithHalo(ctx, prop,
-      { sx: propBody.x, sy: propBody.y, sw: propBody.w, sh: propBody.h,
-        x: poseX + poseW - propW * g.prop.overlap, y: base - propH, w: propW, h: propH },
-      { color: c.prop.haloColor, blur: c.prop.haloBlur, passes: c.prop.haloPasses });
+    propBoxFromPose = {
+      x: poseSide - c.prop.size + c.prop.offsetX,
+      y: poseSide - c.prop.size,
+      w: c.prop.size,
+      h: c.prop.size,
+    };
+    const propBodyLeft = poseBodyLeft
+      - (poseBody.x / pose.width) * poseSide
+      + propBoxFromPose.x
+      + (propBody.x / prop.width) * propBoxFromPose.w;
+    const propBodyRight = propBodyLeft + (propBody.w / prop.width) * propBoxFromPose.w;
+    rightMost = Math.max(rightMost, propBodyRight);
+  }
+
+  // 猫と（むっくん＋小物）の実体全体を基準点のまわりへ置く。
+  const left = CX - rightMost / 2;
+  const poseX = left + poseBodyLeft - (poseBody.x / pose.width) * poseSide;
+  const poseY = plan.charTop;
+  const poseBodyBottom = poseY + ((poseBody.y + poseBody.h) / pose.height) * poseSide;
+  const catX = left - (guestBody.x / guest.width) * catSide;
+  const catY = poseBodyBottom - g.lift
+    - ((guestBody.y + guestBody.h) / guest.height) * catSide;
+
+  ctx.drawImage(guest, catX, catY, catSide, catSide);
+  ctx.drawImage(pose, poseX, poseY, poseSide, poseSide);
+
+  if (prop && propBoxFromPose) {
+    drawWithHalo(ctx, prop, {
+      x: poseX + propBoxFromPose.x,
+      y: poseY + propBoxFromPose.y,
+      w: propBoxFromPose.w,
+      h: propBoxFromPose.h,
+    }, { color: c.prop.haloColor, blur: c.prop.haloBlur, passes: c.prop.haloPasses });
   }
 }
 
@@ -169,16 +191,25 @@ function drawGuestGroup(ctx, { pose, poseBody, prop, propBody, guest, guestBody,
  */
 function drawPartnerBadges(ctx, snapshot, plan, CX) {
   const badges = partnerBadges(snapshot.bigFive);
-  if (!badges) return;
-
   const b = LAYOUT.reservedBand.badge;
   const P = LAYOUT.palette;
 
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-  setFont(ctx, b.labelSize);
-  ctx.fillStyle = P.sub;
-  ctx.fillText(badges.heading, CX, plan.bandTop + b.labelBaseline);
+  setFont(ctx, b.labelSize, { weight: b.labelWeight });
+  ctx.fillStyle = P.ink;
+  ctx.fillText(badges?.heading ?? "ココロパレアの結果", CX, plan.bandTop + b.labelBaseline);
+
+  if (!badges) {
+    setFont(ctx, b.textSize, { weight: 600 });
+    const text = "未連携";
+    const width = ctx.measureText(text).width + b.padding * 2;
+    const top = plan.bandTop + b.pillTop;
+    fillRounded(ctx, { x: CX - width / 2, y: top, w: width, h: b.pillHeight, r: b.pillRadius }, P.surface, P.line);
+    ctx.fillStyle = P.ink;
+    ctx.fillText(text, CX, top + b.pillHeight / 2 + b.textSize * 0.36);
+    return;
+  }
 
   // ピルの幅は中の文字から決める。文字数が違っても左右の余白が揃う
   setFont(ctx, b.textSize, { weight: 600 });
@@ -287,7 +318,7 @@ export async function renderCard(canvas, snapshot) {
     // **実体の矩形で並べる。**箱で並べると余白の差だけ隙間がぶれる。
     drawGuestGroup(ctx, {
       pose, poseBody: poseEntry.body, prop, propBody: propEntry?.body,
-      guest, guestBody: guestEntry.body, plan, CX,
+      guest, guestBody: guestEntry.body, plan, CX: CX + L.guest.offsetX,
     });
   } else if (pose) {
     ctx.drawImage(pose, ...Object.values(containRect(pose, charBox.x, charBox.y, charBox.w, charBox.h)));
@@ -333,7 +364,7 @@ export async function renderCard(canvas, snapshot) {
     ctx.fillText(holland, CX, plan.hollandBaseline);
   }
 
-  // 確保しておいた帯に、相手の因子バッジを描く（F-020）。未連携なら何も描かない。
+  // 確保しておいた帯に、相手の因子バッジまたは未連携ピルを描く（F-020）。
   drawPartnerBadges(ctx, snapshot, plan, CX);
 
   const f = L.footer;

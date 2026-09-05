@@ -84,7 +84,7 @@ export const LAYOUT = Object.freeze({
 
   character: Object.freeze({
     size: 380,
-    topGap: 60,        // middle.top からの空き
+    topGap: 44,        // 旧60pxから16px上へ移動
     prop: Object.freeze({ size: 210, offsetX: 60, haloBlur: 6, haloPasses: 3, haloColor: "#ffffff" }),
   }),
 
@@ -95,17 +95,16 @@ export const LAYOUT = Object.freeze({
    */
   guest: Object.freeze({
     ratio: 0.75,   // むっくんの高さに対する猫の高さ
-    gap: 6,        // 実体どうしの隙間。**0以上にすること**（負にすると重なる）
-    lift: 34,      // 接地線を上げる量。奥に居るように見せる
-    // 2体並ぶときの小物。単体のときより小さくし、むっくんへ寄せる
-    prop: Object.freeze({ scale: 0.8, overlap: 0.45 }),
+    gap: 2,        // 実体どうしの隙間。猫を縮小前へ戻したぶん詰める
+    lift: 50,      // 猫の接地線。むっくんより50px上げて奥に見せる
+    offsetX: 34,   // 連携済みの3点セットをカード中央から右へ移す量
   }),
 
   radar: Object.freeze({
     radius: 240,
     labelGap: 34,
     labelSize: 26,
-    downFromMiddleBottom: 30,   // 下端をこれだけ下げる
+    downFromMiddleBottom: -17,  // 旧位置から47px上（下部全体32px＋レーダーだけ15px）
     gridColor: "#9aabc4",
     labelColor: "#4a5b7a",
     fillColor: "rgba(47, 84, 134, 0.24)",
@@ -122,19 +121,21 @@ export const LAYOUT = Object.freeze({
     gapAbove: 60,
   }),
 
-  /** 相手の因子バッジ（F-020）と、将来の相手称号名（F-021）の帯。未連携なら何も描かない */
+  /** 相手の因子バッジ（F-020）と、未連携表示の帯 */
   reservedBand: Object.freeze({
-    x: 140, w: 800, h: 100,
+    x: 140, w: 800, h: 118,
+    footerGap: 30,
     // 相手の因子バッジ（F-020）。帯の中に収める。y は verticalPlan の bandTop からの相対
     badge: Object.freeze({
-      labelSize: 20,
-      labelBaseline: 24,     // bandTop からの相対
-      pillTop: 38,           // 同上
-      pillHeight: 52,
-      pillRadius: 26,
-      pillGap: 16,
-      textSize: 26,
-      padding: 26,           // ピルの左右の余白
+      labelSize: 30,
+      labelWeight: "bold",
+      labelBaseline: 30.5,   // bandTop からの相対
+      pillTop: 57.5,         // 見出し下端との見た目の間隔を約15pxに保つ
+      pillHeight: 60,
+      pillRadius: 30,
+      pillGap: 18,
+      textSize: 28,
+      padding: 30,           // ピルの左右の余白
     }),
   }),
 
@@ -173,7 +174,7 @@ export function headerLockup(measure) {
 /** 下から順に決まる縦位置を算出する */
 export function verticalPlan() {
   const { middle, conclusion, reservedBand, footer, character, radar } = LAYOUT;
-  const bandTop = footer.note1Baseline - footer.noteSize - 16 - reservedBand.h;
+  const bandTop = footer.note1Baseline - footer.noteSize - reservedBand.footerGap - reservedBand.h;
   const hollandBaseline = bandTop - 22;
   const top2Baseline = hollandBaseline - conclusion.gapBetween;
   const charTop = middle.top + character.topGap;

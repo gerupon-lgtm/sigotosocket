@@ -11,8 +11,7 @@
 | タイプ | `type-<scaleA>--<scaleB>`（**正準順**で並べる） | `type-creativity--erudition` |
 | キャラのポーズ | `character-pose-<scaleId>` | `character-pose-creativity` |
 | 小物 | `prop-<scaleId>` | `prop-erudition` |
-| バッジ（ORVIS） | `badge-orvis-<scaleId>` | `badge-orvis-analysis` |
-| バッジ（Big5） | `badge-bigfive-<factorId>-<high\|low>` / `badge-bigfive-balanced` | `badge-bigfive-extraversion-high` |
+| Big5因子バッジ | 画像IDを持たない。`factorId` と表示値から文字で組む | `extraversion` → `外向性　80` |
 
 **正準順**（この順序を全所で使う。並べ替えない）:
 `leadership` → `organization` → `altruism` → `creativity` → `analysis` → `production` → `adventure` → `erudition`
@@ -36,7 +35,7 @@
 ホランド型の対応（要件定義書 §7-3 が正典。ORVIS原典に基づく）:
 統率＝企業的／段取り＝慣習的／支援＝社会的／創造＝芸術的／探究＝研究的／手仕事・挑戦＝現実的（原典が「Realisticの分割」と明記）／**言葉＝型なし**。
 
-なお実装の現行フィールド名は `holland`（値は表示文字列、「言葉」は `"直接対応なし"`）。**F-024の実装時に上表の形へ移す。**
+実装は上表どおり `hollandType` / `hollandNote` を使用する（F-024実装済み）。
 
 **表示名と原典の尺度名は別物として扱う。** 原典（ORVIS）の尺度名は Leadership / Organization / Altruism / Creativity / Analysis / Production / Adventure / Erudition で、選定リストCSVもこの日本語直訳（リーダーシップ／組織化／利他性／創造性／分析／生産／冒険／学識）を使っている。CSVの列は `scaleId` への対応付けにのみ使い、**画面に出す名前は `scale-definitions.js` の `labelJa` だけが正典**。CSVの尺度名を書き換えるとビルドが壊れる。
 
@@ -86,19 +85,21 @@
 | createdAt | string | ○ | ISO 8601 UTC |
 | scaleScores | `ScaleScore[8]` | ○ | 正準順で固定 |
 | standardizable | boolean | ○ | `false` のとき8尺度の得点差がゼロで判定不能 |
-| rank | `scaleId[8]` | ○ | z降順。同値は正準順で安定ソート |
+| rank | `scaleId[8] \| null` | ○ | z降順。同値は正準順で安定ソート。判定不能時は `null` |
 | primaryTypeId | string \| null | ○ | 判定不能時は `null` |
 | alternativeTypeId | string \| null | ○ | 僅差時のみ設定（§5） |
+| poseScaleId | string \| null | ○ | 1位尺度。判定不能時は `null` |
+| propScaleId | string \| null | ○ | 2位尺度。判定不能時は `null` |
 | bigFive | `BigFiveLink` \| null | ○ | 未連携なら `null` |
-| versions | object | ○ | `itemSetVersion` `scoringVersion` `typeRuleVersion` `characterManifestVersion` `cardTemplateVersion` |
+| versions | object | ○ | `appVersion` `itemSetVersion` `scoringVersion` `typeRuleVersion` `cardTemplateVersion`。現行カードは `card-template-v3` |
 
 ### BigFiveLink（第2フェーズ）
 
 | フィールド | 型 | 説明 |
 |---|---|---|
 | factors | `Record<factorId, 1.00..5.00>` | `intellectImagination` `conscientiousness` `extraversion` `agreeableness` `emotionalStability` |
-| z | `Record<factorId, number>` | 5因子内で個人内標準化した値 |
-| titleId | string \| null | ココロパレアの称号ID（受け取れた場合） |
+| z | `Record<factorId, number \| null>` | 5因子内で個人内標準化した値。全因子同値なら各値は `null` |
+| titleId | `null` | v1結果コードは称号IDを運ばない。F-021をv2で実装する場合に拡張する |
 | receivedAt | string | ISO 8601 UTC |
 | codeVersion | string | 結果コードの版（`v1` 等） |
 
@@ -122,7 +123,7 @@
 {
   "schemaVersion": 1,
   "updatedAt": "2026-08-31T02:30:00Z",
-  "progress": { "answers": {}, "currentPage": 1, "startedAt": "...", "updatedAt": "..." },
+  "progress": { "answers": {}, "currentIndex": 0 },
   "results": [ { "resultId": "...", "...": "..." } ],
   "bigFive": { "factors": {}, "titleId": null, "receivedAt": "...", "codeVersion": "v1" }
 }

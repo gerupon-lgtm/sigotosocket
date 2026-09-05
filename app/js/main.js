@@ -125,6 +125,9 @@ function render() {
   if (!root) return;
   clear(root);
   root.appendChild(screenFor(resolveRoute(location.hash)));
+  // ハッシュルーティングはページを再読込しないため、前画面のスクロール位置が残る。
+  // 画面を組み立て終えた時点で毎回先頭へ戻し、通常のページ遷移と同じ見え方にする。
+  globalThis.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
   const footer = document.getElementById("app-version");
   if (footer) footer.textContent = appMeta.appVersion;
 }

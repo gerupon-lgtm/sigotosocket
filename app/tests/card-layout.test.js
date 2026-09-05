@@ -4,6 +4,7 @@ import { CARD, LAYOUT, TEXT, verticalPlan, headerLockup } from "../js/presentati
 import { TypeDefinitions, UNDETERMINED_TEXT } from "../js/data/type-definitions.js";
 import { ScaleDefinitions } from "../js/data/scale-definitions.js";
 import { hollandCardLine } from "../js/domain/holland.js";
+import { appMeta } from "../js/config/app-meta.js";
 
 /**
  * 文字被りを目視で確認しない。座標から機械的に落とす。
@@ -46,12 +47,16 @@ function boxes() {
     { name: "レーダー", box: { x: 0, y: plan.chartTop, w: CARD.width, h: plan.chartBottom - plan.chartTop }, band: true },
     { name: "上位2領域", box: textBox(top2Longest, L.conclusion.top2Size, plan.top2Baseline) },
     { name: "ホランド型", box: textBox(hollandLongest, L.conclusion.hollandSize, plan.hollandBaseline) },
-    { name: "第2フェーズの帯", box: { x: L.reservedBand.x, y: plan.bandTop, w: L.reservedBand.w, h: L.reservedBand.h } },
+    { name: "ココロパレア見出し", box: textBox("ココロパレアの結果", L.reservedBand.badge.labelSize,
+      plan.bandTop + L.reservedBand.badge.labelBaseline) },
+    { name: "ココロパレアバッジ", box: { x: L.reservedBand.x,
+      y: plan.bandTop + L.reservedBand.badge.pillTop,
+      w: L.reservedBand.w, h: L.reservedBand.badge.pillHeight } },
     { name: "注記1", box: textBox(TEXT.note1, L.footer.noteSize, L.footer.note1Baseline) },
     { name: "注記2", box: textBox(TEXT.note2, L.footer.noteSize, L.footer.note2Baseline) },
     { name: "下部ピル", box: { x: L.footer.pill.x, y: L.footer.pill.y, w: L.footer.pill.w, h: L.footer.pill.h } },
     { name: "下部ピルの文字", box: textBox(TEXT.footerPill, L.footer.pillTextSize, L.footer.pillTextBaseline) },
-    { name: "版数", box: textBox("v0.1.0", L.footer.versionSize, L.footer.versionBaseline) },
+    { name: "版数", box: textBox(appMeta.appVersion, L.footer.versionSize, L.footer.versionBaseline) },
   ];
 }
 

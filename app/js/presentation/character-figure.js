@@ -1,5 +1,5 @@
 import { el } from "./screen-helpers.js";
-import { LAYOUT } from "./card-layout.js";
+import { CARD, LAYOUT } from "./card-layout.js";
 import { poseFor, propFor, guestFor } from "../data/character-manifest.js";
 
 /**
@@ -53,28 +53,28 @@ function guestPlan(pose, prop, guest) {
   const p = bodyRatio(pose);
   const cat = bodyRatio(guest);
 
-  const poseBodyH = p.h;                       // むっくんの実体の高さ（画像1辺＝1）
+  const poseBodyH = p.h;                            // むっくんの実体の高さ（画像1辺＝1）
   const catSide = (poseBodyH * g.ratio) / cat.h;   // 猫の画像の一辺
   const catBodyW = catSide * cat.w;
-  const gap = (g.gap / LAYOUT.character.size) * poseBodyH;
-  const lift = (g.lift / LAYOUT.character.size) * poseBodyH;
+  const gap = g.gap / LAYOUT.character.size;
+  const lift = g.lift / LAYOUT.character.size;
 
   const poseBodyBottom = p.y + p.h;            // むっくんの接地線（画像上端から）
   const poseBodyLeft = catBodyW + gap;
 
-  // 小物は `overlap` ぶんだけむっくんより右へ出る。カードは1080幅の余白へ逃がしているが、
-  // 画面では図の箱がそのまま幅になるので、**張り出しぶんを箱に含める。**
-  // 含めないと、狭い画面で小物が端にぶつかって切れる（実機で確認・2026-09-05）。
+  // 小物も未連携と同じ寸法・張り出しにする。画面では図の箱がそのまま幅になるため、
+  // 小物の実体が右へ張り出すぶんまで groupWidth に含める。
   let propPlan = null;
   let rightMost = poseBodyLeft + p.w;
   if (prop) {
     const d = bodyRatio(prop);
-    const propBodyH = (LAYOUT.character.prop.size * g.prop.scale / LAYOUT.character.size) * poseBodyH;
-    const propSide = propBodyH / d.h;
+    const propSide = LAYOUT.character.prop.size / LAYOUT.character.size;
+    const propBoxLeft = 1 - propSide + (LAYOUT.character.prop.offsetX / LAYOUT.character.size);
+    const propImageLeft = poseBodyLeft - p.x + propBoxLeft;
+    const propBodyLeft = propImageLeft + propSide * d.x;
     const propBodyW = propSide * d.w;
-    const propBodyLeft = poseBodyLeft + p.w - propBodyW * g.prop.overlap;
     rightMost = Math.max(rightMost, propBodyLeft + propBodyW);
-    propPlan = { propSide, propBodyLeft, d };
+    propPlan = { propSide, propImageLeft, d };
   }
 
   const groupWidth = rightMost;
@@ -89,11 +89,11 @@ function guestPlan(pose, prop, guest) {
   };
 
   if (propPlan) {
-    const { propSide, propBodyLeft, d } = propPlan;
+    const { propSide, propImageLeft } = propPlan;
     plan.prop = {
       height: propSide,
-      left: (propBodyLeft - propSide * d.x) / groupWidth,
-      top: poseBodyBottom - propSide * (d.y + d.h),
+      left: propImageLeft / groupWidth,
+      top: 1 - propSide,
     };
   }
   return plan;
@@ -131,7 +131,11 @@ export function characterFigure(snapshot) {
   };
 
   const plan = guest ? guestPlan(pose, prop, guest) : null;
-  if (plan) figure.style.aspectRatio = `${plan.groupWidth} / 1`;
+  if (plan) {
+    figure.style.aspectRatio = `${plan.groupWidth} / 1`;
+    // カードの +34px を画面幅に対する同じ比率で適用する。固定34pxにはしない。
+    figure.style.left = `${(LAYOUT.guest.offsetX / CARD.width * 100).toFixed(4)}%`;
+  }
 
   const place = (part) => (plan ? {
     height: percent(part.height), left: percent(part.left), top: percent(part.top),
