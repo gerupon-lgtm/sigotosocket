@@ -1,4 +1,5 @@
 import { el, formatDateTime } from "./screen-helpers.js";
+import { appHeader } from "./app-header.js";
 import { drawRadar, radarTextFallback } from "./radar-chart.js";
 import { ScaleById } from "../data/scale-definitions.js";
 import { composeResultText } from "../domain/result-composer.js";
@@ -41,7 +42,7 @@ function scoreTable(scaleScores, rank) {
   ]);
 }
 
-export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart, onAbout }) {
+export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart, onHome, onAbout }) {
   const text = composeResultText({
     standardizable: snapshot.standardizable,
     rank: snapshot.rank,
@@ -61,6 +62,7 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
   ]));
 
   return el("section", { class: "screen result" }, [
+    appHeader({ screenLabel: "詳細結果" }),
     el("p", { class: "title-label", text: "あなたの称号" }),
     el("h1", { class: "type-name", text: text.title }),
     el("p", { class: "type-subtitle", text: text.subtitle }),
@@ -86,6 +88,7 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
     el("div", { class: "actions" }, [
       el("button", { class: "primary", type: "button", onClick: onCard }, "カードを見る"),
       el("button", { class: "secondary", type: "button", onClick: onRestart }, "はじめから答え直す"),
+      el("button", { class: "link", type: "button", onClick: onHome }, "トップへ戻る"),
     ]),
     el("div", { class: "disclaimer" }, [
       ...text.notes.map((note) => el("p", { text: note })),

@@ -68,3 +68,46 @@ test("同梱フォントの出典と許諾を置いている", () => {
   assert.ok(license.includes("Adobe"), "元フォントの著作権表示が無い");
   assert.ok(license.includes("Noto Serif JP"), "元フォント名が無い");
 });
+
+/** CSSから、そのセレクタに効いている font-family を拾う。var() は :root から1段だけ解く。 */
+function fontFamilyFor(source, selector) {
+  const css = source.replace(/\/\*[\s\S]*?\*\//g, "");   // コメントは先に落とす
+  const rules = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+    .map(([, selectors, body]) => [selectors.split(",").map((s) => s.trim()), body]);
+  const declarationIn = (body, property) => {
+    for (const part of body.split(";")) {
+      const colon = part.indexOf(":");
+      if (colon < 0) continue;
+      if (part.slice(0, colon).trim() === property) return part.slice(colon + 1).trim();
+    }
+    return null;
+  };
+  const root = rules.find(([selectors]) => selectors.includes(":root"))?.[1] ?? "";
+  for (const [selectors, body] of rules) {
+    if (!selectors.includes(selector)) continue;
+    const value = declarationIn(body, "font-family");
+    if (!value) continue;
+    const variable = value.match(/^var\(\s*(--[\w-]+)\s*\)$/);
+    return variable ? declarationIn(root, variable[1]) : value;
+  }
+  return null;
+}
+
+test("同梱の明朝はカードだけに使う。画面のCSSには当てない（ココロパレアと同じ）", () => {
+  // ココロパレアの styles.css には font-family がサンセリフ1本しかなく、
+  // 画面の称号はゴシック、明朝はカード（canvas）だけ。本人確認のうえ同じにしている。
+  // 画面へ広げるとサブセット（161字）の外の字が混ざる余地も生まれる。
+  const css = readFileSync(new URL("../css/style.css", import.meta.url), "utf8");
+  for (const selector of [".type-name", ".title-label", ".type-subtitle"]) {
+    const family = fontFamilyFor(css, selector);
+    assert.ok(!family || !family.includes("Sigotosocket Mincho"),
+      `${selector} に画面用の明朝が当たっている: ${family}`);
+  }
+  assert.ok(!css.includes("var(--mincho)"), "使われていない明朝の変数が残っている");
+});
+
+test("同梱フォントを読むのは @font-face の宣言だけ（カードのcanvasから使う）", () => {
+  const css = readFileSync(new URL("../css/style.css", import.meta.url), "utf8");
+  const declarations = css.split("Sigotosocket Mincho").length - 1;
+  assert.equal(declarations, 1, `CSSでの参照が ${declarations} 箇所ある。@font-face の1箇所だけのはず`);
+});

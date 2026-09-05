@@ -1,4 +1,5 @@
 import { el } from "./screen-helpers.js";
+import { appHeader } from "./app-header.js";
 import { TOTAL_ITEM_COUNT, answeredCount } from "../domain/response-state.js";
 import { STORAGE_STATUS } from "../infrastructure/progress-storage.js";
 
@@ -26,6 +27,7 @@ export function renderStartScreen({ progressState, latestResult, storageStatus, 
   }
 
   return el("section", { class: "screen start" }, [
+    appHeader({ screenLabel: "はじめる" }),
     el("h1", { text: "シゴトソケット" }),
     el("p", { class: "lead", text: "8つの領域から、あなたが「やってみたい」と感じる方向を見つけます。" }),
     el("p", { class: "meta", text: `全${TOTAL_ITEM_COUNT}問・所要およそ5分` }),

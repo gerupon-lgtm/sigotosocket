@@ -79,12 +79,13 @@ function screenFor(route) {
       bigFive: store.load().bigFive,
       onCard: () => go("card"),
       onRestart: () => { response = createResponseState(null); store.clearProgress(); go("answer"); },
+      onHome: () => go("start"),
       onAbout: () => go("about"),
     });
   }
   if (route === "card") {
     if (!snapshot) return screenFor("start");
-    return renderCardScreen({ snapshot, onBack: () => go("result") });
+    return renderCardScreen({ snapshot, onBack: () => go("result"), onHome: () => go("start") });
   }
   if (route === "about") {
     return renderAboutScreen({

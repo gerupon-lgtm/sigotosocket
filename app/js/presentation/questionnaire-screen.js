@@ -1,4 +1,5 @@
 import { el } from "./screen-helpers.js";
+import { appHeader } from "./app-header.js";
 import { TOTAL_ITEM_COUNT, itemAt } from "../domain/response-state.js";
 
 const CHOICES = Object.freeze([
@@ -23,6 +24,9 @@ export function renderQuestionnaireScreen({ state, onAnswer, onBack, onQuit }) {
   }, choice.label));
 
   return el("section", { class: "screen question" }, [
+    // 設問画面だけ sticky。長い一覧を送っても中断の導線が視界から消えない（ココロパレア踏襲）。
+    appHeader({ screenLabel: "回答中", sticky: true,
+      action: { label: "中断してトップへ", onClick: onQuit } }),
     el("div", { class: "progress", role: "progressbar", "aria-valuemin": "1",
       "aria-valuemax": String(TOTAL_ITEM_COUNT), "aria-valuenow": String(state.currentIndex + 1) }, [
       el("div", { class: "progress-bar", style: `width:${progress}%` }),
@@ -37,7 +41,6 @@ export function renderQuestionnaireScreen({ state, onAnswer, onBack, onQuit }) {
         disabled: state.currentIndex === 0,
         onClick: onBack,
       }, "戻る"),
-      el("button", { class: "link", type: "button", onClick: onQuit }, "中断してトップへ"),
     ]),
   ]);
 }

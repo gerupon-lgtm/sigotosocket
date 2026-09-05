@@ -169,6 +169,57 @@ test("連携済みなら予告は消え、本文に入れ替わる", async () =>
   assert.ok(text.includes("予測できるものではありません"), "本文が出ていない");
 });
 
+test("全画面にヘッダーがあり、画面名が入る（ココロパレアに合わせた導線）", () => {
+  const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
+  const screens = [
+    ["はじめる", renderStartScreen({
+      progressState: createResponseState(null), latestResult: null,
+      storageStatus: STORAGE_STATUS.OK,
+      onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+    })],
+    ["回答中", renderQuestionnaireScreen({
+      state: createResponseState(null), onAnswer() {}, onBack() {}, onQuit() {},
+    })],
+    ["詳細結果", renderResultScreen({
+      snapshot, bigFive: null, onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
+    })],
+    ["出典・免責", renderAboutScreen({ onBack() {}, onClearAll() {} })],
+  ];
+  for (const [label, node] of screens) {
+    const header = node.querySelectorAll(".app-header")[0];
+    assert.ok(header, `${label}: ヘッダーが無い`);
+    assert.equal(header.querySelectorAll(".app-brand-part").length, 2, `${label}: ブランドが無い`);
+    assert.equal(header.querySelectorAll(".app-screen-label")[0]?.textContent, label,
+      `${label}: 画面名が違う`);
+  }
+});
+
+test("設問画面のヘッダーは sticky で、中断してトップへを持つ", () => {
+  let quit = 0;
+  const node = renderQuestionnaireScreen({
+    state: createResponseState(null), onAnswer() {}, onBack() {}, onQuit: () => { quit += 1; },
+  });
+  const header = node.querySelectorAll(".app-header")[0];
+  assert.ok(header.className.includes("is-sticky"), "設問画面のヘッダーが sticky でない");
+  const action = header.querySelectorAll(".app-header-action")[0];
+  assert.equal(action.textContent, "中断してトップへ");
+  action.click();
+  assert.equal(quit, 1);
+});
+
+test("結果画面にトップへ戻るがある（ココロパレアと同じ導線）", () => {
+  let home = 0;
+  const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
+  const node = renderResultScreen({
+    snapshot, bigFive: null,
+    onCard() {}, onRestart() {}, onHome: () => { home += 1; }, onAbout() {},
+  });
+  const back = [...node.querySelectorAll("button")].find((b) => b.textContent === "トップへ戻る");
+  assert.ok(back, "トップへ戻るが無い");
+  back.click();
+  assert.equal(home, 1);
+});
+
 test("出典・免責画面に同梱フォントの出典がある（SIL OFL 1.1）", () => {
   const text = renderAboutScreen({ onBack() {}, onClearAll() {} }).textContent;
   assert.ok(text.includes("Noto Serif JP"), "元フォント名が無い");

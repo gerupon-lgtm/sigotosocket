@@ -1,8 +1,10 @@
 import { el } from "./screen-helpers.js";
+import { appHeader } from "./app-header.js";
 import { appMeta } from "../config/app-meta.js";
 
 export function renderAboutScreen({ onBack, onClearAll }) {
   return el("section", { class: "screen about" }, [
+    appHeader({ screenLabel: "出典・免責" }),
     el("h1", { text: "この診断について" }),
 
     el("h2", { text: "医学的・心理学的な検査ではありません" }),

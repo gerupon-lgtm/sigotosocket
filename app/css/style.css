@@ -41,6 +41,69 @@ body {
   padding: 24px 20px 48px;
 }
 
+/* ヘッダー。**組み立てと寸法はココロパレアの .app-header に合わせている。**
+   色だけは合わせない（要件 v1.8：並べて見分けがつかないため紺系へ移した）。 */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 10px 16px;
+  width: 100%;
+  margin-bottom: 28px;
+  padding-block: 8px;
+  color: var(--sub);
+  font-size: 0.78rem;
+}
+
+.app-header.is-sticky {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgb(244 246 250 / 94%);
+  box-shadow: 0 8px 24px rgb(27 42 68 / 8%);
+  backdrop-filter: blur(10px);
+}
+
+.app-brand {
+  display: inline-flex;
+  flex-wrap: wrap;
+  font-weight: 700;
+}
+
+.app-screen-label { margin-inline-start: auto; }
+
+.app-header-action {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 共有。URLは選んでコピーできる形で必ず見せる（Web Share が無い環境が主）。 */
+.share {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.share-label { margin: 0; color: var(--sub); font-size: 0.8rem; }
+
+.share-url {
+  margin: 2px 0 6px;
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+  user-select: all;
+}
+
+.share .note { margin: 0 0 10px; color: var(--sub); font-size: 0.8rem; }
+
 h1 { font-size: 1.55rem; line-height: 1.35; margin: 0 0 12px; }
 h2 { font-size: 1.1rem; margin: 28px 0 8px; }
 p { margin: 0 0 12px; }
