@@ -306,6 +306,8 @@ test("トップは既存説明を残し、連携方法を独立した閉じた�
   assert.equal(guide.getAttribute("open"), null, "既定で開いている");
   assert.ok(guide.textContent.includes("それぞれ単独で利用できます"));
   assert.ok(guide.textContent.includes("50問の詳細結果"));
+  assert.ok(guide.textContent.includes("詳細結果画面の「シゴトソケットへ結果を渡す」"));
+  assert.ok(guide.textContent.includes("履歴一覧の「この結果をシゴトソケットへ渡す」"));
   assert.ok(guide.textContent.includes("まだ無い場合は45問を終えた後"));
   assert.ok(guide.textContent.includes("最後に渡した結果だけ"));
 });
