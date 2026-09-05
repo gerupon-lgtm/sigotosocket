@@ -2,6 +2,7 @@ import { el, formatDateTime } from "./screen-helpers.js";
 import { drawRadar, radarTextFallback } from "./radar-chart.js";
 import { ScaleById } from "../data/scale-definitions.js";
 import { composeResultText } from "../domain/result-composer.js";
+import { hollandResultLines } from "../domain/holland.js";
 
 function radarBlock(scaleScores) {
   const wrap = el("div", { class: "radar-wrap" });
@@ -47,6 +48,8 @@ export function renderResultScreen({ snapshot, onCard, onRestart, onAbout }) {
     alternativeTypeId: snapshot.alternativeTypeId,
   });
 
+  const holland = hollandResultLines(snapshot.rank);
+
   const observations = text.observations.map((entry) => el("div", { class: "observation" }, [
     el("p", { class: "observation-head", text: `${entry.position}：${entry.label}` }),
     el("p", { class: "observation-body", text: entry.text }),
@@ -60,6 +63,11 @@ export function renderResultScreen({ snapshot, onCard, onRestart, onAbout }) {
     radarBlock(snapshot.scaleScores),
     el("div", { class: "prose" }, text.reason.map((p) => el("p", { text: p }))),
     ...(observations.length > 0 ? [el("h2", { text: "回答から見えたこと" }), ...observations] : []),
+    // 順位が無い（判定不能）ときは空配列が返り、節ごと出ない。
+    ...(holland.length > 0
+      ? [el("h2", { text: "ホランド型" }),
+         el("div", { class: "prose holland" }, holland.map((line) => el("p", { text: line })))]
+      : []),
     el("h2", { text: "8つの領域の点数" }),
     scoreTable(snapshot.scaleScores, snapshot.rank),
     el("div", { class: "actions" }, [

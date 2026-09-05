@@ -15,7 +15,7 @@ const { standardize } = await import("../js/domain/standardize.js");
 const { classify } = await import("../js/domain/type-classifier.js");
 const { createResultSnapshot } = await import("../js/domain/result-snapshot.js");
 const { STORAGE_STATUS } = await import("../js/infrastructure/progress-storage.js");
-const { uniformAnswers, answersWith } = await import("./helpers.js");
+const { uniformAnswers, answersWith, answersByScale } = await import("./helpers.js");
 
 function snapshotFor(answers) {
   const standardized = standardize(scoreScales({ items: ItemMaster, answers }));
@@ -89,6 +89,32 @@ test("判定不能でも結果画面が壊れず、カードへ進める", () =>
   const node = renderResultScreen({ snapshot, onCard() {}, onRestart() {}, onAbout() {} });
   assert.ok(node.textContent.includes("称号を決められませんでした"));
   assert.ok(node.textContent.includes("カードを見る"));
+});
+
+test("結果画面はホランド型を出す（F-024）", () => {
+  const snapshot = snapshotFor(answersByScale({ leadership: 5, analysis: 4 }));
+  assert.equal(snapshot.rank[0], "leadership");
+  const node = renderResultScreen({ snapshot, onCard() {}, onRestart() {}, onAbout() {} });
+  const text = node.textContent;
+  assert.ok(text.includes("企業的（Enterprising）"), "1位の型名が出ていない");
+  assert.ok(text.includes("調べてみてください"), "調べる手がかりの案内が出ていない");
+});
+
+test("言葉が1位なら、結果画面は6類型の外だと伝え、2位の型を参考に添える", () => {
+  const snapshot = snapshotFor(answersByScale({ erudition: 5, analysis: 4 }));
+  assert.equal(snapshot.rank[0], "erudition");
+  assert.equal(snapshot.rank[1], "analysis");
+  const text = renderResultScreen({ snapshot, onCard() {}, onRestart() {}, onAbout() {} }).textContent;
+  assert.ok(text.includes("6類型の外にある"), "型を持たない領域である旨が出ていない");
+  assert.ok(text.includes("（参考）次に高かった「探究」は「研究的（Investigative）」"));
+  assert.ok(!text.includes("対応なし"), "「対応なし」とは書かない");
+});
+
+test("判定不能ならホランド型の節を出さない", () => {
+  const snapshot = snapshotFor(uniformAnswers(3));
+  assert.equal(snapshot.rank, null);
+  const text = renderResultScreen({ snapshot, onCard() {}, onRestart() {}, onAbout() {} }).textContent;
+  assert.ok(!text.includes("ホランド"), "順位が無いのにホランド型が出ている");
 });
 
 test("出典・免責画面に出典とデータ削除がある", () => {

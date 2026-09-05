@@ -15,3 +15,12 @@ export function createMemoryStorage() {
     _map: map,
   };
 }
+
+/**
+ * 指定した尺度だけ高い回答をつくる。順位を狙って決めたいテストで使う。
+ * @param {Record<string, number>} byScale 尺度IDごとの回答値
+ * @param {number} fallback それ以外の尺度に入れる値
+ */
+export function answersByScale(byScale, fallback = 1) {
+  return answersWith((item) => byScale[item.scaleId] ?? fallback);
+}
