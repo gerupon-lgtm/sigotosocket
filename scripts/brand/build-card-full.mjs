@@ -162,37 +162,33 @@ console.log(`${CHART === "bars" ? `棒グラフ ピッチ${BAR_PITCH}` : `レー
 console.log(`キャラ ${CHAR_SIZE}px（中央領域 ${midH}px の ${(CHAR_SIZE/midH*100).toFixed(0)}%、カード高の ${(CHAR_SIZE/H*100).toFixed(0)}%）／小物 ${propSize}px`);
 
 // 明暗二重の縁取りを近似する（実装は canvas の drawSilhouette。ここは近似）
-async function outlined(buf, spreadDark, spreadLight, mode = "dual") {
+async function outlined(buf, spread, blur, hex = "#ffffff") {
   const m = await sharp(buf).metadata();
-  const w = m.width, h = m.height, pad = spreadDark + 4;
+  const w = m.width, h = m.height, pad = spread + blur + 6;
   const alpha = await sharp(buf).extractChannel("alpha").raw().toBuffer();
-  const sil = async (hex) => sharp({ create: { width: w, height: h, channels: 3, background: hex } })
+  const sil = await sharp({ create: { width: w, height: h, channels: 3, background: hex } })
     .joinChannel(alpha, { raw: { width: w, height: h, channels: 1 } }).png().toBuffer();
-  const dark = await sil("#3b4a45"), light = await sil("#ffffff");
-  const pairs = mode === "white" ? [[light, spreadDark]]
-    : mode === "dark" ? [[dark, spreadDark]]
-    : [[dark, spreadDark], [light, spreadLight]];
+  // 8方向へずらして合成した輪郭を作り、必要ならぼかす
   const layers = [];
-  for (const [buf2, sp] of pairs) {
-    for (let dx = -1; dx <= 1; dx += 1) for (let dy = -1; dy <= 1; dy += 1) {
-      if (dx === 0 && dy === 0) continue;
-      layers.push({ input: buf2, left: pad + dx * sp, top: pad + dy * sp });
-    }
+  for (let dx = -1; dx <= 1; dx += 1) for (let dy = -1; dy <= 1; dy += 1) {
+    if (dx === 0 && dy === 0) continue;
+    layers.push({ input: sil, left: pad + dx * spread, top: pad + dy * spread });
   }
-  layers.push({ input: buf, left: pad, top: pad });
-  return { buf: await sharp({ create: { width: w + pad * 2, height: h + pad * 2, channels: 4, background: { r:0,g:0,b:0,alpha:0 } } })
-    .composite(layers).png().toBuffer(), pad };
+  let ring = await sharp({ create: { width: w + pad * 2, height: h + pad * 2, channels: 4, background: { r:0,g:0,b:0,alpha:0 } } })
+    .composite(layers).png().toBuffer();
+  if (blur > 0) ring = await sharp(ring).blur(blur).png().toBuffer();
+  return { buf: await sharp(ring).composite([{ input: buf, left: pad, top: pad }]).png().toBuffer(), pad };
 }
 const poseMeta = await sharp(pose).metadata();
 console.log(`余白を切った後のキャラ ${poseMeta.width}x${poseMeta.height}px／上の空き ${(charTop - MID.top).toFixed(0)}px`);
 console.log(`キャラとレーダーの間 ${charGap.toFixed(0)}px／レーダー下端 ${(chartTop + chartH).toFixed(0)}／下の文字の上端 ${(Y.top2 - 30).toFixed(0)} → 空き ${(Y.top2 - 30 - (chartTop + chartH)).toFixed(0)}px`);
 await sharp(Buffer.from(svg))
   .composite(await (async () => {
-    const p2 = await outlined(prop, 7, 4, process.env.OUTLINE ?? "dual");   // 小物のみ縁取り
+    const p2 = await outlined(prop, Number(process.env.SPREAD ?? 7), Number(process.env.BLUR ?? 0));   // 小物のみ縁取り（白）
     const pm = await sharp(pose).metadata(), qm = await sharp(prop).metadata();
     return [
       { input: pose, left: Math.round(CX - pm.width / 2), top: charTop },
-      { input: p2.buf, left: Math.round(CX + pm.width / 2 - qm.width) - p2.pad, top: charTop + pm.height - qm.height - p2.pad },
+      { input: p2.buf, left: Math.round(CX + pm.width / 2 - qm.width + Number(process.env.PROP_DX ?? 0)) - p2.pad, top: charTop + pm.height - qm.height + Number(process.env.PROP_DY ?? 0) - p2.pad },
     ];
   })())
   .png().toFile(process.env.OUT ?? "docs/brand/card/中央キャラのみ.png");
