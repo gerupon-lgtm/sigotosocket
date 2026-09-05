@@ -19,7 +19,7 @@ export function linkageGuide() {
       el("p", { class: "linkage-guide-note", text: "複数の結果は同時に連携できません。新しく渡すと以前の情報が置き換わり、最後に渡した結果だけが使われます。ココロパレア内の履歴は削除されません。" }),
       el("p", { class: "linkage-guide-link" }, [
         el("a", {
-          href: appMeta.brand.siblingUrl,
+          href: appMeta.brand.siblingLinkageUrl,
           rel: "noreferrer",
         }, `${appMeta.brand.siblingName}へ進む`),
       ]),

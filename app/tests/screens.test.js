@@ -311,6 +311,9 @@ test("トップは既存説明を残し、連携方法を独立した閉じた�
   assert.ok(!guide.textContent.includes("この結果をシゴトソケットへ渡す"));
   assert.ok(guide.textContent.includes("まだ無い場合は45問を終えた後"));
   assert.ok(guide.textContent.includes("最後に渡した結果だけ"));
+  const linkageEntry = guide.querySelectorAll("a")[0];
+  assert.equal(linkageEntry.getAttribute("href"), "https://kokoro.sikumilab.com/#/sigotosocket");
+  assert.equal(linkageEntry.getAttribute("target"), null, "専用入口を別タブで開いている");
 });
 
 test("未連携の結果画面にも閉じた連携方法を表示する", () => {

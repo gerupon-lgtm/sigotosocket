@@ -16,6 +16,7 @@ export const ALLOWED_LINK_URLS = Object.freeze([
   "https://projects.ori.org/lrg/PDFs_papers/Pozzebon_etal_2009_ORVIS_JPA.pdf",
   "https://ipip.ori.org/",
   "https://kokoro.sikumilab.com/",
+  "https://kokoro.sikumilab.com/#/sigotosocket",
 ]);
 
 // XMLの名前空間識別子。取得は発生しない（SVGを組み立てるときに必ず現れる）。

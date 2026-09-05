@@ -13,6 +13,8 @@ const brand = Object.freeze({
   // 姉妹アプリ。連携（F-010）の相手であり、リンクは check-static の許可リストに載せている
   siblingName: "ココロパレア",
   siblingUrl: "https://kokoro.sikumilab.com/",
+  // 任意連携の案内からだけ使う専用入口。通常の姉妹アプリ紹介リンクとは分ける。
+  siblingLinkageUrl: "https://kokoro.sikumilab.com/#/sigotosocket",
   subtitle: "ORVIS 自己理解支援ツール",
   iconPath: "assets/brand/sigotosocket-mark.svg",
 });
@@ -20,7 +22,7 @@ const brand = Object.freeze({
 export const appMeta = Object.freeze({
   brand,
   appId: "sigotosocket",
-  appVersion: "v0.2.2",
+  appVersion: "v0.2.3",
   // 公開URL（2026-09-05 確定・要確認21を解消）。index.html の canonical / og:url と一致させること。
   siteOrigin: "https://sigotosocket.sikumilab.com",
   storageSchemaVersion: 1,

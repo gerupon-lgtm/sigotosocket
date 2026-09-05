@@ -18,6 +18,8 @@
 
 `typeId` は**順序を持たない**。上位2尺度が {analysis, leadership} なら、どちらが1位でも `type-leadership--analysis` になる。理由は §5 に記す。
 
+連携先URLは保存データへ含めず、`appMeta.brand` に置く。通常紹介用の `siblingUrl` と、任意連携用の `siblingLinkageUrl`（ココロパレア `#/sigotosocket`）を分離し、用途を混同しない。
+
 ## 2. 尺度マスタ（`app/js/data/scale-definitions.js`）
 
 | フィールド | 型 | 必須 | 説明 |
