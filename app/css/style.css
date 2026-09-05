@@ -230,7 +230,67 @@ body {
   line-height: 1.9;
 }
 
-/* 共有。URLは選んでコピーできる形で必ず見せる（Web Share が無い環境が主）。 */
+/* 各診断は単独で完結するため、連携方法は独立した補助情報として閉じて置く。 */
+.linkage-guide {
+  margin: 20px 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.linkage-guide > summary {
+  position: relative;
+  padding: 14px 42px 14px 16px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.linkage-guide > summary::-webkit-details-marker { display: none; }
+
+.linkage-guide > summary::after {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  content: "›";
+  font-size: 1.35rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  transition: transform 0.15s ease;
+}
+
+.linkage-guide[open] > summary::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.linkage-guide-body {
+  margin: 0 16px;
+  padding: 14px 0 18px;
+  border-top: 1px solid var(--line);
+  color: var(--sub);
+  font-size: 0.9rem;
+}
+
+.linkage-guide-steps { margin: 10px 0 14px; padding-left: 1.5rem; }
+.linkage-guide-steps li + li { margin-top: 6px; }
+.linkage-guide-note { margin-bottom: 8px; }
+.linkage-guide-link { margin: 14px 0 0; font-weight: 700; }
+
+.linkage-receipt {
+  margin: 18px 0;
+  padding: 14px 16px;
+  border: 1px solid #9eb8d7;
+  border-radius: 14px;
+  background: #eef4fb;
+}
+
+.linkage-receipt h2 { margin: 0 0 6px; color: var(--accent); font-size: 1rem; }
+.linkage-receipt p { margin: 0; color: var(--sub); font-size: 0.9rem; }
+.linkage-receipt p + p { margin-top: 6px; }
+
+/* 共有。画像共有が使えなくても、結果テキストのコピーへ到達できるようにする。 */
 .share {
   margin-top: 20px;
   padding: 14px 16px;

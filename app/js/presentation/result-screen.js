@@ -7,6 +7,7 @@ import { ScaleById } from "../data/scale-definitions.js";
 import { composeResultText } from "../domain/result-composer.js";
 import { hollandResultLines } from "../domain/holland.js";
 import { uniqueInterest, lockPreview, consistencyPairs } from "../domain/cross-analysis.js";
+import { linkageGuide } from "./linkage-guide.js";
 
 function radarBlock(scaleScores) {
   const wrap = el("div", { class: "radar-wrap" });
@@ -114,6 +115,7 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
          el("div", { class: "prose holland" }, holland.map((line) => el("p", { text: line })))]
       : []),
     ...linkage,
+    ...(!bigFive ? [linkageGuide()] : []),
     el("h2", { text: "8つの領域の点数" }),
     scoreTable(snapshot.scaleScores, snapshot.rank),
     el("div", { class: "actions" }, [

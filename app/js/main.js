@@ -19,15 +19,33 @@ import { renderAboutScreen } from "./presentation/about-screen.js";
 import { clear, el } from "./presentation/screen-helpers.js";
 
 const store = createStore();
+let snapshot = null;
+
+function receiveLinkage() {
+  const bigFiveBeforeIntake = store.load().bigFive;
+  const link = receiveBigFive({
+    location: globalThis.location,
+    history: globalThis.history,
+    store,
+  });
+  if (!link) return null;
+  const latest = store.latestResult();
+  if (isValidSnapshot(latest)) snapshot = latest;
+  return {
+    kind: bigFiveBeforeIntake ? "updated" : "received",
+    hasResult: snapshot !== null,
+  };
+}
+
 // ココロパレアから #b5= で来たときは、画面を組み立てる前に受け取ってURLから消す（F-010）。
 // 受け取れなくても何も表示しない。単体の結果へそのまま進む。
-receiveBigFive({ location: globalThis.location, history: globalThis.history, store });
+let linkageReceipt = receiveLinkage();
 let response = createResponseState(store.load().progress);
-let snapshot = null;
 const initial = store.latestResult();
 if (isValidSnapshot(initial)) snapshot = initial;
 
 function go(route) {
+  if (route !== "start") linkageReceipt = null;
   const next = hashFor(route);
   if (location.hash === next) render();
   else location.hash = next;
@@ -113,6 +131,7 @@ function screenFor(route) {
     progressState: response,
     latestResult: snapshot,
     storageStatus: store.status,
+    linkageReceipt,
     onStart: () => { response = createResponseState(null); store.clearProgress(); go("answer"); },
     onResume: () => { response = withIndex(response, firstUnansweredIndex(response)); go("answer"); },
     onShowResult: () => go("result"),
@@ -135,14 +154,10 @@ function render() {
 // ページを読み込み直さずにハッシュだけが変わって来る経路もある（タブが開いたまま
 // 連携リンクを開いた場合など）。起動時と同じ受け取りをここでも通す。#b5= でなければ何もしない。
 globalThis.addEventListener?.("hashchange", () => {
-  const link = receiveBigFive({ location: globalThis.location, history: globalThis.history, store });
   // 受け取れたら、結び付け直された結果をメモリへ読み直す（F-011）。
   // **これが無いと、開いたままのタブでは連携が結果画面にもカードにも出ない。**
-  // 起動時の経路は受け取りのあとに読み込むので問題にならないが、ここは別経路である。
-  if (link) {
-    const latest = store.latestResult();
-    if (isValidSnapshot(latest)) snapshot = latest;
-  }
+  const receipt = receiveLinkage();
+  if (receipt) linkageReceipt = receipt;
   render();
 });
 if (typeof document !== "undefined") {

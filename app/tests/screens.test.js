@@ -283,10 +283,71 @@ test("説明パネルからココロパレアへ行ける", async () => {
     storageStatus: STORAGE_STATUS.OK,
     onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
   });
-  const link = [...node.querySelectorAll("a")].find((a) => a.getAttribute("href") === appMeta.brand.siblingUrl);
-  assert.ok(link, "ココロパレアへのリンクが無い");
-  assert.equal(link.getAttribute("rel"), "noopener noreferrer");
-  assert.ok(link.textContent.includes("ココロパレア"));
+  const links = [...node.querySelectorAll("a")].filter((a) =>
+    a.getAttribute("href") === appMeta.brand.siblingUrl);
+  assert.ok(links.length >= 1, "ココロパレアへのリンクが無い");
+  for (const link of links) {
+    assert.equal(link.getAttribute("target"), null, "連携フローで別タブを開いている");
+    assert.equal(link.getAttribute("rel"), "noreferrer");
+    assert.ok(link.textContent.includes("ココロパレア"));
+  }
+});
+
+test("トップは既存説明を残し、連携方法を独立した閉じたパネルで案内する", () => {
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  assert.equal(node.querySelectorAll(".tool-intro").length, 1, "既存説明を消している");
+  const guide = node.querySelectorAll(".linkage-guide")[0];
+  assert.ok(guide, "独立した連携方法が無い");
+  assert.equal(guide.tagName, "DETAILS");
+  assert.equal(guide.getAttribute("open"), null, "既定で開いている");
+  assert.ok(guide.textContent.includes("それぞれ単独で利用できます"));
+  assert.ok(guide.textContent.includes("50問の詳細結果"));
+  assert.ok(guide.textContent.includes("まだ無い場合は45問を終えた後"));
+  assert.ok(guide.textContent.includes("最後に渡した結果だけ"));
+});
+
+test("未連携の結果画面にも閉じた連携方法を表示する", () => {
+  const snapshot = snapshotFor(answersByScale({ production: 5, adventure: 4 }));
+  const node = renderResultScreen({
+    snapshot, bigFive: null, onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
+  });
+  const guide = node.querySelectorAll(".linkage-guide")[0];
+  assert.ok(guide, "結果画面に連携方法が無い");
+  assert.equal(guide.getAttribute("open"), null);
+  assert.ok(guide.textContent.includes("ココロパレアへ進む"));
+});
+
+test("受取直後は結果が無くても完了と45問後の反映を知らせる", () => {
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    linkageReceipt: { kind: "received", hasResult: false },
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  const receipt = node.querySelectorAll(".linkage-receipt")[0];
+  assert.ok(receipt, "受取完了が表示されない");
+  assert.ok(receipt.textContent.includes("ココロパレアの結果を受け取りました"));
+  assert.ok(receipt.textContent.includes("45問を終えると"));
+  assert.ok(node.textContent.includes("45問を始める"));
+});
+
+test("再連携では置換を明示し、既存結果への入口を組み合わせ結果として示す", () => {
+  const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: snapshot,
+    storageStatus: STORAGE_STATUS.OK,
+    linkageReceipt: { kind: "updated", hasResult: true },
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  const receipt = node.querySelectorAll(".linkage-receipt")[0];
+  assert.ok(receipt.textContent.includes("ココロパレアの結果を更新しました"));
+  assert.ok(receipt.textContent.includes("以前の連携情報"));
+  assert.ok(receipt.textContent.includes("置き換えました"));
+  assert.ok(node.textContent.includes("組み合わせた結果を見る"));
 });
 
 test("出典・免責画面に同梱フォントの出典がある（SIL OFL 1.1）", () => {

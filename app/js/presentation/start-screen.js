@@ -4,6 +4,7 @@ import { screenHeading } from "./screen-heading.js";
 import { TOTAL_ITEM_COUNT, answeredCount } from "../domain/response-state.js";
 import { STORAGE_STATUS } from "../infrastructure/progress-storage.js";
 import { appMeta } from "../config/app-meta.js";
+import { linkageGuide } from "./linkage-guide.js";
 
 
 /**
@@ -55,8 +56,7 @@ function toolIntro() {
       el("p", { class: "intro-link" }, [
         el("a", {
           href: appMeta.brand.siblingUrl,
-          target: "_blank",
-          rel: "noopener noreferrer",
+          rel: "noreferrer",
         }, `${appMeta.brand.siblingName}を開く`),
       ]),
       // 「準備中」と書いていたが、ココロパレア側の受け渡しが公開された（2026-09-05）。
@@ -70,11 +70,38 @@ function toolIntro() {
   ]);
 }
 
-export function renderStartScreen({ progressState, latestResult, storageStatus, onStart, onResume, onShowResult, onAbout }) {
+function linkageReceiptCard(receipt) {
+  if (!receipt || !["received", "updated"].includes(receipt.kind)) return null;
+  const updated = receipt.kind === "updated";
+  const body = [];
+  body.push(el("h2", { text: updated
+    ? "ココロパレアの結果を更新しました"
+    : "ココロパレアの結果を受け取りました" }));
+  if (updated) {
+    body.push(el("p", { text: "以前の連携情報を、今回渡された結果に置き換えました。最後に渡した結果だけが使われます。" }));
+  }
+  body.push(el("p", { text: receipt.hasResult
+    ? "前回のシゴトソケット結果へ反映しました。再回答は必要ありません。"
+    : "シゴトソケットの45問を終えると、2つの結果を合わせて確認できます。" }));
+  return el("section", { class: "linkage-receipt", role: "status" }, body);
+}
+
+export function renderStartScreen({
+  progressState,
+  latestResult,
+  storageStatus,
+  linkageReceipt = null,
+  onStart,
+  onResume,
+  onShowResult,
+  onAbout,
+}) {
   const hasProgress = progressState && answeredCount(progressState) > 0;
   const actions = [
     el("button", { class: "primary", type: "button", onClick: onStart },
-      hasProgress ? "はじめから回答する" : "はじめる"),
+      hasProgress
+        ? "はじめから回答する"
+        : linkageReceipt && !latestResult ? "45問を始める" : "はじめる"),
   ];
   if (hasProgress) {
     actions.unshift(el("button", { class: "primary", type: "button", onClick: onResume },
@@ -82,7 +109,7 @@ export function renderStartScreen({ progressState, latestResult, storageStatus, 
   }
   if (latestResult) {
     actions.push(el("button", { class: "secondary", type: "button", onClick: onShowResult },
-      "前回の結果を見る"));
+      linkageReceipt?.hasResult ? "組み合わせた結果を見る" : "前回の結果を見る"));
   }
 
   const notices = [];
@@ -93,6 +120,7 @@ export function renderStartScreen({ progressState, latestResult, storageStatus, 
     notices.push(el("p", { class: "notice", text: "以前の版で保存したデータが見つかりましたが、今の版では読み込めません。データは消さずに残しています。" }));
   }
 
+  const receipt = linkageReceiptCard(linkageReceipt);
   return el("section", { class: "screen start" }, [
     appHeader({}),
     el("div", { class: "panel" }, [
@@ -101,9 +129,11 @@ export function renderStartScreen({ progressState, latestResult, storageStatus, 
       el("p", { class: "meta", text: `全${TOTAL_ITEM_COUNT}問・所要およそ5分` }),
       // 説明は「はじめる」の上に置く（ココロパレアと同じ並び）
       toolIntro(),
+      ...(receipt ? [receipt] : []),
       ...notices,
       el("div", { class: "actions" }, actions),
     ]),
+    linkageGuide(),
     el("p", { class: "disclaimer" }, [
       "この診断は医学的・心理学的な検査ではありません。結果は自己理解の手がかりとしてお使いください。",
       el("br"),
