@@ -350,3 +350,54 @@ test("判定不能でも結果画面のキャラクターは出る", () => {
   });
   assert.equal(node.querySelectorAll(".character-figure").length, 1);
 });
+
+/* ---- CSP と style（2026-09-05・プログレスバーが動かなかった件） ---- */
+
+test("プログレスバーの幅は設問が進むと伸びる", async () => {
+  const { el } = await import("../js/presentation/screen-helpers.js");
+  void el;   // 同じDOMスタブを共有していることの確認
+  const widthAt = (index) => {
+    let state = createResponseState(null);
+    for (let i = 0; i < index; i += 1) state = { ...state, currentIndex: i + 1 };
+    const node = renderQuestionnaireScreen({
+      state, onAnswer() {}, onBack() {}, onQuit() {},
+    });
+    return node.querySelectorAll(".progress-bar")[0].style.width;
+  };
+  const first = Number.parseFloat(widthAt(0));
+  const middle = Number.parseFloat(widthAt(22));
+  const last = Number.parseFloat(widthAt(44));
+  assert.ok(first > 0, `1問目で幅が無い: ${first}`);
+  assert.ok(middle > first, `22問目で伸びていない: ${first} → ${middle}`);
+  assert.equal(last, 100, `45問目で100%にならない: ${last}`);
+});
+
+test("幅は style プロパティに入る（style属性はCSPで無視される）", () => {
+  const node = renderQuestionnaireScreen({
+    state: createResponseState(null), onAnswer() {}, onBack() {}, onQuit() {},
+  });
+  const bar = node.querySelectorAll(".progress-bar")[0];
+  assert.equal(bar.getAttribute("style"), null, "style属性に書くとCSPで効かない");
+  assert.ok(bar.style.width, "style プロパティに入っていない");
+});
+
+test("el に style を文字列で渡したら落ちる（黙って無視されるのを防ぐ）", async () => {
+  const { el } = await import("../js/presentation/screen-helpers.js");
+  assert.throws(() => el("div", { style: "width:50%" }), /STYLE_MUST_BE_OBJECT_CSP/);
+  assert.doesNotThrow(() => el("div", { style: { width: "50%" } }));
+});
+
+test("画面のソースに style 属性を組み立てる書き方が残っていない", async () => {
+  const { readFile, readdir } = await import("node:fs/promises");
+  const dir = new URL("../js/presentation/", import.meta.url);
+  for (const entry of await readdir(dir)) {
+    if (!entry.endsWith(".js")) continue;
+    // 規則そのものを実装している側。禁止する書き方を注釈で引用している
+    if (entry === "screen-helpers.js") continue;
+    const source = await readFile(new URL(entry, dir), "utf8");
+    assert.ok(!/setAttribute\(\s*["']style["']/.test(source),
+      `${entry}: setAttribute("style", ...) はCSPで無視される`);
+    assert.ok(!/style:\s*[`"']/.test(source),
+      `${entry}: style を文字列で渡している。オブジェクトで渡すこと`);
+  }
+});

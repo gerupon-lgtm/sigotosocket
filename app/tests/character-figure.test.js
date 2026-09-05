@@ -74,3 +74,103 @@ test("小物が無いときは、読み上げも小物を言わない", () => {
   const figure = characterFigure({ poseScaleId: "altruism", propScaleId: null });
   assert.equal(figure.getAttribute("aria-label"), poseFor("altruism").alt);
 });
+
+/* ---- 連携済みのゲスト猫（F-022・2026-09-05） ---- */
+
+const { guestFor } = await import("../js/data/character-manifest.js");
+
+const LINKED = { poseScaleId: "altruism", propScaleId: "creativity", bigFive: { z: {} } };
+
+/**
+ * 位置は 0.01% 刻みで入る（`percent()` が toFixed(2)）。図の高さを1とすると
+ * 誤差は 1e-4 の桁。**そこまでを一致とみなす。**320pxの図で 0.03px にあたる。
+ */
+const CLOSE = 1e-3;
+function assertClose(actual, expected, message) {
+  assert.ok(Math.abs(actual - expected) < CLOSE,
+    `${message}: ${actual} と ${expected} が離れている`);
+}
+
+/** 図の高さ（＝むっくんの画像の一辺）を1として、実体の位置を読み直す */
+function bodyBox(figure, className, entry) {
+  const node = pick(figure, className)[0];
+  const groupWidth = Number.parseFloat(figure.style.aspectRatio);
+  const side = Number.parseFloat(node.style.height) / 100;
+  const left = (Number.parseFloat(node.style.left) / 100) * groupWidth;
+  const top = Number.parseFloat(node.style.top) / 100;
+  return {
+    left: left + side * (entry.body.x / entry.width),
+    right: left + side * ((entry.body.x + entry.body.w) / entry.width),
+    bottom: top + side * ((entry.body.y + entry.body.h) / entry.height),
+    height: side * (entry.body.h / entry.height),
+  };
+}
+
+test("連携していなければ猫を出さない", () => {
+  const figure = characterFigure({ poseScaleId: "altruism", propScaleId: null, bigFive: null });
+  assert.equal(pick(figure, "character-guest").length, 0);
+});
+
+test("連携済みなら猫を並べる（F-022・カードと同じ判断材料）", () => {
+  const figure = characterFigure(LINKED);
+  assert.equal(pick(figure, "character-guest").length, 1);
+  assert.equal(pick(figure, "character-guest")[0].getAttribute("src"), guestFor("cat").imagePath);
+  assert.ok(figure.className.includes("with-guest"), figure.className);
+});
+
+test("猫の実体の高さは、むっくんの実体の75%（D-20）", () => {
+  const figure = characterFigure(LINKED);
+  const cat = bodyBox(figure, "character-guest", guestFor("cat"));
+  const mukkun = bodyBox(figure, "character-pose", poseFor("altruism"));
+  assertClose(cat.height / mukkun.height, LAYOUT.guest.ratio, "猫の実体の高さの比");
+});
+
+test("実体どうしを離す。**重ならない**（card-layout の gap と同値）", () => {
+  const figure = characterFigure(LINKED);
+  const cat = bodyBox(figure, "character-guest", guestFor("cat"));
+  const mukkun = bodyBox(figure, "character-pose", poseFor("altruism"));
+  const gap = mukkun.left - cat.right;
+  const expected = (LAYOUT.guest.gap / LAYOUT.character.size) * mukkun.height;
+  assert.ok(gap > 0, `重なっている: ${gap}`);
+  assertClose(gap, expected, "実体どうしの隙間");
+});
+
+test("猫だけ接地線を上げる（奥に見せる・card-layout の lift と同値）", () => {
+  const figure = characterFigure(LINKED);
+  const cat = bodyBox(figure, "character-guest", guestFor("cat"));
+  const mukkun = bodyBox(figure, "character-pose", poseFor("altruism"));
+  const lift = mukkun.bottom - cat.bottom;
+  const expected = (LAYOUT.guest.lift / LAYOUT.character.size) * mukkun.height;
+  assert.ok(lift > 0, `猫が下がっている: ${lift}`);
+  assertClose(lift, expected, "猫を上げる量");
+});
+
+test("ポーズが変わっても猫の実体は常に75%（画像の箱で組まない）", () => {
+  // 実体が箱に占める割合は 0.851〜1.000 とばらつく。箱で組むと猫の大きさが揺れる
+  for (const poseId of ["production", "leadership", "neutral", "analysis"]) {
+    const figure = characterFigure({ poseScaleId: poseId, propScaleId: null, bigFive: { z: {} } });
+    const cat = bodyBox(figure, "character-guest", guestFor("cat"));
+    const mukkun = bodyBox(figure, "character-pose", poseFor(poseId));
+    assertClose(cat.height / mukkun.height, LAYOUT.guest.ratio, poseId);
+  }
+});
+
+test("読み上げは猫にも触れる", () => {
+  const label = characterFigure(LINKED).getAttribute("aria-label");
+  assert.ok(label.includes(guestFor("cat").alt), label);
+});
+
+test("すべての要素が図の中に収まる（はみ出して切れない）", () => {
+  const figure = characterFigure(LINKED);
+  const groupWidth = Number.parseFloat(figure.style.aspectRatio);
+  for (const [className, entry] of [
+    ["character-pose", poseFor("altruism")],
+    ["character-guest", guestFor("cat")],
+    ["character-prop", propFor("creativity")],
+  ]) {
+    const box = bodyBox(figure, className, entry);
+    assert.ok(box.left >= -0.001, `${className} が左へはみ出す: ${box.left}`);
+    assert.ok(box.right <= groupWidth + 0.001, `${className} が右へはみ出す: ${box.right}`);
+    assert.ok(box.bottom <= 1.001, `${className} が下へはみ出す: ${box.bottom}`);
+  }
+});

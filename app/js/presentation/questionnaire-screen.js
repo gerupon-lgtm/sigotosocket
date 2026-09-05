@@ -28,7 +28,8 @@ export function renderQuestionnaireScreen({ state, onAnswer, onBack, onQuit }) {
     appHeader({ sticky: true, action: { label: "中断してトップへ", onClick: onQuit } }),
     el("div", { class: "progress", role: "progressbar", "aria-valuemin": "1",
       "aria-valuemax": String(TOTAL_ITEM_COUNT), "aria-valuenow": String(state.currentIndex + 1) }, [
-      el("div", { class: "progress-bar", style: `width:${progress}%` }),
+      // 幅は style プロパティで入る（`el` が CSSOM を使う）。style属性はCSPで無視される
+      el("div", { class: "progress-bar", style: { width: `${progress}%` } }),
     ]),
     el("p", { class: "counter", text: `${state.currentIndex + 1} / ${TOTAL_ITEM_COUNT}問` }),
     el("p", { class: "prompt", text: "こういうことをするのは、好きですか。" }),

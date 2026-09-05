@@ -1,19 +1,25 @@
 import { el } from "./screen-helpers.js";
 import { LAYOUT } from "./card-layout.js";
-import { poseFor, propFor } from "../data/character-manifest.js";
+import { poseFor, propFor, guestFor } from "../data/character-manifest.js";
 
 /**
- * 結果画面のキャラクター（ポーズ＋小物）。ココロパレアの結果画面に合わせて置く。
+ * 結果画面のキャラクター（ポーズ＋小物、連携済みならゲストの猫も）。
+ * ココロパレアの結果画面に合わせて置く。
  *
  * **カードと同じ絵・同じ組み合わせ・同じ比率で出す。**画面とカードで違う姿が出ると、
  * どちらが本当の結果なのか分からなくなる。比率は `card-layout.js` から取り、
  * ここに数値を直書きしない（カードの構図を変えたら画面も一緒に動く）。
  *
- * **読み上げは描けたものだけを言う。**小物の画像が出せなかったときに小物を説明すると、
+ * **猫を並べるときは実体（body）どうしで組む。**画像の箱で組むと、実体が箱に占める
+ * 割合がポーズごとに違う（0.851〜1.000）ぶんだけ猫の見かけの大きさが変わり、
+ * D-20 で決めた「猫＝むっくんの75%」が守れない。`card-renderer.js` の
+ * `drawGuestGroup()` と同じ式をここでも使う。
+ *
+ * **読み上げは描けたものだけを言う。**画像が出せなかったときにそれを説明すると、
  * 読み上げだけが実物と食い違う（`card-renderer.js` の `cardAltText` と同じ姿勢）。
  */
 
-/** 小物の大きさと張り出し。カードの `character` の比率をそのまま使う。 */
+/** 小物の大きさと張り出し。単体のときはカードの `character` の比率をそのまま使う。 */
 const PROP_SIZE_RATIO = LAYOUT.character.prop.size / LAYOUT.character.size;
 const PROP_OVERHANG_RATIO = LAYOUT.character.prop.offsetX / LAYOUT.character.size;
 
@@ -21,8 +27,80 @@ function percent(ratio) {
   return `${(ratio * 100).toFixed(2)}%`;
 }
 
+/** 画像の箱に対する実体の割合。カードの body 矩形をそのまま比に直す。 */
+function bodyRatio(entry) {
+  return {
+    x: entry.body.x / entry.width,
+    y: entry.body.y / entry.height,
+    w: entry.body.w / entry.width,
+    h: entry.body.h / entry.height,
+  };
+}
+
+function image(className, entry, style) {
+  return el("img", {
+    class: className, src: entry.imagePath, alt: "", decoding: "async",
+    width: entry.width, height: entry.height, style,
+  });
+}
+
 /**
- * @param {{poseScaleId: string|null, propScaleId: string|null}} snapshot
+ * 猫と並べる配置を、むっくんの画像の一辺を1として計算する。
+ * `drawGuestGroup()` と同じで、**接地線をそろえ、猫だけ `lift` ぶん上げる。**
+ */
+function guestPlan(pose, prop, guest) {
+  const g = LAYOUT.guest;
+  const p = bodyRatio(pose);
+  const cat = bodyRatio(guest);
+
+  const poseBodyH = p.h;                       // むっくんの実体の高さ（画像1辺＝1）
+  const catSide = (poseBodyH * g.ratio) / cat.h;   // 猫の画像の一辺
+  const catBodyW = catSide * cat.w;
+  const gap = (g.gap / LAYOUT.character.size) * poseBodyH;
+  const lift = (g.lift / LAYOUT.character.size) * poseBodyH;
+
+  const poseBodyBottom = p.y + p.h;            // むっくんの接地線（画像上端から）
+  const poseBodyLeft = catBodyW + gap;
+
+  // 小物は `overlap` ぶんだけむっくんより右へ出る。カードは1080幅の余白へ逃がしているが、
+  // 画面では図の箱がそのまま幅になるので、**張り出しぶんを箱に含める。**
+  // 含めないと、狭い画面で小物が端にぶつかって切れる（実機で確認・2026-09-05）。
+  let propPlan = null;
+  let rightMost = poseBodyLeft + p.w;
+  if (prop) {
+    const d = bodyRatio(prop);
+    const propBodyH = (LAYOUT.character.prop.size * g.prop.scale / LAYOUT.character.size) * poseBodyH;
+    const propSide = propBodyH / d.h;
+    const propBodyW = propSide * d.w;
+    const propBodyLeft = poseBodyLeft + p.w - propBodyW * g.prop.overlap;
+    rightMost = Math.max(rightMost, propBodyLeft + propBodyW);
+    propPlan = { propSide, propBodyLeft, d };
+  }
+
+  const groupWidth = rightMost;
+  const plan = {
+    groupWidth,
+    pose: { height: 1, left: (poseBodyLeft - p.x) / groupWidth, top: 0 },
+    guest: {
+      height: catSide,
+      left: (-catSide * cat.x) / groupWidth,
+      top: poseBodyBottom - lift - catSide * (cat.y + cat.h),
+    },
+  };
+
+  if (propPlan) {
+    const { propSide, propBodyLeft, d } = propPlan;
+    plan.prop = {
+      height: propSide,
+      left: (propBodyLeft - propSide * d.x) / groupWidth,
+      top: poseBodyBottom - propSide * (d.y + d.h),
+    };
+  }
+  return plan;
+}
+
+/**
+ * @param {{poseScaleId: string|null, propScaleId: string|null, bigFive: object|null}} snapshot
  * @returns {HTMLElement|null} ポーズが引けなければ null（節ごと出さない）
  */
 export function characterFigure(snapshot) {
@@ -30,37 +108,62 @@ export function characterFigure(snapshot) {
   const pose = poseFor(snapshot?.poseScaleId ?? "neutral");
   if (!pose) return null;
   const prop = snapshot?.propScaleId ? propFor(snapshot.propScaleId) : null;
+  // 連携済みのときだけ猫を出す。判断材料はカードと同じ `snapshot.bigFive`（F-022）
+  const guest = snapshot?.bigFive ? guestFor("cat") : null;
 
-  const altWith = (withProp) => (withProp && prop ? `${pose.alt}と、${prop.alt}` : pose.alt);
-  const fallback = el("p", { class: "character-fallback", text: altWith(true) });
+  const describe = ({ withProp = true, withGuest = true } = {}) => [
+    pose.alt,
+    withProp && prop ? `と、${prop.alt}` : "",
+    withGuest && guest ? `。となりに${guest.alt}` : "",
+  ].join("");
+
+  const fallback = el("p", { class: "character-fallback", text: describe() });
   const figure = el("div", {
-    class: "character-figure", role: "img", "aria-label": altWith(true),
+    class: `character-figure${guest ? " with-guest" : ""}`,
+    role: "img", "aria-label": describe(),
   }, [fallback]);
 
-  const poseImage = el("img", {
-    class: "character-pose", src: pose.imagePath, alt: "", decoding: "async",
-    width: pose.width, height: pose.height,
-  });
+  const shown = { prop: Boolean(prop), guest: Boolean(guest) };
+  const retell = () => {
+    const text = describe({ withProp: shown.prop, withGuest: shown.guest });
+    figure.setAttribute("aria-label", text);
+    fallback.textContent = text;
+  };
+
+  const plan = guest ? guestPlan(pose, prop, guest) : null;
+  if (plan) figure.style.aspectRatio = `${plan.groupWidth} / 1`;
+
+  const place = (part) => (plan ? {
+    height: percent(part.height), left: percent(part.left), top: percent(part.top),
+  } : undefined);
+
+  const poseImage = plan
+    ? image("character-pose", pose, place(plan.pose))
+    : image("character-pose", pose, {});
   // 画像が出せたときだけ説明文を引っ込める。出せなければ文字で読める経路が残る。
   poseImage.addEventListener("load", () => { fallback.hidden = true; });
   poseImage.addEventListener("error", () => { poseImage.remove(); });
   figure.appendChild(poseImage);
 
-  if (prop) {
-    const propImage = el("img", {
-      class: "character-prop", src: prop.imagePath, alt: "", decoding: "async",
-      width: prop.width, height: prop.height,
+  if (guest) {
+    const guestImage = image("character-guest", guest, place(plan.guest));
+    guestImage.addEventListener("error", () => {
+      guestImage.remove();
+      shown.guest = false;
+      retell();
     });
+    figure.appendChild(guestImage);
+  }
+
+  if (prop) {
     // 比率は card-layout.js から来る。CSSに数値を持たせると2か所を直すことになる。
-    // **style属性ではなく `style` プロパティで入れる。**index.html の CSP が
-    // `style-src 'self'` なので、style属性はブラウザに無視される（CSSOM は通る）。
-    propImage.style.width = percent(PROP_SIZE_RATIO);
-    propImage.style.right = `-${percent(PROP_OVERHANG_RATIO)}`;
+    const propImage = image("character-prop", prop, plan
+      ? place(plan.prop)
+      : { width: percent(PROP_SIZE_RATIO), right: `-${percent(PROP_OVERHANG_RATIO)}` });
     propImage.addEventListener("error", () => {
       propImage.remove();
-      // 小物が出せなかったので、説明からも外す。
-      figure.setAttribute("aria-label", altWith(false));
-      fallback.textContent = altWith(false);
+      shown.prop = false;
+      retell();
     });
     figure.appendChild(propImage);
   }
