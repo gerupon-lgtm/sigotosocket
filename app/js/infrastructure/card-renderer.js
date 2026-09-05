@@ -1,22 +1,21 @@
 import { appMeta } from "../config/app-meta.js";
 import { ScaleById } from "../data/scale-definitions.js";
+import { SCALE_ORDER } from "../data/scale-order.js";
 import { TypeById, UNDETERMINED_TEXT } from "../data/type-definitions.js";
 import { drawRadar } from "../presentation/radar-chart.js";
-import { resolveVisibilityAid, AID_LEVEL, DEFAULT_SUBJECT_TONES } from "../domain/visibility-aid.js";
+import { drawMark, roundedRectPath } from "../presentation/mark.js";
+import { CARD, LAYOUT, TEXT, verticalPlan, headerLockup } from "../presentation/card-layout.js";
+import { hollandCardLine } from "../domain/holland.js";
 
-export const CARD_SIZE = Object.freeze({ width: 1080, height: 1800 });
+export const CARD_SIZE = CARD;
 
-const PALETTE = Object.freeze({
-  background: "#f4f6fa",
-  ink: "#1b2a44",
-  sub: "#4a5b7a",
-  line: "#ccd6e4",
-});
+const SANS = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif';
+const MINCHO = '"Noto Serif CJK JP", "Hiragino Mincho ProN", "Yu Mincho", serif';
 
 /**
- * キャラクターアセット（ハリネズミのポーズ8種＋小物8点）は未制作。
- * 用意できていない場合は枠だけを描き、カード生成そのものは成立させる。
- * アセットは背景透過で書き出すこと（白背景のままだと地色の上に白い矩形が乗る）。
+ * キャラクターは背景透過で、**余白を切り落とした状態で配置する前提**。
+ * アセット側に透明余白が残っていると、指定サイズより小さく見える。
+ * 余白の除去はアセット生成の工程で行う（docs/brand/card-layout.md）。
  */
 async function loadImage(src) {
   if (typeof Image === "undefined") return null;
@@ -36,131 +35,197 @@ function containRect(image, x, y, w, h) {
   return { x: x + ((w - dw) / 2), y: y + ((h - dh) / 2), w: dw, h: dh };
 }
 
-/**
- * 地色にキャラクターが沈まないようにする視認性補助。
- * キャラクターを再配色せず、地色も差し替えない（ココロパレアの方針を踏襲）。
- * 判定は resolveVisibilityAid が決定的に行うので、プレビューと保存画像が食い違わない。
- */
-function drawSilhouette(ctx, image, rect, color, spread) {
-  // 画像を塗りつぶしたシルエットを、周囲8方向へずらして重ねる＝縁取り。
-  const offsets = [];
-  for (let dx = -1; dx <= 1; dx += 1) {
-    for (let dy = -1; dy <= 1; dy += 1) {
-      if (dx !== 0 || dy !== 0) offsets.push([dx * spread, dy * spread]);
-    }
-  }
-  ctx.save();
-  ctx.globalCompositeOperation = "source-over";
-  for (const [dx, dy] of offsets) {
-    ctx.save();
-    ctx.translate(rect.x + dx, rect.y + dy);
-    ctx.drawImage(image, 0, 0, rect.w, rect.h);
-    ctx.globalCompositeOperation = "source-atop";
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, rect.w, rect.h);
-    ctx.restore();
-  }
-  ctx.restore();
+function setFont(ctx, size, { family = SANS, weight = "normal" } = {}) {
+  ctx.font = `${weight === "normal" ? "" : `${weight} `}${size}px ${family}`;
 }
 
-function drawWithVisibilityAid(ctx, image, frame, aid) {
-  const rect = containRect(image, frame.x, frame.y, frame.w, frame.h);
-
-  if (aid.level === AID_LEVEL.PLATE && aid.plateColor) {
-    // 両側とも地色へ溶ける場合だけ、彩度を持たない中立のプレートを敷く。
-    const pad = 28;
-    ctx.save();
-    ctx.fillStyle = aid.plateColor;
-    ctx.beginPath();
-    const [px, py, pw, ph, r] = [rect.x - pad, rect.y - pad, rect.w + (pad * 2), rect.h + (pad * 2), 32];
-    ctx.moveTo(px + r, py);
-    ctx.arcTo(px + pw, py, px + pw, py + ph, r);
-    ctx.arcTo(px + pw, py + ph, px, py + ph, r);
-    ctx.arcTo(px, py + ph, px, py, r);
-    ctx.arcTo(px, py, px + pw, py, r);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+/** maxWidth に収まるまで1pxずつ縮める。称号は最長15字でも収まる想定だが、保険として持つ。 */
+function fitText(ctx, text, size, minSize, maxWidth, options) {
+  let current = size;
+  setFont(ctx, current, options);
+  while (current > minSize && ctx.measureText(text).width > maxWidth) {
+    current -= 1;
+    setFont(ctx, current, options);
   }
+  return current;
+}
 
-  if (aid.outline) {
-    // 明暗の二重。地色が明るくても暗くても、どちらかの線が輪郭を立てる。
-    drawSilhouette(ctx, image, rect, aid.outline.dark, 7);
-    drawSilhouette(ctx, image, rect, aid.outline.light, 4);
-  }
+/** 字間を広げて targetWidth に合わせる。measureText を1文字ずつ使う。 */
+function drawTracked(ctx, text, x, baseline, targetWidth) {
+  const chars = [...text];
+  const widths = chars.map((c) => ctx.measureText(c).width);
+  const natural = widths.reduce((sum, w) => sum + w, 0);
+  const tracking = chars.length > 1 ? Math.max(0, targetWidth - natural) / (chars.length - 1) : 0;
+  let cursor = x;
+  chars.forEach((c, i) => {
+    ctx.fillText(c, cursor, baseline);
+    cursor += widths[i] + tracking;
+  });
+}
 
+/**
+ * 小物が地色に沈まないようにする。**白のやわらかい暈し**を重ねる。
+ * 地色 #f4f6fa は白に近いため、白い縁は輪郭ではなく
+ * 「キャラクターと小物の間に隙間を作る」役割になる（要件定義書 §11-0）。
+ * ctx.filter は対応差があるため shadowBlur を重ねる方式にしている。
+ */
+function drawWithHalo(ctx, image, rect, { color, blur, passes }) {
   ctx.save();
-  if (aid.shadow) {
-    ctx.shadowColor = "rgba(27, 42, 68, 0.28)";
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetY = 8;
-  }
-  ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
+  ctx.shadowColor = color;
+  ctx.shadowBlur = blur;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  for (let i = 0; i < passes; i += 1) ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
   ctx.restore();
+  ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
+}
+
+function fillRounded(ctx, rect, fill, stroke) {
+  roundedRectPath(ctx, rect.x, rect.y, rect.w, rect.h, rect.r);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = rect.lineWidth ?? 1; ctx.stroke(); }
+}
+
+/** 上位2領域の位置。マークの点灯とレーダーの強調を同じ配列から導く（食い違い防止） */
+export function litIndexesFor(rank) {
+  if (!Array.isArray(rank)) return [];
+  return rank.slice(0, 2).map((id) => SCALE_ORDER.indexOf(id)).filter((i) => i >= 0);
 }
 
 export async function renderCard(canvas, snapshot) {
-  canvas.width = CARD_SIZE.width;
-  canvas.height = CARD_SIZE.height;
+  canvas.width = CARD.width;
+  canvas.height = CARD.height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("CARD_CONTEXT_UNAVAILABLE");
 
-  ctx.fillStyle = PALETTE.background;
-  ctx.fillRect(0, 0, CARD_SIZE.width, CARD_SIZE.height);
+  const L = LAYOUT, P = L.palette, plan = verticalPlan();
+  const CX = plan.centerX;
+
+  ctx.fillStyle = P.background;
+  ctx.fillRect(0, 0, CARD.width, CARD.height);
+
+  // 外枠（二重）
+  fillRounded(ctx, { ...L.frame.outer, lineWidth: L.frame.outer.lineWidth }, null, P.frameOuter);
+  fillRounded(ctx, { ...L.frame.inner, lineWidth: L.frame.inner.lineWidth }, null, P.frameInner);
+
+  // ヘッダー：マーク＋アプリ名＋副題を1つの塊として中央へ
+  const h = L.header;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  const lockup = headerLockup((text, size) => {
+    setFont(ctx, size, size === h.nameSize ? { weight: 600 } : {});
+    return [...text].reduce((sum, c) => sum + ctx.measureText(c).width, 0);
+  });
+  const { groupX, textX, nameWidth } = lockup;
+  setFont(ctx, h.nameSize, { weight: 600 });
+
+  drawMark(ctx, {
+    x: groupX, y: h.markTop, size: h.markSize,
+    litIndexes: litIndexesFor(snapshot.rank),
+  });
+  ctx.fillStyle = P.ink;
+  drawTracked(ctx, TEXT.appName, textX, h.nameBaseline, nameWidth);
+  setFont(ctx, h.subtitleSize);
+  ctx.fillStyle = P.sub;
+  ctx.fillText(TEXT.appSubtitle, textX, h.subtitleBaseline);
+
+  ctx.strokeStyle = P.line;
+  ctx.lineWidth = 2;
+  for (const [x1, x2] of [h.divider.left, h.divider.right]) {
+    ctx.beginPath();
+    ctx.moveTo(x1, h.divider.y);
+    ctx.lineTo(x2, h.divider.y);
+    ctx.stroke();
+  }
+  ctx.fillStyle = P.dot;
+  ctx.beginPath();
+  ctx.arc(CX, h.divider.y, h.divider.dotRadius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 称号
+  const t = L.title;
+  fillRounded(ctx, t.pill, P.surface, P.line);
+  ctx.textAlign = "center";
+  setFont(ctx, t.pillTextSize, { family: MINCHO });
+  ctx.fillStyle = P.ink;
+  ctx.fillText(TEXT.titlePill, CX, t.pillTextBaseline);
 
   const type = snapshot.primaryTypeId ? TypeById[snapshot.primaryTypeId] : null;
   const title = type ? type.name : UNDETERMINED_TEXT.name;
+  fitText(ctx, title, t.size, t.minSize, t.maxWidth, { family: MINCHO });
+  ctx.fillStyle = P.ink;
+  ctx.fillText(title, CX, t.baseline);
 
-  ctx.fillStyle = PALETTE.ink;
-  ctx.textAlign = "center";
-  ctx.font = "bold 62px system-ui, sans-serif";
-  ctx.fillText(title, CARD_SIZE.width / 2, 130);
+  setFont(ctx, t.neutralSize);
+  ctx.fillStyle = P.sub;
+  ctx.fillText(type ? type.subtitle : UNDETERMINED_TEXT.subtitle, CX, t.neutralBaseline);
 
-  ctx.font = "30px system-ui, sans-serif";
-  ctx.fillStyle = PALETTE.sub;
-  ctx.fillText("シゴトソケット", CARD_SIZE.width / 2, 186);
-
-  // キャラクター枠（ポーズ＝1位尺度、小物＝2位尺度）
-  const poseSrc = snapshot.poseScaleId ? `assets/characters/character-pose-${snapshot.poseScaleId}.webp` : null;
-  const propSrc = snapshot.propScaleId ? `assets/props/prop-${snapshot.propScaleId}.webp` : null;
-  const pose = poseSrc ? await loadImage(poseSrc) : null;
-  const prop = propSrc ? await loadImage(propSrc) : null;
-  const frame = { x: 240, y: 220, w: 600, h: 480 };
-  const aid = resolveVisibilityAid(PALETTE.background, DEFAULT_SUBJECT_TONES);
+  // キャラクター（ポーズ＝1位、小物＝2位）
+  const c = L.character;
+  const pose = snapshot.poseScaleId ? await loadImage(`assets/characters/character-pose-${snapshot.poseScaleId}.webp`) : null;
+  const prop = snapshot.propScaleId ? await loadImage(`assets/props/prop-${snapshot.propScaleId}.webp`) : null;
+  const charBox = { x: CX - c.size / 2, y: plan.charTop, w: c.size, h: c.size };
   if (pose) {
-    drawWithVisibilityAid(ctx, pose, frame, aid);
+    ctx.drawImage(pose, ...Object.values(containRect(pose, charBox.x, charBox.y, charBox.w, charBox.h)));
     if (prop) {
-      drawWithVisibilityAid(ctx, prop,
-        { x: frame.x + frame.w - 190, y: frame.y + frame.h - 190, w: 180, h: 180 }, aid);
+      const p = c.prop;
+      const propBox = containRect(prop,
+        charBox.x + charBox.w - p.size + p.offsetX, charBox.y + charBox.h - p.size, p.size, p.size);
+      drawWithHalo(ctx, prop, propBox, { color: p.haloColor, blur: p.haloBlur, passes: p.haloPasses });
     }
   } else {
-    ctx.strokeStyle = PALETTE.line;
+    ctx.strokeStyle = P.line;
     ctx.setLineDash([12, 10]);
     ctx.lineWidth = 3;
-    ctx.strokeRect(frame.x, frame.y, frame.w, frame.h);
+    ctx.strokeRect(charBox.x, charBox.y, charBox.w, charBox.h);
     ctx.setLineDash([]);
-    ctx.fillStyle = PALETTE.sub;
-    ctx.font = "28px system-ui, sans-serif";
-    ctx.fillText("キャラクター画像は準備中です", CARD_SIZE.width / 2, frame.y + (frame.h / 2));
+    ctx.fillStyle = P.sub;
+    setFont(ctx, 28);
+    ctx.fillText(TEXT.characterPending, CX, charBox.y + (charBox.h / 2));
   }
 
+  // レーダー（上位2領域はここでは強調しない。強調は下の行が担う）
+  const r = L.radar;
   drawRadar(ctx, snapshot.scaleScores, {
-    cx: CARD_SIZE.width / 2, cy: 960, radius: 190,
-    labelFont: "26px system-ui, sans-serif",
+    cx: CX, cy: plan.radarCenterY, radius: r.radius,
+    gridColor: r.gridColor, labelColor: r.labelColor,
+    fillColor: r.fillColor, strokeColor: r.strokeColor, strokeWidth: r.strokeWidth,
+    labelFont: `${r.labelSize}px ${SANS}`, labelGap: r.labelGap,
   });
 
-  // 上位2領域のバッジ（記号は第2フェーズ。MVPはテキスト）
+  // 上位2領域とホランド型（1つの塊）
+  const con = L.conclusion;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
   if (snapshot.rank) {
-    ctx.font = "30px system-ui, sans-serif";
-    ctx.fillStyle = PALETTE.ink;
-    const badges = snapshot.rank.slice(0, 2).map((id) => ScaleById[id].labelJa).join("　/　");
-    ctx.fillText(badges, CARD_SIZE.width / 2, 1230);
+    setFont(ctx, con.top2Size, { weight: con.top2Bold ? "bold" : "normal" });
+    ctx.fillStyle = P.ink;
+    ctx.fillText(snapshot.rank.slice(0, 2).map((id) => ScaleById[id].labelJa).join("　/　"), CX, plan.top2Baseline);
+  }
+  const holland = hollandCardLine(snapshot.rank);
+  if (holland) {
+    setFont(ctx, con.hollandSize);
+    ctx.fillStyle = P.sub;
+    ctx.fillText(holland, CX, plan.hollandBaseline);
   }
 
-  ctx.font = "22px system-ui, sans-serif";
-  ctx.fillStyle = PALETTE.sub;
-  ctx.fillText("ORVIS（IPIP収録・パブリックドメイン）に基づく参考ツールです", CARD_SIZE.width / 2, 1285);
-  ctx.fillText(`医学的・心理学的な診断ではありません　${appMeta.appVersion}`, CARD_SIZE.width / 2, 1318);
+  // plan.bandTop から高さ reservedBand.h は第2フェーズ用。MVPでは何も描かない。
 
-  return { canvas, aid };
+  const f = L.footer;
+  setFont(ctx, f.noteSize);
+  ctx.fillStyle = P.sub;
+  ctx.fillText(TEXT.note1, CX, f.note1Baseline);
+  ctx.fillText(TEXT.note2, CX, f.note2Baseline);
+  fillRounded(ctx, f.pill, P.surface, P.line);
+  setFont(ctx, f.pillTextSize, { family: MINCHO });
+  ctx.fillStyle = P.ink;
+  ctx.fillText(TEXT.footerPill, CX, f.pillTextBaseline);
+  ctx.save();
+  ctx.globalAlpha = f.versionAlpha;
+  setFont(ctx, f.versionSize);
+  ctx.fillStyle = P.sub;
+  ctx.fillText(appMeta.appVersion, CX, f.versionBaseline);
+  ctx.restore();
+
+  return { canvas };
 }

@@ -41,3 +41,39 @@ ${holes.join("\n")}
 </svg>
 `;
 }
+
+/** 角丸の矩形パス。ctx.roundRect の対応差を避けて自前で引く。 */
+function roundedRectPath(ctx, x, y, w, h, r) {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+/**
+ * マークを canvas へ描く。SVG版（buildMarkSvg）と同じ幾何を使う。
+ * @param {number[]} litIndexes 点灯させる口の番号。先頭が1位。
+ */
+export function drawMark(ctx, { x, y, size, litIndexes = [] }) {
+  const k = size / MARK.viewBox;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = MARK.tile;
+  roundedRectPath(ctx, 2 * k, 2 * k, (MARK.viewBox - 4) * k, (MARK.viewBox - 4) * k, MARK.corner * k);
+  ctx.fill();
+  for (let i = 0; i < 8; i += 1) {
+    const c = holeCenter(i);
+    const rank = litIndexes.indexOf(i);
+    ctx.fillStyle = rank >= 0 ? (MARK.lit[rank] ?? MARK.lit[MARK.lit.length - 1]) : MARK.unlit;
+    ctx.beginPath();
+    ctx.arc(c.x * k, c.y * k, MARK.holeRadius * k, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+export { roundedRectPath };

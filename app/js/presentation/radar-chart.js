@@ -14,6 +14,7 @@ export function drawRadar(ctx, scaleScores, options = {}) {
     labelColor = "#4a5b7a", gridColor = "#ccd6e4",
     fillColor = "rgba(47, 84, 134, 0.24)", strokeColor = "#2f5486",
     labelFont = "14px system-ui, sans-serif", showLabels = true,
+    labelGap = 22, strokeWidth = 2,
   } = options;
 
   const byId = new Map(scaleScores.map((score) => [score.scaleId, score]));
@@ -55,7 +56,7 @@ export function drawRadar(ctx, scaleScores, options = {}) {
   ctx.fillStyle = fillColor;
   ctx.fill();
   ctx.strokeStyle = strokeColor;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = strokeWidth;
   ctx.stroke();
 
   if (showLabels) {
@@ -65,7 +66,7 @@ export function drawRadar(ctx, scaleScores, options = {}) {
     ctx.textBaseline = "middle";
     SCALE_ORDER.forEach((scaleId, i) => {
       const a = angleFor(i);
-      const r = radius + 22;
+      const r = radius + labelGap;
       ctx.fillText(ScaleById[scaleId].labelJa, cx + (Math.cos(a) * r), cy + (Math.sin(a) * r));
     });
   }
