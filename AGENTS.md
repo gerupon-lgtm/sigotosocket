@@ -95,7 +95,7 @@ npm test              # node:test
 npm run items:build   # 項目CSV → app/js/data/item-master.js
 npm run items:check   # 項目マスタの整合検証（件数・尺度別内訳・重複・値域）
 npm run character:manifest
-npm run fonts:build      # 称号の明朝を必要な字だけに絞って同梱（要 node_modules）
+npm run fonts:subset      # 称号の明朝を必要な字だけに絞って同梱（要 node_modules）
 npm run version:check # 版数の同値検証
 npm run dev
 ```

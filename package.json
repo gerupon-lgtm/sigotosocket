@@ -16,7 +16,7 @@
     "character:manifest": "node scripts/characters/build-manifest.mjs",
     "character:check": "node scripts/characters/check-character-assets.mjs",
     "character:tones": "node scripts/characters/measure-tones.mjs",
-    "fonts:build": "node scripts/fonts/build-mincho-subset.mjs"
+    "fonts:subset": "node scripts/fonts/build-mincho-subset.mjs"
   },
   "devDependencies": {
     "sharp": "^0.35.3",

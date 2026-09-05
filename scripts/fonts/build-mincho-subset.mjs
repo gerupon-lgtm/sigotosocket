@@ -7,7 +7,7 @@ import { readCodepoints } from "./woff2-cmap.mjs";
 /**
  * 称号などを描く明朝を、必要な字だけのサブセットにして同梱する。
  *
- *   npm run fonts:build [元フォントのパス]
+ *   npm run fonts:subset [元フォントのパス]
  *
  * 元は Noto Serif JP（SIL OFL 1.1）。可変フォントなので wght=400 に固定してから
  * 切り出す。固定しないと gvar が残って倍近い大きさになる。
@@ -39,7 +39,7 @@ function resolveSource(argv) {
   if (found) return found;
   throw new Error(
     "元フォント（Noto Serif JP の可変フォント）が見つかりません。\n"
-    + "  npm run fonts:build <NotoSerifJP-VF.ttf のパス>\n"
+    + "  npm run fonts:subset <NotoSerifJP-VF.ttf のパス>\n"
     + `  探した場所: ${SOURCE_CANDIDATES.join(" / ")}`,
   );
 }

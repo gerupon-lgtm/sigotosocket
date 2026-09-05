@@ -1,6 +1,6 @@
 /* 称号などに使う明朝。Noto Serif JP を必要な161字だけに絞って同梱している（SIL OFL 1.1、
    出典は assets/fonts/OFL.txt）。字が足りない場合に豆腐を出さないよう、card-renderer.js の
-   MINCHO では後ろに端末の明朝を並べてある。文字を足したら npm run fonts:build を実行すること。 */
+   MINCHO では後ろに端末の明朝を並べてある。文字を足したら npm run fonts:subset を実行すること。 */
 @font-face {
   font-family: "Sigotosocket Mincho";
   src: url("../assets/fonts/sigotosocket-mincho.woff2") format("woff2");
