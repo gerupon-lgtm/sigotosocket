@@ -98,5 +98,5 @@ export function resolveVisibilityAid(backgroundColor, subjectTones) {
   });
 }
 
-/** むっくんの代表トーン【想定】。アセット制作後に manifest の実測値で置き換える。 */
-export const DEFAULT_SUBJECT_TONES = Object.freeze({ light: "#f2ead8", dark: "#6b563c" });
+/** むっくんの代表トーン。実アセット10枚から `npm run character:tones` で実測した値（2026-09-05）。 */
+export const DEFAULT_SUBJECT_TONES = Object.freeze({ light: "#efe0cc", dark: "#684a34" });

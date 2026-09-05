@@ -11,8 +11,8 @@ const W = 1080, H = Number(process.env.CARD_H ?? 1800), CX = W / 2;
 const BG = "#f4f6fa", INK = "#1b2a44", SUB = "#4a5b7a", LINE = "#ccd6e4";
 const SANS = 'system-ui, "Noto Sans CJK JP", "Hiragino Sans", sans-serif';
 const MINCHO = '"Noto Serif CJK JP", "Hiragino Mincho ProN", serif';
-const POSE = "../image/hedgehog_current_10/character-pose-analysis.png";
-const PROP = "../image/hedgehog_props8_final/prop-production.png";
+const POSE = process.env.POSE ?? "app/assets/characters/character-pose-analysis.webp";
+const PROP = process.env.PROP ?? "app/assets/props/prop-production.webp";
 
 // 確定済みの縦位置
 const Y = { icon: 61.9, name: 111.9, sub: 148.4, deco: 167.9, pillTop: 192.2, pillText: 227.3, title: 305.6, neutral: 350.1 };
@@ -168,9 +168,9 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   ${t(CX, Y.version, "v0.1.0", 13, SUB, { opacity: 0.72 })}
 </svg>`;
 
-const pose = await sharp(POSE).trim({ threshold: 1 }).resize(CHAR_SIZE, CHAR_SIZE, { fit: "inside" }).png().toBuffer();
+const pose = await sharp(POSE).resize(CHAR_SIZE, CHAR_SIZE, { fit: "inside" }).png().toBuffer();
 const propSize = process.env.PROP_PX ? Number(process.env.PROP_PX) : Math.round(CHAR_SIZE * Number(process.env.PROP_RATIO ?? 0.32));
-const prop = await sharp(PROP).trim({ threshold: 1 }).resize(propSize, propSize, { fit: "inside" }).png().toBuffer();
+const prop = await sharp(PROP).resize(propSize, propSize, { fit: "inside" }).png().toBuffer();
 
 const pt = await tones(POSE);
 const aid = resolveVisibilityAid(BG, { light: pt.light, dark: pt.dark });

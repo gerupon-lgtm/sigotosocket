@@ -12,6 +12,7 @@
     "items:check": "node scripts/items/check-items.mjs",
     "version:check": "node scripts/version/check-version.mjs",
     "character:alpha": "node scripts/characters/alpha-from-white.mjs",
+    "character:build": "node scripts/characters/build-character-assets.mjs",
     "character:check": "node scripts/characters/check-character-assets.mjs",
     "character:tones": "node scripts/characters/measure-tones.mjs"
   },
