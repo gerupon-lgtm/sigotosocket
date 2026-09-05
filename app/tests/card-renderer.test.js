@@ -269,3 +269,39 @@ test("猫とむっくんは重ならない（実体の矩形どうしを離し�
   assert.ok(g.gap >= 0, `間隔が負だと重なる: ${g.gap}`);
   assert.ok(g.lift > 0, "接地線を上げないと奥行きが出ない");
 });
+
+/* ---- F-020 相手の因子バッジ ---- */
+
+test("連携済みなら、相手の因子バッジをカードに描く（F-020）", async () => {
+  const { parseBigFiveCode } = await import("../js/domain/big-five-link.js");
+  const c = stubCanvas();
+  // 協調性4.2（高）／情緒安定性1.8（低）
+  const link = parseBigFiveCode("v1-300300300420180");
+  const snapshot = { ...snapshotFor(answersWith((_, i) => (i % 5) + 1)), bigFive: link };
+  await renderCard(c.canvas, snapshot);
+  const text = c.texts.join("|");
+  assert.ok(text.includes("ココロパレアの結果"), `見出しが無い: ${text}`);
+  assert.ok(text.includes("協調性"), "高い因子が出ていない");
+  assert.ok(text.includes("情緒安定性"), "低い因子が出ていない");
+});
+
+test("未連携ならバッジを描かない", async () => {
+  const c = stubCanvas();
+  const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
+  await renderCard(c.canvas, snapshot);
+  assert.ok(!c.texts.join("|").includes("ココロパレアの結果"), "未連携なのにバッジが出ている");
+});
+
+test("バッジは確保した帯の中に収める（下の注記に食い込まない）", async () => {
+  const { LAYOUT, verticalPlan } = await import("../js/presentation/card-layout.js");
+  const plan = verticalPlan();
+  const band = LAYOUT.reservedBand;
+  assert.ok(band.badge, "バッジの座標が card-layout.js に無い");
+  // badge の y は bandTop からの相対。絶対位置に直してから帯と比べる
+  const top = plan.bandTop;
+  const bottom = top + band.h;
+  const labelY = top + band.badge.labelBaseline;
+  const pillBottom = top + band.badge.pillTop + band.badge.pillHeight;
+  assert.ok(labelY > top && labelY < bottom, `見出しが帯の外: ${labelY}`);
+  assert.ok(pillBottom <= bottom, `ピルが帯の下へはみ出す: ${pillBottom} > ${bottom}`);
+});

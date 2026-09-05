@@ -6,6 +6,7 @@ import { drawRadar } from "../presentation/radar-chart.js";
 import { drawMark, roundedRectPath } from "../presentation/mark.js";
 import { CARD, LAYOUT, TEXT, verticalPlan, headerLockup } from "../presentation/card-layout.js";
 import { hollandCardLine } from "../domain/holland.js";
+import { partnerBadges, badgeText } from "../domain/partner-badges.js";
 import { poseFor, propFor, guestFor } from "../data/character-manifest.js";
 
 export const CARD_SIZE = CARD;
@@ -162,6 +163,43 @@ function drawGuestGroup(ctx, { pose, poseBody, prop, propBody, guest, guestBody,
   }
 }
 
+/**
+ * 相手（ココロパレア）の因子バッジ。**称号を作り直さず、渡された数値が
+ * そのまま言えることだけを言う**（partner-badges.js）。
+ */
+function drawPartnerBadges(ctx, snapshot, plan, CX) {
+  const badges = partnerBadges(snapshot.bigFive);
+  if (!badges) return;
+
+  const b = LAYOUT.reservedBand.badge;
+  const P = LAYOUT.palette;
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  setFont(ctx, b.labelSize);
+  ctx.fillStyle = P.sub;
+  ctx.fillText(badges.heading, CX, plan.bandTop + b.labelBaseline);
+
+  // ピルの幅は中の文字から決める。文字数が違っても左右の余白が揃う
+  setFont(ctx, b.textSize, { weight: 600 });
+  const pills = badges.items.map((item) => {
+    const text = badgeText(item);
+    return { text, w: ctx.measureText(text).width + b.padding * 2 };
+  });
+
+  const total = pills.reduce((sum, pill) => sum + pill.w, 0) + b.pillGap * (pills.length - 1);
+  let x = CX - total / 2;
+  const top = plan.bandTop + b.pillTop;
+
+  for (const pill of pills) {
+    fillRounded(ctx, { x, y: top, w: pill.w, h: b.pillHeight, r: b.pillRadius }, P.surface, P.line);
+    ctx.fillStyle = P.ink;
+    setFont(ctx, b.textSize, { weight: 600 });
+    ctx.fillText(pill.text, x + pill.w / 2, top + b.pillHeight / 2 + b.textSize * 0.36);
+    x += pill.w + b.pillGap;
+  }
+}
+
 export async function renderCard(canvas, snapshot) {
   await ensureMinchoLoaded();
 
@@ -295,7 +333,8 @@ export async function renderCard(canvas, snapshot) {
     ctx.fillText(holland, CX, plan.hollandBaseline);
   }
 
-  // plan.bandTop から高さ reservedBand.h は第2フェーズ用。MVPでは何も描かない。
+  // 確保しておいた帯に、相手の因子バッジを描く（F-020）。未連携なら何も描かない。
+  drawPartnerBadges(ctx, snapshot, plan, CX);
 
   const f = L.footer;
   setFont(ctx, f.noteSize);

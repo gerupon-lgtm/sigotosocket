@@ -21,10 +21,10 @@ import { LAYOUT } from "../js/presentation/card-layout.js";
 const answers = Object.fromEntries(ItemMaster.map((it, i) => [it.id, ((i * 3) % 5) + 1]));
 const std = standardize(scoreScales({ items: ItemMaster, answers }));
 const base = createResultSnapshot({ standardized: std, classification: classify(std) });
-const link = parseBigFiveCode("v1-342288401195267");
 
 const q = new URLSearchParams(location.search);
 document.documentElement.style.setProperty("--w", (q.get("w") ?? "360") + "px");
+const link = parseBigFiveCode(q.get("code") ?? "v1-342288401195267");
 const only = q.get("linked");
 const typeOverride = q.get("type");   // 称号を差し替えて長さの検証に使う
 const pairs = only === "1" ? [[attachBigFive(base, link), "連携あり"]]

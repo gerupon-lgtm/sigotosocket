@@ -122,8 +122,21 @@ export const LAYOUT = Object.freeze({
     gapAbove: 60,
   }),
 
-  /** 第2フェーズのバッジ・相手称号名のために空けてある。MVPでは何も描かない */
-  reservedBand: Object.freeze({ x: 140, w: 800, h: 100 }),
+  /** 相手の因子バッジ（F-020）と、将来の相手称号名（F-021）の帯。未連携なら何も描かない */
+  reservedBand: Object.freeze({
+    x: 140, w: 800, h: 100,
+    // 相手の因子バッジ（F-020）。帯の中に収める。y は verticalPlan の bandTop からの相対
+    badge: Object.freeze({
+      labelSize: 20,
+      labelBaseline: 24,     // bandTop からの相対
+      pillTop: 38,           // 同上
+      pillHeight: 52,
+      pillRadius: 26,
+      pillGap: 16,
+      textSize: 26,
+      padding: 26,           // ピルの左右の余白
+    }),
+  }),
 
   footer: Object.freeze({
     noteSize: 15,
