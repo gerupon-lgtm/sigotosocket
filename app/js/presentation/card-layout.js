@@ -31,9 +31,11 @@ const B = (key) => H - FROM_BOTTOM[key];
 /**
  * ヘッダー〜称号の塊を、確定値からさらに下へずらす量。
  * 上の枠との間隔が詰まって見えるため（2026-09-05 本人指摘）。
+ * いったん18で組み、実物を見て10px上げて8に確定した（同日）。
+ * これで内枠からの空き41.9px／中立副題からキャラクターまで61.9pxになる。
  * **個々のyを書き換えず、ここ1か所で動かす。**
  */
-const HEADER_DROP = 18;
+const HEADER_DROP = -11.9;
 
 export const LAYOUT = Object.freeze({
   palette: Object.freeze({
@@ -70,8 +72,8 @@ export const LAYOUT = Object.freeze({
     pillTextSize: 27,
     pillTextBaseline: 227.3 + HEADER_DROP,
     baseline: 305.6 + HEADER_DROP,
-    size: 47,          // 比率90%（52 × 0.9）
-    minSize: 34,       // 自動縮小の下限
+    size: 52,          // ココロパレアと同値。1350時代の比率90%は前提が消えた（card-layout.md）
+    minSize: 38,       // 自動縮小の下限。ココロパレアと同値
     maxWidth: 890,
     neutralSize: 29,
     neutralBaseline: 350.1 + HEADER_DROP,
