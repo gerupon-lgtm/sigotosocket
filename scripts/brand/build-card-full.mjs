@@ -76,7 +76,7 @@ function barsSvg(top) {
     const cy = top + i * BAR_PITCH + BAR_PITCH / 2;
     const lit = LIT_IDS.includes(id);
     const v = Math.min(1, Math.max(0.06, 0.5 + SCORES[id] / 4));
-    g.push(t(labelRight, cy + 9, ScaleById[id].labelJa, 26, lit ? INK : SUB, { anchor: "end", weight: lit ? "bold" : "normal" }));
+    g.push(t(labelRight, cy + 9, ScaleById[id].labelJa, 26, lit ? INK : GSTYLE.label, { anchor: "end", weight: lit ? "bold" : "normal" }));
     g.push(`<rect x="${trackX}" y="${(cy - barH / 2).toFixed(1)}" width="${trackW}" height="${barH}" rx="${barH / 2}" fill="${LINE}"/>`);
     g.push(`<rect x="${trackX}" y="${(cy - barH / 2).toFixed(1)}" width="${(trackW * v).toFixed(1)}" height="${barH}" rx="${barH / 2}" fill="${lit ? "#2f5486" : "#93a8c6"}"/>`);
   });
@@ -90,14 +90,15 @@ function radarSvg(cy, R) {
   const g = [];
   for (let ring = 1; ring <= 4; ring += 1) {
     const rr = (R * ring) / 4;
-    g.push(`<polygon points="${[...Array(8)].map((_, i) => `${(CX + Math.cos(ang(i)) * rr).toFixed(1)},${(cy + Math.sin(ang(i)) * rr).toFixed(1)}`).join(" ")}" fill="none" stroke="${LINE}"/>`);
+    const outer = ring === 4;
+    g.push(`<polygon points="${[...Array(8)].map((_, i) => `${(CX + Math.cos(ang(i)) * rr).toFixed(1)},${(cy + Math.sin(ang(i)) * rr).toFixed(1)}`).join(" ")}" fill="none" stroke="${outer ? GSTYLE.outer : GSTYLE.grid}" stroke-width="${outer ? GSTYLE.ow : 1}"/>`);
   }
-  for (let i = 0; i < 8; i += 1) g.push(`<line x1="${CX}" y1="${cy}" x2="${(CX + Math.cos(ang(i)) * R).toFixed(1)}" y2="${(cy + Math.sin(ang(i)) * R).toFixed(1)}" stroke="${LINE}"/>`);
+  for (let i = 0; i < 8; i += 1) g.push(`<line x1="${CX}" y1="${cy}" x2="${(CX + Math.cos(ang(i)) * R).toFixed(1)}" y2="${(cy + Math.sin(ang(i)) * R).toFixed(1)}" stroke="${RSTYLE.grid}"/>`);
   const pts = SCALE_ORDER.map((id, i) => { const rr = R * (0.5 + SCORES[id] / 4); return `${(CX + Math.cos(ang(i)) * rr).toFixed(1)},${(cy + Math.sin(ang(i)) * rr).toFixed(1)}`; });
-  g.push(`<polygon points="${pts.join(" ")}" fill="rgba(47,84,134,0.24)" stroke="#2f5486" stroke-width="3"/>`);
+  g.push(`<polygon points="${pts.join(" ")}" fill="${RSTYLE.fill}" stroke="${RSTYLE.stroke}" stroke-width="${RSTYLE.sw}"/>`);
   SCALE_ORDER.forEach((id, i) => {
     const rr = R + 34, lit = ["analysis", "production"].includes(id);
-    g.push(t((CX + Math.cos(ang(i)) * rr).toFixed(1), (cy + Math.sin(ang(i)) * rr + 9).toFixed(1), ScaleById[id].labelJa, 26, lit ? INK : SUB, { weight: lit ? "bold" : "normal" }));
+    g.push(t((CX + Math.cos(ang(i)) * rr).toFixed(1), (cy + Math.sin(ang(i)) * rr + 9).toFixed(1), ScaleById[id].labelJa, 26, lit ? INK : GSTYLE.label, { weight: (lit && process.env.RADAR_BOLD !== "0") ? "bold" : "normal" }));
   });
   return g.join("");
 }
@@ -108,6 +109,23 @@ const radarH = chartH;
 const stack = CHAR_SIZE + (radarH ? 40 + radarH : 0);
 const charTop = Math.round(MID.top + Number(process.env.TOP_GAP ?? 55));
 const RADAR_DOWN = Number(process.env.RADAR_DOWN ?? 0);
+const RSTYLE = {
+  a: { grid: "#ccd6e4", fill: "rgba(47,84,134,0.24)", stroke: "#2f5486", sw: 3 },
+  b: { grid: "#bcc9db", fill: "rgba(47,84,134,0.38)", stroke: "#2f5486", sw: 4 },
+  c: { grid: "#b3c2d6", fill: "rgba(31,58,95,0.50)",  stroke: "#1f3a5f", sw: 4 },
+  d: { grid: "#ccd6e4", fill: "rgba(223,127,104,0.30)", stroke: "#C2604A", sw: 4 },
+  e: { grid: "#c3d0e0", fill: "rgba(240,176,108,0.42)", stroke: "#DF7F68", sw: 4 },
+}[process.env.RSTYLE ?? "a"];
+// 枠とラベルの見え方（grid=内側の目盛、outer=一番外の八角形、label=上位以外のラベル）
+const GSTYLE = {
+  a: { grid: "#ccd6e4", outer: "#ccd6e4", ow: 1, label: "#4a5b7a" },
+  b: { grid: "#a9b9cf", outer: "#a9b9cf", ow: 1, label: "#4a5b7a" },
+  c: { grid: "#ccd6e4", outer: "#8fa3bf", ow: 2, label: "#3d4f6d" },
+  d: { grid: "#a9b9cf", outer: "#7f93b0", ow: 2.5, label: "#33445e" },
+  e: { grid: "#9aabc4", outer: "#9aabc4", ow: 1, label: "#4a5b7a" },
+  f: { grid: "#8fa3bf", outer: "#8fa3bf", ow: 1, label: "#4a5b7a" },
+  g: { grid: "#8398b7", outer: "#8398b7", ow: 1, label: "#4a5b7a" },
+}[process.env.GSTYLE ?? "a"];
 const chartTop = MID.bottom + RADAR_DOWN - chartH;
 const radarCy = chartTop + radarH / 2;
 const charGap = chartTop - (charTop + CHAR_SIZE);
@@ -129,7 +147,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   <rect width="${W}" height="${H}" fill="${BG}"/>
   <rect x="18" y="18" width="1044" height="${H-36}" rx="46" fill="none" stroke="${INK}" stroke-opacity="0.22" stroke-width="3"/>
   <rect x="28" y="28" width="1024" height="${H-56}" rx="38" fill="none" stroke="${INK}" stroke-opacity="0.12" stroke-width="2"/>
-  ${markSvg(groupX, Y.icon, 94, [7,0])}
+  ${markSvg(groupX, Y.icon, 94, LIT_IDS.map((id) => SCALE_ORDER.indexOf(id)))}
   ${t(textX, Y.name, NAME, 48, INK, { weight:"600", anchor:"start" })}
   ${t(textX, Y.sub, SUBTITLE, 23, SUB, { anchor:"start" })}
   <line x1="300" y1="${Y.deco}" x2="488" y2="${Y.deco}" stroke="${LINE}" stroke-width="2"/>
@@ -138,10 +156,10 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   <rect x="${(W-344)/2}" y="${Y.pillTop}" width="344" height="52" rx="26" fill="#ffffff" fill-opacity="0.9" stroke="${LINE}"/>
   ${t(CX, Y.pillText, "あなたの称号", 27, INK, { font: MINCHO })}
   ${t(CX, Y.title, type.name, ts, INK, { font: MINCHO })}
-  ${t(CX, Y.neutral, type.subtitle, 26, SUB)}
+  ${t(CX, Y.neutral, type.subtitle, Number(process.env.NEUTRAL ?? 26), SUB)}
   ${frameSvg()}
   ${CHART === "bars" ? barsSvg(chartTop) : (RADAR_R > 0 ? radarSvg(radarCy, RADAR_R) : "")}
-  ${t(CX, Y.top2, "探究　/　手仕事", 30, INK)}
+  ${t(CX, Y.top2, "探究　/　手仕事", 30, INK, { weight: process.env.TOP2_BOLD === "1" ? "bold" : "normal" })}
   ${t(CX, Y.holland, "ホランド型：研究的（Investigative）", 26, SUB)}
   ${t(CX, Y.note1, "ORVIS（IPIP収録・パブリックドメイン）に基づく参考ツールです", 15, SUB)}
   ${t(CX, Y.note2, "医学的・心理学的な診断ではありません", 15, SUB)}
@@ -151,7 +169,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
 </svg>`;
 
 const pose = await sharp(POSE).trim({ threshold: 1 }).resize(CHAR_SIZE, CHAR_SIZE, { fit: "inside" }).png().toBuffer();
-const propSize = Math.round(CHAR_SIZE * Number(process.env.PROP_RATIO ?? 0.32));
+const propSize = process.env.PROP_PX ? Number(process.env.PROP_PX) : Math.round(CHAR_SIZE * Number(process.env.PROP_RATIO ?? 0.32));
 const prop = await sharp(PROP).trim({ threshold: 1 }).resize(propSize, propSize, { fit: "inside" }).png().toBuffer();
 
 const pt = await tones(POSE);

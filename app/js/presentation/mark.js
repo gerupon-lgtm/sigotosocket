@@ -7,7 +7,8 @@ export const MARK = Object.freeze({
   viewBox: 120,
   tile: "#1f3a5f",
   unlit: "#f4ecdd",
-  lit: Object.freeze(["#F0B06C", "#DF7F68"]),
+  // 先頭が1位。赤みの強い側（R−G が大きい側）を1位に置く。
+  lit: Object.freeze(["#DF7F68", "#F0B06C"]),
   ringRadius: 33,
   holeRadius: 11,
   corner: 28,
