@@ -223,6 +223,59 @@ test("結果画面にトップへ戻るがある（ココロパレアと同じ�
   assert.equal(home, 1);
 });
 
+test("トップの本文は白いパネルに載る（ココロパレア踏襲）", () => {
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  const panel = node.querySelectorAll(".panel")[0];
+  assert.ok(panel, "パネルが無い");
+  assert.ok(panel.querySelectorAll(".screen-kicker").length === 1, "見出しがパネルの中にない");
+  assert.ok(panel.textContent.includes("はじめる"));
+});
+
+test("ツール説明のパネルは閉じた状態で置く", () => {
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  const intro = node.querySelectorAll(".tool-intro")[0];
+  assert.ok(intro, "説明パネルが無い");
+  assert.equal(intro.tagName, "DETAILS");
+  assert.equal(intro.getAttribute("open"), null, "既定で開いている");
+  assert.equal(intro.querySelectorAll("summary").length, 1);
+});
+
+test("説明パネルは3つの話題を持つ（ツール・連携・むっくん）", () => {
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  const text = node.querySelectorAll(".tool-intro")[0].textContent;
+  assert.ok(text.includes("ORVIS"), "ツールの説明が無い");
+  assert.ok(text.includes("ココロパレア"), "連携の説明が無い");
+  assert.ok(text.includes("むっくん"), "キャラクターの紹介が無い");
+  assert.ok(text.includes("ビッグファイブ"), "連携相手が何かの説明が無い");
+});
+
+test("説明パネルは禁止語を含まず、職業も示さない", () => {
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  const text = node.querySelectorAll(".tool-intro")[0].textContent;
+  for (const phrase of ["平均より", "人より", "多数派", "少数派", "苦手", "向いていない"]) {
+    assert.ok(!text.includes(phrase), `禁止語「${phrase}」`);
+  }
+  for (const word of ["適職", "向いている職業", "天職"]) {
+    assert.ok(!text.includes(word), `「${word}」が含まれる`);
+  }
+});
+
 test("出典・免責画面に同梱フォントの出典がある（SIL OFL 1.1）", () => {
   const text = renderAboutScreen({ onBack() {}, onClearAll() {} }).textContent;
   assert.ok(text.includes("Noto Serif JP"), "元フォント名が無い");

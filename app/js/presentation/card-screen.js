@@ -46,9 +46,7 @@ export function renderCardScreen({ snapshot, onBack, onHome, shareUrl }) {
   const section = el("section", { class: "screen card" }, [
     appHeader({ action: { label: "結果へ戻る", onClick: onBack } }),
     screenHeading({ kicker: "RESULT CARD", title: "結果カード" }),
-    holder,
-    status,
-    actions,
+    el("div", { class: "panel" }, [holder, status, actions]),
     share,
     el("div", { class: "actions" }, [
       el("button", { class: "secondary", type: "button", onClick: onBack }, "結果へ戻る"),

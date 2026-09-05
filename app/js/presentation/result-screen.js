@@ -65,11 +65,13 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
   return el("section", { class: "screen result" }, [
     appHeader({ action: { label: "トップへ戻る", onClick: onHome } }),
     screenHeading({ kicker: "DETAIL RESULT", title: "45問の詳細結果" }),
-    el("p", { class: "title-label", text: "あなたの称号" }),
-    el("h2", { class: "type-name", text: text.title }),
-    el("p", { class: "type-subtitle", text: text.subtitle }),
-    el("p", { class: "meta", text: formatDateTime(snapshot.createdAt) }),
-    radarBlock(snapshot.scaleScores),
+    el("div", { class: "panel" }, [
+      el("p", { class: "title-label", text: "あなたの称号" }),
+      el("h2", { class: "type-name", text: text.title }),
+      el("p", { class: "type-subtitle", text: text.subtitle }),
+      el("p", { class: "meta", text: formatDateTime(snapshot.createdAt) }),
+      radarBlock(snapshot.scaleScores),
+    ]),
     el("div", { class: "prose" }, text.reason.map((p) => el("p", { text: p }))),
     ...(observations.length > 0 ? [el("h2", { text: "回答から見えたこと" }), ...observations] : []),
     // 順位が無い（判定不能）ときは空配列が返り、節ごと出ない。

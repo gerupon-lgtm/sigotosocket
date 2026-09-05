@@ -4,6 +4,57 @@ import { screenHeading } from "./screen-heading.js";
 import { TOTAL_ITEM_COUNT, answeredCount } from "../domain/response-state.js";
 import { STORAGE_STATUS } from "../infrastructure/progress-storage.js";
 
+
+/**
+ * 閉じたまま置く説明パネル。開いた人にだけ読ませる（ココロパレアの
+ * `.start-introduction` と同じ作り）。トップの本筋は「はじめる」であって、
+ * 説明で埋めない。
+ *
+ * 文言の約束（変更禁止事項2・6）:
+ * - 他人との比較を書かない
+ * - 職業を挙げない。むっくんの説明も「道具と所作」にとどめる
+ */
+function toolIntro() {
+  const topic = (title, lines) => el("div", { class: "intro-topic" }, [
+    el("h2", { class: "intro-topic-title", text: title }),
+    ...lines.map((line) => el("p", { text: line })),
+  ]);
+
+  return el("details", { class: "tool-intro" }, [
+    el("summary", {}, [
+      el("span", { class: "intro-summary-mark", "aria-hidden": "true", text: "？" }),
+      el("span", { class: "intro-summary-copy" }, [
+        el("span", { text: "このツールのこと。" }),
+        el("br"),
+        el("span", { text: "連携でできること。" }),
+        el("br"),
+        el("span", { text: "むっくんのこと。" }),
+      ]),
+    ]),
+    el("div", { class: "intro-body" }, [
+      topic("このツールについて", [
+        "ORVIS（職業興味の尺度）の日本語短縮版45問から、8つの領域への関心を見ます。"
+        + "出るのは「あなたの中でどの領域が高いか」で、ほかの人と比べた順位ではありません。",
+        "回答と結果はこの端末のブラウザにだけ残り、サーバーへは送りません。",
+      ]),
+      topic("ココロパレアと連携すると", [
+        "ココロパレアは、ビッグファイブ（IPIP日本語50項目版）で性格の傾向を見る姉妹アプリです。",
+        "あちらの結果をこちらへ渡すと、「性格からは予測できない興味」が結果に加わります。"
+        + "手仕事と挑戦の2領域はビッグファイブとほとんど関係が見られないため、"
+        + "そこが上位に来た人は、性格の型からは説明されない関心を持っていることになります。",
+        "渡すのは5つの数値だけです。回答そのものは行き来しません。",
+        "※ 受け渡しの導線は準備中です。",
+      ]),
+      topic("むっくんについて", [
+        "案内役のハリネズミです。8つの領域を、道具と所作の違いで見せ分けます。",
+        "職業の恰好はさせません。「やってみたいこと」は仕事の名前ではなく、"
+        + "手の動かし方や向き合い方として描いています。",
+        "ココロパレアの猫とは、どちらが上ということのない並びで登場します。",
+      ]),
+    ]),
+  ]);
+}
+
 export function renderStartScreen({ progressState, latestResult, storageStatus, onStart, onResume, onShowResult, onAbout }) {
   const hasProgress = progressState && answeredCount(progressState) > 0;
   const actions = [
@@ -29,11 +80,14 @@ export function renderStartScreen({ progressState, latestResult, storageStatus, 
 
   return el("section", { class: "screen start" }, [
     appHeader({}),
-    screenHeading({ kicker: "INTEREST CHECK", title: "やってみたいことのかたちを見る" }),
-    el("p", { class: "lead", text: "8つの領域から、あなたが「やってみたい」と感じる方向を見つけます。" }),
-    el("p", { class: "meta", text: `全${TOTAL_ITEM_COUNT}問・所要およそ5分` }),
-    ...notices,
-    el("div", { class: "actions" }, actions),
+    el("div", { class: "panel" }, [
+      screenHeading({ kicker: "INTEREST CHECK", title: "やってみたいことのかたちを見る" }),
+      el("p", { class: "lead", text: "8つの領域から、あなたが「やってみたい」と感じる方向を見つけます。" }),
+      el("p", { class: "meta", text: `全${TOTAL_ITEM_COUNT}問・所要およそ5分` }),
+      ...notices,
+      el("div", { class: "actions" }, actions),
+    ]),
+    toolIntro(),
     el("p", { class: "disclaimer" }, [
       "この診断は医学的・心理学的な検査ではありません。結果は自己理解の手がかりとしてお使いください。",
       el("br"),
