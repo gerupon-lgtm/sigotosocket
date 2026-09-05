@@ -149,6 +149,26 @@ test("連携済みでも対象の領域が上位でなければ出さない", as
   assert.ok(!text.includes("予測できるものではありません"));
 });
 
+test("未連携で対象が上位なら、連携の予告を出す（F-014）", () => {
+  const snapshot = snapshotFor(answersByScale({ production: 5, adventure: 4 }));
+  const text = renderResultScreen({
+    snapshot, bigFive: null, onCard() {}, onRestart() {}, onAbout() {},
+  }).textContent;
+  assert.ok(text.includes("連携すると"), "予告が出ていない");
+  assert.ok(text.includes("手仕事"), "本人の領域名が入っていない");
+});
+
+test("連携済みなら予告は消え、本文に入れ替わる", async () => {
+  const { parseBigFiveCode } = await import("../js/domain/big-five-link.js");
+  const snapshot = snapshotFor(answersByScale({ production: 5, adventure: 4 }));
+  const text = renderResultScreen({
+    snapshot, bigFive: parseBigFiveCode("v1-342288401195267"),
+    onCard() {}, onRestart() {}, onAbout() {},
+  }).textContent;
+  assert.ok(!text.includes("連携すると"), "連携済みなのに予告が残っている");
+  assert.ok(text.includes("予測できるものではありません"), "本文が出ていない");
+});
+
 test("出典・免責画面に同梱フォントの出典がある（SIL OFL 1.1）", () => {
   const text = renderAboutScreen({ onBack() {}, onClearAll() {} }).textContent;
   assert.ok(text.includes("Noto Serif JP"), "元フォント名が無い");
