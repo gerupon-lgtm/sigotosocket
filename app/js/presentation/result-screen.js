@@ -3,6 +3,7 @@ import { drawRadar, radarTextFallback } from "./radar-chart.js";
 import { ScaleById } from "../data/scale-definitions.js";
 import { composeResultText } from "../domain/result-composer.js";
 import { hollandResultLines } from "../domain/holland.js";
+import { uniqueInterest } from "../domain/cross-analysis.js";
 
 function radarBlock(scaleScores) {
   const wrap = el("div", { class: "radar-wrap" });
@@ -40,7 +41,7 @@ function scoreTable(scaleScores, rank) {
   ]);
 }
 
-export function renderResultScreen({ snapshot, onCard, onRestart, onAbout }) {
+export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart, onAbout }) {
   const text = composeResultText({
     standardizable: snapshot.standardizable,
     rank: snapshot.rank,
@@ -49,6 +50,8 @@ export function renderResultScreen({ snapshot, onCard, onRestart, onAbout }) {
   });
 
   const holland = hollandResultLines(snapshot.rank);
+  // ③固有性（F-013）。連携していない・該当が無いときは null が返り、節ごと出ない。
+  const unique = uniqueInterest({ rank: snapshot.rank, bigFive });
 
   const observations = text.observations.map((entry) => el("div", { class: "observation" }, [
     el("p", { class: "observation-head", text: `${entry.position}：${entry.label}` }),
@@ -67,6 +70,10 @@ export function renderResultScreen({ snapshot, onCard, onRestart, onAbout }) {
     ...(holland.length > 0
       ? [el("h2", { text: "ホランド型" }),
          el("div", { class: "prose holland" }, holland.map((line) => el("p", { text: line })))]
+      : []),
+    ...(unique
+      ? [el("h2", { text: "性格からは予測できない興味" }),
+         el("div", { class: "prose unique-interest" }, unique.lines.map((line) => el("p", { text: line })))]
       : []),
     el("h2", { text: "8つの領域の点数" }),
     scoreTable(snapshot.scaleScores, snapshot.rank),

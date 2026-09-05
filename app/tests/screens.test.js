@@ -117,6 +117,38 @@ test("判定不能ならホランド型の節を出さない", () => {
   assert.ok(!text.includes("ホランド"), "順位が無いのにホランド型が出ている");
 });
 
+test("連携済みで手仕事・挑戦が上位なら、結果画面に固有の興味が出る（F-013）", async () => {
+  const { parseBigFiveCode } = await import("../js/domain/big-five-link.js");
+  const snapshot = snapshotFor(answersByScale({ production: 5, adventure: 4 }));
+  assert.deepEqual(snapshot.rank.slice(0, 2), ["production", "adventure"]);
+  const node = renderResultScreen({
+    snapshot, bigFive: parseBigFiveCode("v1-342288401195267"),
+    onCard() {}, onRestart() {}, onAbout() {},
+  });
+  const text = node.textContent;
+  assert.ok(text.includes("手仕事") && text.includes("挑戦"));
+  assert.ok(text.includes("予測できるものではありません"), "③の根拠が出ていない");
+});
+
+test("連携していなければ固有の興味は出さない", () => {
+  const snapshot = snapshotFor(answersByScale({ production: 5, adventure: 4 }));
+  const text = renderResultScreen({
+    snapshot, bigFive: null, onCard() {}, onRestart() {}, onAbout() {},
+  }).textContent;
+  assert.ok(!text.includes("予測できるものではありません"),
+    "連携していないのに固有の興味を出している");
+});
+
+test("連携済みでも対象の領域が上位でなければ出さない", async () => {
+  const { parseBigFiveCode } = await import("../js/domain/big-five-link.js");
+  const snapshot = snapshotFor(answersByScale({ analysis: 5, erudition: 4 }));
+  const text = renderResultScreen({
+    snapshot, bigFive: parseBigFiveCode("v1-342288401195267"),
+    onCard() {}, onRestart() {}, onAbout() {},
+  }).textContent;
+  assert.ok(!text.includes("予測できるものではありません"));
+});
+
 test("出典・免責画面に同梱フォントの出典がある（SIL OFL 1.1）", () => {
   const text = renderAboutScreen({ onBack() {}, onClearAll() {} }).textContent;
   assert.ok(text.includes("Noto Serif JP"), "元フォント名が無い");
