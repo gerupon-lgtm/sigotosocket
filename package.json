@@ -10,6 +10,8 @@
     "items:build": "node scripts/items/build-items.mjs",
     "types:export": "node scripts/types/export-types.mjs",
     "items:check": "node scripts/items/check-items.mjs",
+    "sample:template": "node scripts/items/alpha.mjs --template",
+    "sample:check": "node scripts/items/alpha.mjs",
     "version:check": "node scripts/version/check-version.mjs",
     "character:alpha": "node scripts/characters/alpha-from-white.mjs",
     "character:build": "node scripts/characters/build-character-assets.mjs",
