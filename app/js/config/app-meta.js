@@ -10,6 +10,9 @@ const diagnosticVersions = Object.freeze({
 /** 画面とカードで使うブランドの文言。**1か所で持つ**（ココロパレアの appMeta.brand に倣う）。 */
 const brand = Object.freeze({
   name: "シゴトソケット",
+  // 姉妹アプリ。連携（F-010）の相手であり、リンクは check-static の許可リストに載せている
+  siblingName: "ココロパレア",
+  siblingUrl: "https://kokoro.sikumilab.com/",
   subtitle: "ORVIS 自己理解支援ツール",
   iconPath: "assets/brand/sigotosocket-mark.svg",
 });

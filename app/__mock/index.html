@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>mock</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>body{margin:0;background:#fff;display:flex;gap:10px;padding:10px}
+figure{margin:0;width:var(--w,360px)}figcaption{font:600 15px system-ui;text-align:center;padding:4px 0}
+canvas{width:100%;display:block;box-shadow:0 1px 6px rgba(0,0,0,.18)}</style>
+</head><body>
+<script type="module">
+// 検討用モック。実装のレンダラ（card-renderer.js）でカードを描き、
+// キャラクター帯だけを消して猫＋むっくん＋小物を置き直す。
+import { renderCard } from "../js/infrastructure/card-renderer.js";
+import { ItemMaster } from "../js/data/item-master.js";
+import { scoreScales } from "../js/domain/scoring.js";
+import { standardize } from "../js/domain/standardize.js";
+import { classify } from "../js/domain/type-classifier.js";
+import { createResultSnapshot } from "../js/domain/result-snapshot.js";
+import { LAYOUT, verticalPlan } from "../js/presentation/card-layout.js";
+
+const params = new URLSearchParams(location.search);
+const cat = params.get("cat") ?? "guest-cat-b.webp";
+const ratio = Number(params.get("ratio") ?? 0.75);
+const gap = Number(params.get("gap") ?? 10);
+const shifts = (params.get("shifts") ?? "0,60,120").split(",").map(Number);
+document.documentElement.style.setProperty("--w", (params.get("w") ?? "360") + "px");
+
+const load = (src) => new Promise((res, rej) => {
+  const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src;
+});
+/** 透明余白を除いた実体の矩形を返す。 */
+function bodyRect(img) {
+  const c = document.createElement("canvas");
+  c.width = img.width; c.height = img.height;
+  const x = c.getContext("2d"); x.drawImage(img, 0, 0);
+  const d = x.getImageData(0, 0, img.width, img.height).data;
+  let x0 = img.width, x1 = 0, y0 = img.height, y1 = 0;
+  for (let y = 0; y < img.height; y++) for (let px = 0; px < img.width; px++) {
+    if (d[(y * img.width + px) * 4 + 3] > 10) {
+      if (px < x0) x0 = px; if (px > x1) x1 = px;
+      if (y < y0) y0 = y; if (y > y1) y1 = y;
+    }
+  }
+  return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+}
+
+const answers = Object.fromEntries(ItemMaster.map((it, i) => [it.id, ((i * 3) % 5) + 1]));
+const std = standardize(scoreScales({ items: ItemMaster, answers }));
+const snap = createResultSnapshot({ standardized: std, classification: classify(std) });
+const plan = verticalPlan(), C = LAYOUT.character;
+
+const [poseImg, propImg, catImg] = await Promise.all([
+  load(`../assets/characters/character-pose-${snap.poseScaleId}.webp`),
+  load(`../assets/props/prop-${snap.propScaleId}.webp`),
+  load(`../assets/guest/${cat}`),
+]);
+const poseR = bodyRect(poseImg), propR = bodyRect(propImg), catR = bodyRect(catImg);
+
+for (const shift of shifts) {
+  const canvas = document.createElement("canvas");
+  await renderCard(canvas, snap);
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#f4f6fa";
+  ctx.fillRect(60, plan.charTop - 20, 960, C.size + 40);
+
+  // 実体の高さで揃える。箱ではなく見た目で詰める。
+  const poseH = C.size, poseW = (poseR.w / poseR.h) * poseH;
+  const catH = C.size * ratio, catW = (catR.w / catR.h) * catH;
+  const propH = C.prop.size * 0.8, propW = (propR.w / propR.h) * propH;
+  const base = plan.charBottom;
+  const groupW = catW + gap + poseW;
+  const left = plan.centerX - groupW / 2 + shift;
+  const poseX = left + catW + gap;
+
+  ctx.drawImage(catImg, catR.x, catR.y, catR.w, catR.h, left, base - catH, catW, catH);
+  ctx.drawImage(poseImg, poseR.x, poseR.y, poseR.w, poseR.h, poseX, base - poseH, poseW, poseH);
+  ctx.drawImage(propImg, propR.x, propR.y, propR.w, propR.h,
+    poseX + poseW - propW * 0.45, base - propH, propW, propH);
+
+  const fig = document.createElement("figure");
+  const cap = document.createElement("figcaption");
+  cap.textContent = shift === 0 ? "中央" : (shift > 0 ? `右へ +${shift}px` : `左へ ${-shift}px`);
+  fig.append(cap, canvas);
+  document.body.append(fig);
+}
+document.title = "ready";
+</script></body></html>

@@ -9,11 +9,13 @@ import { appMeta } from "../app/js/config/app-meta.js";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const APP = join(ROOT, "app");
 
-// 許可してよいのは「出典」だけ。職業サイトなど利用者を先へ送る導線は載せない。
-// 理由は要件定義書 §7-3（職業を提示しないという方針を外部委託で越えないため）。
+// 許可してよいのは「出典」と「姉妹アプリ（ココロパレア）」だけ。
+// **職業サイトなど、利用者を職業の提示へ送る導線は載せない**（要件定義書 §7-3）。
+// ココロパレアは連携相手そのもので、職業を提示する先ではないため対象外とする（v1.18）。
 export const ALLOWED_LINK_URLS = Object.freeze([
   "https://projects.ori.org/lrg/PDFs_papers/Pozzebon_etal_2009_ORVIS_JPA.pdf",
   "https://ipip.ori.org/",
+  "https://kokoro.sikumilab.com/",
 ]);
 
 // XMLの名前空間識別子。取得は発生しない（SVGを組み立てるときに必ず現れる）。

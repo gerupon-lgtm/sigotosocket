@@ -276,6 +276,19 @@ test("説明パネルは禁止語を含まず、職業も示さない", () => {
   }
 });
 
+test("説明パネルからココロパレアへ行ける", async () => {
+  const { appMeta } = await import("../js/config/app-meta.js");
+  const node = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  const link = [...node.querySelectorAll("a")].find((a) => a.getAttribute("href") === appMeta.brand.siblingUrl);
+  assert.ok(link, "ココロパレアへのリンクが無い");
+  assert.equal(link.getAttribute("rel"), "noopener noreferrer");
+  assert.ok(link.textContent.includes("ココロパレア"));
+});
+
 test("出典・免責画面に同梱フォントの出典がある（SIL OFL 1.1）", () => {
   const text = renderAboutScreen({ onBack() {}, onClearAll() {} }).textContent;
   assert.ok(text.includes("Noto Serif JP"), "元フォント名が無い");

@@ -3,6 +3,7 @@ import { appHeader } from "./app-header.js";
 import { screenHeading } from "./screen-heading.js";
 import { TOTAL_ITEM_COUNT, answeredCount } from "../domain/response-state.js";
 import { STORAGE_STATUS } from "../infrastructure/progress-storage.js";
+import { appMeta } from "../config/app-meta.js";
 
 
 /**
@@ -43,8 +44,16 @@ function toolIntro() {
         + "手仕事と挑戦の2領域はビッグファイブとほとんど関係が見られないため、"
         + "そこが上位に来た人は、性格の型からは説明されない関心を持っていることになります。",
         "渡すのは5つの数値だけです。回答そのものは行き来しません。",
-        "※ 受け渡しの導線は準備中です。",
       ]),
+      el("p", { class: "intro-link" }, [
+        el("a", {
+          href: appMeta.brand.siblingUrl,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        }, `${appMeta.brand.siblingName}を開く`),
+      ]),
+      el("p", { class: "intro-note", text: "※ 結果の受け渡しは準備中です。いまは別々に使えます。" }),
+
       topic("むっくんについて", [
         "案内役のハリネズミです。8つの領域を、道具と所作の違いで見せ分けます。",
         "職業の恰好はさせません。「やってみたいこと」は仕事の名前ではなく、"
