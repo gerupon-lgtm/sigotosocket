@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
-import { PoseAlt, PropAlt } from "./character-alt.js";
+import { PoseAlt, PropAlt, GuestAlt } from "./character-alt.js";
 import { appMeta } from "../../app/js/config/app-meta.js";
 
 /**
@@ -34,10 +34,20 @@ async function collect(dir, prefix, altTable) {
     }
     const alt = altTable[characterId];
     if (!alt) throw new Error(`${name}: altが character-alt.js にない（characterId=${characterId}）`);
+    // 透明余白を除いた実体の矩形。**2体を並べるときはここを基準にする**（F-022）。
+    // 箱で並べると、余白の量が絵ごとに違うぶん見た目の隙間が揃わない。
+    const trimmed = await sharp(bytes).trim({ threshold: 1 }).toBuffer({ resolveWithObject: true });
+    const body = {
+      x: -trimmed.info.trimOffsetLeft,
+      y: -trimmed.info.trimOffsetTop,
+      w: trimmed.info.width,
+      h: trimmed.info.height,
+    };
     entries.push({
       characterId,
       imagePath,
       alt,
+      body,
       width: meta.width,
       height: meta.height,
       integrity: `sha256-${createHash("sha256").update(bytes).digest("base64")}`,
@@ -48,12 +58,16 @@ async function collect(dir, prefix, altTable) {
 
 const poses = await collect("characters", "character-pose-", PoseAlt);
 const props = await collect("props", "prop-", PropAlt);
+// ゲスト（F-022）。**自オリジンに置く**（変更禁止事項8：他オリジンの画像はcanvasを汚染する）
+const guests = await collect("guest", "guest-", GuestAlt);
 
 const render = (entries) => entries.map((e) => `  Object.freeze({\n`
   + `    characterId: ${JSON.stringify(e.characterId)},\n`
   + `    imagePath: ${JSON.stringify(e.imagePath)},\n`
   + `    alt: ${JSON.stringify(e.alt)},\n`
   + `    width: ${e.width}, height: ${e.height},\n`
+  + `    body: Object.freeze({ x: ${e.body.x}, y: ${e.body.y}, w: ${e.body.w}, h: ${e.body.h} }),
+`
   + `    integrity: ${JSON.stringify(e.integrity)},\n`
   + `  }),`).join("\n");
 
@@ -70,6 +84,9 @@ ${render(poses)}
   props: Object.freeze([
 ${render(props)}
   ]),
+  guests: Object.freeze([
+${render(guests)}
+  ]),
 });
 
 /** characterId からポーズの項目を引く。無ければ null。 */
@@ -81,6 +98,11 @@ export function poseFor(characterId) {
 export function propFor(characterId) {
   return CharacterManifest.props.find((e) => e.characterId === characterId) ?? null;
 }
+
+/** ゲスト出演の図柄を引く。無ければ null。 */
+export function guestFor(characterId) {
+  return CharacterManifest.guests.find((e) => e.characterId === characterId) ?? null;
+}
 `);
 
-console.log(`manifest OK: ポーズ${poses.length}件 / 小物${props.length}件 → ${fileURLToPath(OUT)}`);
+console.log(`manifest OK: ポーズ${poses.length}件 / 小物${props.length}件 / ゲスト${guests.length}件 → ${fileURLToPath(OUT)}`);

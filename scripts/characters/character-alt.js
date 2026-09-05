@@ -23,6 +23,15 @@ export const PoseAlt = Object.freeze({
   guest: "正面を向いて座り、少し笑っているハリネズミ",
 });
 
+/**
+ * ゲスト出演の猫（F-022）。ココロパレアの完成画像から**猫だけを切り出した**もので、
+ * 描き直し・拡大縮小・再配色はしていない（小物の連結成分を消して余白を詰めただけ）。
+ * altでも猫を主役として書かず、「ゲスト」であることが分かる書き方にする。
+ */
+export const GuestAlt = Object.freeze({
+  cat: "ココロパレアからゲスト出演した、正面を向いて座っている猫",
+});
+
 export const PropAlt = Object.freeze({
   leadership: "台に立てた三角の旗",
   organization: "番号を書いた札と砂時計",

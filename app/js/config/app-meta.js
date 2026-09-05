@@ -25,7 +25,8 @@ export const appMeta = Object.freeze({
   siteOrigin: "https://sigotosocket.sikumilab.com",
   storageSchemaVersion: 1,
   storageKey: "sigotosocket:v1",
-  cardTemplateVersion: "card-template-v1",
+  // v2: 連携済みのときゲストの猫を加える構成（F-022・D-20）
+  cardTemplateVersion: "card-template-v2",
   characterManifestVersion: "character-manifest-v1",
   diagnosticVersions,
   releasedAt: null,

@@ -75,8 +75,9 @@ function screenFor(route) {
     if (!snapshot) return screenFor("start");
     return renderResultScreen({
       snapshot,
-      // 連携は結果とは別に保持している。表示のたびに今の連携を読む（F-013）。
-      bigFive: store.load().bigFive,
+      // **結果に紐づいた連携**を見る。カード（F-022）と同じ出どころに揃える。
+      // いまの連携（store）を見ると、連携を外したときに画面とカードで食い違う。
+      bigFive: snapshot.bigFive,
       onCard: () => go("card"),
       onRestart: () => { response = createResponseState(null); store.clearProgress(); go("answer"); },
       onHome: () => go("start"),

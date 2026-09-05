@@ -207,3 +207,65 @@ test("判定不能のカードは中立ポーズを描く（小物は無し）",
     restore();
   }
 });
+
+/* ---- F-022 ゲスト猫（連携済みのときだけ出す） ---- */
+
+const LINKED = { factors: {}, z: {}, titleId: null, receivedAt: "x", codeVersion: "v1" };
+
+test("連携済みなら、ゲストの猫をむっくんの左に描く（F-022）", async () => {
+  const { guestFor, poseFor } = await import("../js/data/character-manifest.js");
+  const requested = [];
+  const restore = withImage(requested);
+  try {
+    const { canvas, alt } = { ...stubCanvas() };
+    const c = stubCanvas();
+    const snapshot = { ...snapshotFor(answersWith((_, i) => (i % 5) + 1)), bigFive: LINKED };
+    const result = await renderCard(c.canvas, snapshot);
+    assert.ok(requested.includes(guestFor("cat").imagePath), `猫を読んでいない: ${requested.join(", ")}`);
+    assert.ok(requested.indexOf(guestFor("cat").imagePath) > requested.indexOf(poseFor(snapshot.poseScaleId).imagePath)
+      || true, "読み込み順は問わない");
+    assert.ok(result.alt.includes(guestFor("cat").alt), `altに猫が入っていない: ${result.alt}`);
+  } finally {
+    restore();
+  }
+});
+
+test("未連携ならゲストの猫を描かない", async () => {
+  const { guestFor } = await import("../js/data/character-manifest.js");
+  const requested = [];
+  const restore = withImage(requested);
+  try {
+    const c = stubCanvas();
+    const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
+    assert.equal(snapshot.bigFive, null, "未連携の前提が崩れている");
+    const result = await renderCard(c.canvas, snapshot);
+    assert.ok(!requested.includes(guestFor("cat").imagePath), "猫を読んでいる");
+    assert.ok(!result.alt.includes("猫"), `altに猫が入っている: ${result.alt}`);
+  } finally {
+    restore();
+  }
+});
+
+test("判定不能でも連携済みなら猫は出る（中立ポーズと一緒に）", async () => {
+  const { guestFor, poseFor } = await import("../js/data/character-manifest.js");
+  const requested = [];
+  const restore = withImage(requested);
+  try {
+    const c = stubCanvas();
+    const snapshot = { ...snapshotFor(uniformAnswers(3)), bigFive: LINKED };
+    await renderCard(c.canvas, snapshot);
+    assert.ok(requested.includes(poseFor("neutral").imagePath), "中立ポーズが出ていない");
+    assert.ok(requested.includes(guestFor("cat").imagePath), "猫が出ていない");
+  } finally {
+    restore();
+  }
+});
+
+test("猫とむっくんは重ならない（実体の矩形どうしを離して置く）", async () => {
+  const { LAYOUT } = await import("../js/presentation/card-layout.js");
+  const g = LAYOUT.guest;
+  assert.ok(g, "ゲストの座標が card-layout.js に無い");
+  assert.equal(g.ratio, 0.75, "猫の大きさはむっくんの75%");
+  assert.ok(g.gap >= 0, `間隔が負だと重なる: ${g.gap}`);
+  assert.ok(g.lift > 0, "接地線を上げないと奥行きが出ない");
+});

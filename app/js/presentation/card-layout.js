@@ -86,6 +86,19 @@ export const LAYOUT = Object.freeze({
     prop: Object.freeze({ size: 210, offsetX: 60, haloBlur: 6, haloPasses: 3, haloColor: "#ffffff" }),
   }),
 
+  /**
+   * ゲスト出演の猫（F-022）。連携済みのときだけ描く。
+   * **実体（透明余白を除いた矩形）どうしで並べる。**箱で並べると、余白の量が違うぶん
+   * 見た目の隙間がポーズごとに変わる。
+   */
+  guest: Object.freeze({
+    ratio: 0.75,   // むっくんの高さに対する猫の高さ
+    gap: 6,        // 実体どうしの隙間。**0以上にすること**（負にすると重なる）
+    lift: 34,      // 接地線を上げる量。奥に居るように見せる
+    // 2体並ぶときの小物。単体のときより小さくし、むっくんへ寄せる
+    prop: Object.freeze({ scale: 0.8, overlap: 0.45 }),
+  }),
+
   radar: Object.freeze({
     radius: 240,
     labelGap: 34,

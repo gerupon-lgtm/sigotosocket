@@ -6,7 +6,7 @@ import { drawRadar } from "../presentation/radar-chart.js";
 import { drawMark, roundedRectPath } from "../presentation/mark.js";
 import { CARD, LAYOUT, TEXT, verticalPlan, headerLockup } from "../presentation/card-layout.js";
 import { hollandCardLine } from "../domain/holland.js";
-import { poseFor, propFor } from "../data/character-manifest.js";
+import { poseFor, propFor, guestFor } from "../data/character-manifest.js";
 
 export const CARD_SIZE = CARD;
 
@@ -76,15 +76,22 @@ function drawTracked(ctx, text, x, baseline, targetWidth) {
  * 「キャラクターと小物の間に隙間を作る」役割になる（要件定義書 §11-0）。
  * ctx.filter は対応差があるため shadowBlur を重ねる方式にしている。
  */
+/**
+ * 縁取り（白いにじみ）を付けて描く。`rect` に sx/sy/sw/sh があれば、その範囲だけを切って使う。
+ * 実体の矩形で並べるときは切り出しが要る（余白ごと描くと寸法が狂う）。
+ */
 function drawWithHalo(ctx, image, rect, { color, blur, passes }) {
+  const draw = rect.sw
+    ? () => ctx.drawImage(image, rect.sx, rect.sy, rect.sw, rect.sh, rect.x, rect.y, rect.w, rect.h)
+    : () => ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
   ctx.save();
   ctx.shadowColor = color;
   ctx.shadowBlur = blur;
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
-  for (let i = 0; i < passes; i += 1) ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
+  for (let i = 0; i < passes; i += 1) draw();
   ctx.restore();
-  ctx.drawImage(image, rect.x, rect.y, rect.w, rect.h);
+  draw();
 }
 
 function fillRounded(ctx, rect, fill, stroke) {
@@ -116,6 +123,42 @@ async function ensureMinchoLoaded() {
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * 猫・むっくん・小物を1つの塊として中央へ置く（F-022）。
+ *
+ * **接地線をそろえ、猫だけ `lift` ぶん上げる。**上げることで奥に居るように見える。
+ * 猫は先に描くので、順序としては奥になる。ただし矩形は `gap` ぶん離すので重ならない
+ * （変更禁止事項7の残す4項目のうち「覗き込み・前足を伸ばす所作」は絵の側で担保）。
+ */
+function drawGuestGroup(ctx, { pose, poseBody, prop, propBody, guest, guestBody, plan, CX }) {
+  const c = LAYOUT.character;
+  const g = LAYOUT.guest;
+
+  const poseH = c.size;
+  const poseW = (poseBody.w / poseBody.h) * poseH;
+  const catH = poseH * g.ratio;
+  const catW = (guestBody.w / guestBody.h) * catH;
+
+  const groupW = catW + g.gap + poseW;
+  const left = CX - groupW / 2;
+  const poseX = left + catW + g.gap;
+  const base = plan.charBottom;
+
+  ctx.drawImage(guest, guestBody.x, guestBody.y, guestBody.w, guestBody.h,
+    left, base - catH - g.lift, catW, catH);
+  ctx.drawImage(pose, poseBody.x, poseBody.y, poseBody.w, poseBody.h,
+    poseX, base - poseH, poseW, poseH);
+
+  if (prop && propBody) {
+    const propH = c.prop.size * g.prop.scale;
+    const propW = (propBody.w / propBody.h) * propH;
+    drawWithHalo(ctx, prop,
+      { sx: propBody.x, sy: propBody.y, sw: propBody.w, sh: propBody.h,
+        x: poseX + poseW - propW * g.prop.overlap, y: base - propH, w: propW, h: propH },
+      { color: c.prop.haloColor, blur: c.prop.haloBlur, passes: c.prop.haloPasses });
   }
 }
 
@@ -197,8 +240,18 @@ export async function renderCard(canvas, snapshot) {
   const propEntry = snapshot.propScaleId ? propFor(snapshot.propScaleId) : null;
   const pose = poseEntry ? await loadImage(poseEntry.imagePath) : null;
   const prop = poseEntry && propEntry ? await loadImage(propEntry.imagePath) : null;
+  // 連携済みのときだけゲストを出す（F-022・D-20）。判断材料は結果に紐づいた連携。
+  const guestEntry = snapshot.bigFive ? guestFor("cat") : null;
+  const guest = guestEntry ? await loadImage(guestEntry.imagePath) : null;
   const charBox = { x: CX - c.size / 2, y: plan.charTop, w: c.size, h: c.size };
-  if (pose) {
+  if (pose && guest) {
+    // 連携済み。猫とむっくん（＋小物）を1つの塊として中央へ置く（F-022・D-20）。
+    // **実体の矩形で並べる。**箱で並べると余白の差だけ隙間がぶれる。
+    drawGuestGroup(ctx, {
+      pose, poseBody: poseEntry.body, prop, propBody: propEntry?.body,
+      guest, guestBody: guestEntry.body, plan, CX,
+    });
+  } else if (pose) {
     ctx.drawImage(pose, ...Object.values(containRect(pose, charBox.x, charBox.y, charBox.w, charBox.h)));
     if (prop) {
       const p = c.prop;
@@ -260,14 +313,15 @@ export async function renderCard(canvas, snapshot) {
   ctx.fillText(appMeta.appVersion, CX, f.versionBaseline);
   ctx.restore();
 
-  return { canvas, alt: cardAltText({ title, snapshot, pose: pose ? poseEntry : null, prop: prop ? propEntry : null }) };
+  return { canvas, alt: cardAltText({ title, snapshot,
+    pose: pose ? poseEntry : null, prop: prop ? propEntry : null, guest: guest ? guestEntry : null }) };
 }
 
 /**
  * カードの読み上げ文。**描けたものだけを言う。**画像が出せなかったときに
  * 居ないキャラクターを説明すると、読み上げだけが実物と食い違う。
  */
-function cardAltText({ title, snapshot, pose, prop }) {
+function cardAltText({ title, snapshot, pose, prop, guest }) {
   const parts = [`シゴトソケットの結果カード。称号は「${title}」。`];
   if (snapshot.rank) {
     parts.push(`高かった領域は${snapshot.rank.slice(0, 2).map((id) => ScaleById[id].labelJa).join("と")}。`);
@@ -275,5 +329,6 @@ function cardAltText({ title, snapshot, pose, prop }) {
     if (holland) parts.push(`${holland}。`);
   }
   if (pose) parts.push(`絵は${pose.alt}${prop ? `と、${prop.alt}` : ""}。`);
+  if (guest) parts.push(`${guest.alt}が並んでいます。`);
   return parts.join("");
 }

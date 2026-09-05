@@ -302,3 +302,23 @@ test("出典・免責画面に出典とデータ削除がある", () => {
   assert.ok(text.includes("パブリックドメイン"));
   assert.ok(text.includes("削除"));
 });
+
+test("結果画面の③は、結果に紐づいた連携を見る（カードと同じ出どころ）", async () => {
+  const { parseBigFiveCode } = await import("../js/domain/big-five-link.js");
+  const { attachBigFive } = await import("../js/domain/result-snapshot.js");
+  const base = snapshotFor(answersByScale({ production: 5, adventure: 4 }));
+  const linked = attachBigFive(base, parseBigFiveCode("v1-342288401195267"));
+
+  // 画面へ渡すのは snapshot.bigFive。main.js もそこから取る
+  const withLink = renderResultScreen({
+    snapshot: linked, bigFive: linked.bigFive,
+    onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
+  }).textContent;
+  assert.ok(withLink.includes("予測できるものではありません"));
+
+  const without = renderResultScreen({
+    snapshot: base, bigFive: base.bigFive,
+    onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
+  }).textContent;
+  assert.ok(!without.includes("予測できるものではありません"));
+});
