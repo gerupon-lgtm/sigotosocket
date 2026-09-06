@@ -285,14 +285,28 @@ test("全画面にヘッダーがあり、見出しは本文側が持つ（コ�
   }
 });
 
-test("設問画面のヘッダーは sticky で、中断してトップへを持つ", () => {
+test("T-046 回答中のヘッダーは開始・回答完了画面と同じ外枠classを使う", () => {
   let quit = 0;
-  const node = renderQuestionnaireScreen({
+  const start = renderStartScreen({
+    progressState: createResponseState(null), latestResult: null,
+    storageStatus: STORAGE_STATUS.OK,
+    onStart() {}, onResume() {}, onShowResult() {}, onAbout() {},
+  });
+  const questionnaire = renderQuestionnaireScreen({
     state: createResponseState(null), onAnswer() {}, onBack() {}, onQuit: () => { quit += 1; },
   });
-  const header = node.querySelectorAll(".app-header")[0];
-  assert.ok(header.className.includes("is-sticky"), "設問画面のヘッダーが sticky でない");
-  const action = header.querySelectorAll(".app-header-action")[0];
+  const completion = renderCompletionScreen({
+    onComplete() {}, onBack() {}, onQuit() {}, onDiscard() {},
+  });
+  const headers = [start, questionnaire, completion]
+    .map((screen) => screen.querySelectorAll(".app-header")[0]);
+
+  assert.deepEqual(headers.map((header) => header.className), [
+    "app-header",
+    "app-header",
+    "app-header",
+  ]);
+  const action = headers[1].querySelectorAll(".app-header-action")[0];
   assert.equal(action.textContent, "中断してトップへ");
   action.click();
   assert.equal(quit, 1);

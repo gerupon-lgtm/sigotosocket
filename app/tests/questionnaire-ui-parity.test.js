@@ -5,7 +5,8 @@ import { readFile } from "node:fs/promises";
 const stylesUrl = new URL("../css/style.css", import.meta.url);
 
 function declarationsFor(styles, selector) {
-  for (const match of styles.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+  const uncommentedStyles = styles.replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const match of uncommentedStyles.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const selectors = match[1].split(",").map((candidate) => candidate.trim());
     if (selectors.includes(selector)) return match[2];
   }
@@ -40,13 +41,11 @@ test("T-045 S-002 transplants Kokoro Parea questionnaire dimensions while retain
   assert.match(danger, /color:\s*#7a2b2b/);
 });
 
-test("T-045 S-001 keeps the questionnaire header flat while adopting Kokoro Parea spacing", async () => {
+test("T-046 S-001 keeps one header geometry for all screens", async () => {
   const styles = await readFile(stylesUrl, "utf8");
-  const sticky = declarationsFor(styles, ".app-header.is-sticky");
+  const header = declarationsFor(styles, ".app-header");
 
-  assert.match(sticky, /padding-top:\s*12px/);
-  assert.match(sticky, /padding-inline:\s*12px/);
-  assert.match(sticky, /border-radius:\s*0/);
-  assert.match(sticky, /background:\s*transparent/);
-  assert.match(sticky, /box-shadow:\s*none/);
+  assert.match(header, /padding-bottom:\s*18px/);
+  assert.match(header, /border-bottom:\s*1px solid var\(--line\)/);
+  assert.doesNotMatch(styles, /\.app-header\.is-sticky\s*\{/);
 });

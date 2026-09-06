@@ -61,8 +61,7 @@ export function renderQuestionnaireScreen({
   }, choice.label));
 
   return el("section", { class: "screen question questionnaire-screen" }, [
-    // 設問画面だけ sticky。長い一覧を送っても中断の導線が視界から消えない（ココロパレア踏襲）。
-    appHeader({ sticky: true, action: { label: "中断してトップへ", onClick: onQuit } }),
+    appHeader({ action: { label: "中断してトップへ", onClick: onQuit } }),
     el("div", { class: "progress", role: "progressbar", "aria-valuemin": "1",
       "aria-valuemax": String(TOTAL_ITEM_COUNT), "aria-valuenow": String(state.currentIndex + 1) }, [
       // 幅は style プロパティで入る（`el` が CSSOM を使う）。style属性はCSPで無視される

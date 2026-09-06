@@ -22,7 +22,7 @@ const brand = Object.freeze({
 export const appMeta = Object.freeze({
   brand,
   appId: "sigotosocket",
-  appVersion: "v0.2.5",
+  appVersion: "v0.2.6",
   // 公開URL（2026-09-05 確定・要確認21を解消）。index.html の canonical / og:url と一致させること。
   siteOrigin: "https://sigotosocket.sikumilab.com",
   storageSchemaVersion: 1,

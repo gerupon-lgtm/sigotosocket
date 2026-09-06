@@ -47,9 +47,9 @@ test("操作を渡さなければ何も出ない", () => {
   assert.equal(appHeader({}).querySelectorAll(".app-header-action").length, 0);
 });
 
-test("sticky は指定したときだけ付く", () => {
-  assert.equal(appHeader({ sticky: true }).className, "app-header is-sticky");
+test("操作の有無にかかわらずヘッダーの外枠classは共通", () => {
   assert.equal(appHeader({}).className, "app-header");
+  assert.equal(appHeader({ action: { label: "トップ画面へ", href: "#/start" } }).className, "app-header");
 });
 
 test("見出しは英字のキッカーと日本語のタイトルの2段（ココロパレア踏襲）", () => {
