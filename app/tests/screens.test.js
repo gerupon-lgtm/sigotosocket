@@ -5,7 +5,10 @@ import { installDom } from "./dom-stub.js";
 installDom();
 
 const { renderStartScreen } = await import("../js/presentation/start-screen.js");
-const { renderQuestionnaireScreen } = await import("../js/presentation/questionnaire-screen.js");
+const {
+  renderQuestionnaireScreen,
+  renderCompletionScreen,
+} = await import("../js/presentation/questionnaire-screen.js");
 const { renderResultScreen } = await import("../js/presentation/result-screen.js");
 const { renderAboutScreen } = await import("../js/presentation/about-screen.js");
 const { createResponseState, withAnswer } = await import("../js/domain/response-state.js");
@@ -72,6 +75,48 @@ test("選択肢を押すと itemId と値が渡る", () => {
   });
   node.querySelectorAll(".choice")[4].click();
   assert.deepEqual(received, [ItemMaster[0].id, 5]);
+});
+
+test("回答を見直しているときだけ、任意の設問から回答を完了できる", () => {
+  const actions = [];
+  const regular = renderQuestionnaireScreen({
+    state: createResponseState(null),
+    onAnswer() {},
+    onBack() {},
+    onQuit() {},
+    onComplete() { actions.push("regular"); },
+  });
+  assert.ok(!regular.textContent.includes("回答を完了する"));
+
+  const reviewing = renderQuestionnaireScreen({
+    state: createResponseState(null),
+    completionAvailable: true,
+    onAnswer() {},
+    onBack() {},
+    onQuit() {},
+    onComplete() { actions.push("complete"); },
+  });
+  reviewing.querySelectorAll(".complete-review")[0].click();
+  assert.deepEqual(actions, ["complete"]);
+});
+
+test("45問の最終回答後は結果を確定せず、確認画面から結果表示か回答見直しを選べる", () => {
+  const actions = [];
+  const node = renderCompletionScreen({
+    onComplete() { actions.push("complete"); },
+    onBack() { actions.push("back"); },
+    onQuit() { actions.push("quit"); },
+  });
+
+  assert.ok(node.textContent.includes("45 / 45問"));
+  assert.ok(node.textContent.includes("45問の回答が完了しました"));
+  assert.ok(node.textContent.includes("内容を確定すると結果を表示します"));
+  assert.equal(node.querySelectorAll(".choice").length, 0);
+
+  node.querySelectorAll(".primary")[0].click();
+  node.querySelectorAll(".secondary")[0].click();
+  node.querySelectorAll(".app-header-action")[0].click();
+  assert.deepEqual(actions, ["complete", "back", "quit"]);
 });
 
 test("結果画面はタイプ名・数値・免責を出す", () => {

@@ -12,7 +12,10 @@ import { createStore } from "./infrastructure/progress-storage.js";
 import { receiveBigFive } from "./infrastructure/linkage-intake.js";
 import { resolveRoute, hashFor } from "./infrastructure/router.js";
 import { renderStartScreen } from "./presentation/start-screen.js";
-import { renderQuestionnaireScreen } from "./presentation/questionnaire-screen.js";
+import {
+  renderQuestionnaireScreen,
+  renderCompletionScreen,
+} from "./presentation/questionnaire-screen.js";
 import { renderResultScreen } from "./presentation/result-screen.js";
 import { renderCardScreen } from "./presentation/card-screen.js";
 import { renderAboutScreen } from "./presentation/about-screen.js";
@@ -41,6 +44,7 @@ function receiveLinkage() {
 // 受け取れなくても何も表示しない。単体の結果へそのまま進む。
 let linkageReceipt = receiveLinkage();
 let response = createResponseState(store.load().progress);
+let completionQuestionVisible = false;
 const initial = store.latestResult();
 if (isValidSnapshot(initial)) snapshot = initial;
 
@@ -62,13 +66,22 @@ function finish() {
   snapshot = attachBigFive(createResultSnapshot({ standardized, classification }), store.load().bigFive);
   store.saveResult(snapshot);
   response = createResponseState(null);
+  completionQuestionVisible = false;
   go("result");
 }
 
 function answer(itemId, value) {
   response = withAnswer(response, itemId, value);
   persist();
-  if (isComplete(response)) { finish(); return; }
+  if (
+    isComplete(response)
+    && response.currentIndex === TOTAL_ITEM_COUNT - 1
+    && !completionQuestionVisible
+  ) {
+    completionQuestionVisible = false;
+    render();
+    return;
+  }
   const next = response.currentIndex + 1;
   response = withIndex(response, Math.min(next, TOTAL_ITEM_COUNT - 1));
   persist();
@@ -86,6 +99,16 @@ function openAbout(from) {
 
 function screenFor(route) {
   if (route === "answer") {
+    if (isComplete(response) && !completionQuestionVisible) {
+      return renderCompletionScreen({
+        onComplete: finish,
+        onBack: () => {
+          completionQuestionVisible = true;
+          render();
+        },
+        onQuit: () => go("start"),
+      });
+    }
     return renderQuestionnaireScreen({
       state: response,
       onAnswer: answer,
@@ -96,6 +119,8 @@ function screenFor(route) {
         render();
       },
       onQuit: () => go("start"),
+      onComplete: finish,
+      completionAvailable: completionQuestionVisible,
     });
   }
   if (route === "result") {
@@ -132,8 +157,17 @@ function screenFor(route) {
     latestResult: snapshot,
     storageStatus: store.status,
     linkageReceipt,
-    onStart: () => { response = createResponseState(null); store.clearProgress(); go("answer"); },
-    onResume: () => { response = withIndex(response, firstUnansweredIndex(response)); go("answer"); },
+    onStart: () => {
+      completionQuestionVisible = false;
+      response = createResponseState(null);
+      store.clearProgress();
+      go("answer");
+    },
+    onResume: () => {
+      completionQuestionVisible = false;
+      response = withIndex(response, firstUnansweredIndex(response));
+      go("answer");
+    },
     onShowResult: () => go("result"),
     onAbout: () => openAbout("start"),
   });

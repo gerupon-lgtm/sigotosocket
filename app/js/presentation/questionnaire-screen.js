@@ -10,8 +10,32 @@ const CHOICES = Object.freeze([
   { value: 5, label: "とても好き" },
 ]);
 
+/** 最終回答を保存したあと、採点・結果保存の前に明示的な確認を挟む。 */
+export function renderCompletionScreen({ onComplete, onBack, onQuit }) {
+  return el("section", { class: "screen question completion" }, [
+    appHeader({ action: { label: "中断してトップへ", onClick: onQuit } }),
+    el("p", { class: "counter", text: `${TOTAL_ITEM_COUNT} / ${TOTAL_ITEM_COUNT}問` }),
+    el("h1", { text: `${TOTAL_ITEM_COUNT}問の回答が完了しました` }),
+    el("p", {
+      class: "lead",
+      text: "回答を見直す場合は戻ることができます。内容を確定すると結果を表示します。",
+    }),
+    el("div", { class: "actions completion-actions" }, [
+      el("button", { class: "primary", type: "button", onClick: onComplete }, "結果を見る"),
+      el("button", { class: "secondary", type: "button", onClick: onBack }, "回答へ戻る"),
+    ]),
+  ]);
+}
+
 /** 1問1画面。ココロパレア踏襲。出題順は固定でシャッフルしない。 */
-export function renderQuestionnaireScreen({ state, onAnswer, onBack, onQuit }) {
+export function renderQuestionnaireScreen({
+  state,
+  onAnswer,
+  onBack,
+  onQuit,
+  onComplete,
+  completionAvailable = false,
+}) {
   const item = itemAt(state.currentIndex);
   const current = state.answers[item.id];
   const progress = ((state.currentIndex + 1) / TOTAL_ITEM_COUNT) * 100;
@@ -36,6 +60,13 @@ export function renderQuestionnaireScreen({ state, onAnswer, onBack, onQuit }) {
     el("h2", { class: "item-text", text: item.textJa }),
     el("div", { class: "choices" }, choices),
     el("div", { class: "actions row" }, [
+      completionAvailable
+        ? el("button", {
+          class: "primary complete-review",
+          type: "button",
+          onClick: onComplete,
+        }, "回答を完了する")
+        : null,
       el("button", {
         class: "secondary", type: "button",
         disabled: state.currentIndex === 0,
