@@ -55,13 +55,14 @@ test("保存できない環境では通知を出す", () => {
   assert.ok(node.textContent.includes("保存できない"));
 });
 
-test("設問は1問1画面。1問目では戻るが無効", () => {
+test("設問は1問1画面。1問目では前の質問が無効", () => {
   const node = renderQuestionnaireScreen({
-    state: createResponseState(null), onAnswer() {}, onBack() {}, onQuit() {},
+    state: createResponseState(null), onAnswer() {}, onBack() {}, onQuit() {}, onDiscard() {},
   });
   assert.ok(node.textContent.includes("1 / 45問"));
   assert.ok(node.textContent.includes(ItemMaster[0].textJa));
   const back = node.querySelectorAll(".secondary")[0];
+  assert.equal(back.textContent, "前の質問");
   assert.equal(back.getAttribute("disabled"), "");
   assert.equal(node.querySelectorAll(".choice").length, 5);
 });
@@ -71,7 +72,7 @@ test("選択肢を押すと itemId と値が渡る", () => {
   const node = renderQuestionnaireScreen({
     state: createResponseState(null),
     onAnswer(id, value) { received = [id, value]; },
-    onBack() {}, onQuit() {},
+    onBack() {}, onQuit() {}, onDiscard() {},
   });
   node.querySelectorAll(".choice")[4].click();
   assert.deepEqual(received, [ItemMaster[0].id, 5]);
@@ -84,6 +85,7 @@ test("回答を見直しているときだけ、任意の設問から回答を�
     onAnswer() {},
     onBack() {},
     onQuit() {},
+    onDiscard() {},
     onComplete() { actions.push("regular"); },
   });
   assert.ok(!regular.textContent.includes("回答を完了する"));
@@ -94,10 +96,47 @@ test("回答を見直しているときだけ、任意の設問から回答を�
     onAnswer() {},
     onBack() {},
     onQuit() {},
+    onDiscard() {},
     onComplete() { actions.push("complete"); },
   });
   reviewing.querySelectorAll(".complete-review")[0].click();
   assert.deepEqual(actions, ["complete"]);
+});
+
+test("T-045 S-002 uses Kokoro Parea questionnaire controls in regular and review modes", () => {
+  for (const completionAvailable of [false, true]) {
+    const actions = [];
+    const node = renderQuestionnaireScreen({
+      state: createResponseState(null),
+      completionAvailable,
+      onAnswer() {},
+      onBack() { actions.push("back"); },
+      onQuit() {},
+      onComplete() {},
+      onDiscard() { actions.push("discard"); },
+    });
+
+    const options = node.querySelectorAll(".answer-options")[0];
+    assert.ok(options);
+    assert.equal(options.querySelectorAll(".answer-option").length, 5);
+    const navigation = node.querySelectorAll(".questionnaire-navigation")[0];
+    assert.ok(navigation);
+    const previous = navigation.querySelectorAll(".secondary-button")[0];
+    assert.equal(previous.textContent, "前の質問");
+    previous.click();
+    const management = node.querySelectorAll(".questionnaire-management")[0];
+    assert.ok(management);
+    assert.equal(management.tagName, "DETAILS");
+    assert.ok(management.textContent.includes("その他の操作"));
+    const discard = management.querySelectorAll(".danger-button")[0];
+    assert.equal(discard.textContent, "回答を破棄");
+    discard.click();
+    assert.deepEqual(actions, ["back", "discard"]);
+    assert.equal(
+      navigation.querySelectorAll(".questionnaire-complete-button").length,
+      completionAvailable ? 1 : 0,
+    );
+  }
 });
 
 test("45問の最終回答後は結果を確定せず、確認画面から結果表示か回答見直しを選べる", () => {
@@ -106,6 +145,7 @@ test("45問の最終回答後は結果を確定せず、確認画面から結果
     onComplete() { actions.push("complete"); },
     onBack() { actions.push("back"); },
     onQuit() { actions.push("quit"); },
+    onDiscard() { actions.push("discard"); },
   });
 
   assert.ok(node.textContent.includes("45 / 45問"));
@@ -116,7 +156,10 @@ test("45問の最終回答後は結果を確定せず、確認画面から結果
   node.querySelectorAll(".primary")[0].click();
   node.querySelectorAll(".secondary")[0].click();
   node.querySelectorAll(".app-header-action")[0].click();
-  assert.deepEqual(actions, ["complete", "back", "quit"]);
+  const management = node.querySelectorAll(".questionnaire-management")[0];
+  assert.ok(management);
+  management.querySelectorAll(".danger-button")[0].click();
+  assert.deepEqual(actions, ["complete", "back", "quit", "discard"]);
 });
 
 test("結果画面はタイプ名・数値・免責を出す", () => {

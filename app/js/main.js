@@ -70,6 +70,14 @@ function finish() {
   go("result");
 }
 
+function discardCurrentResponse() {
+  if (!globalThis.confirm("途中回答を破棄します。破棄後は復元できません。")) return;
+  response = createResponseState(null);
+  completionQuestionVisible = false;
+  store.clearProgress();
+  go("start");
+}
+
 function answer(itemId, value) {
   response = withAnswer(response, itemId, value);
   persist();
@@ -107,6 +115,7 @@ function screenFor(route) {
           render();
         },
         onQuit: () => go("start"),
+        onDiscard: discardCurrentResponse,
       });
     }
     return renderQuestionnaireScreen({
@@ -119,6 +128,7 @@ function screenFor(route) {
         render();
       },
       onQuit: () => go("start"),
+      onDiscard: discardCurrentResponse,
       onComplete: finish,
       completionAvailable: completionQuestionVisible,
     });
