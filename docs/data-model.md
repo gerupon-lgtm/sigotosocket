@@ -20,6 +20,8 @@
 
 連携先URLは保存データへ含めず、`appMeta.brand` に置く。通常紹介用の `siblingUrl` と、任意連携用の `siblingLinkageUrl`（ココロパレア `#/sigotosocket`）を分離し、用途を混同しない。
 
+F-012の表示モデルは保存しない。結果表示時に `scaleScores` と `bigFive.z` から `ConsistencyItem` を決定的に組み立てる。各項目は `direction`（高×高／低×低／高×低／低×高）、平易な主本文3段、既定で閉じる研究補足を持つ。文言変更に伴うlocalStorage schema変更はない。
+
 ## 2. 尺度マスタ（`app/js/data/scale-definitions.js`）
 
 | フィールド | 型 | 必須 | 説明 |

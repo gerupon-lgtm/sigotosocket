@@ -1,19 +1,18 @@
 import { ScaleById } from "../data/scale-definitions.js";
 import { BIG_FIVE_FACTOR_ORDER, BIG_FIVE_FACTOR_LABEL } from "./big-five-link.js";
 import {
-  CONSISTENCY_PAIRS, CONSISTENCY_PREAMBLE, CONSISTENCY_NONE, positionPhrase, echoPhrase,
+  CONSISTENCY_PAIRS, CONSISTENCY_PREAMBLE, CONSISTENCY_NONE, CORRELATION_GUIDE,
+  pastPositionPhrase,
 } from "./cross-analysis-text.js";
 
 /**
- * 掛け合わせの層（第2フェーズ）。②整合／不整合（F-012）と③固有性（F-013）を持つ。
+ * 掛け合わせの層（第2フェーズ）。②組み合わせの読み方（F-012）と③固有性（F-013）を持つ。
  *
- * ②は**並置型**で出す（processing-design §8-1）。「特性からはこう予想されるが実際は違った」
- * とは書かない。本人の2つの事実と、原典で報告された結びつきの強さを別々に書き、
- * 両者を結ぶ推論は読み手に返す。
+ * ②は2アプリの結果を出どころごとに説明し、その後で断定を避けた組み合わせの読み方を示す。
+ * 原典で報告された相関は主本文へ混ぜず、開閉できる研究補足へ分ける。
  *
- * §10-2 の検証ゲートは「②を出すか出さないか」ではなく「**言い切りの強さ**」を決めるものへ
- * 変えた（2026-09-05・要件定義書 v1.21）。友人サンプルで符号が再現したら残差型へ格上げしてよい。
- * 実測は `npm run sample:check`（T-035）で行う。
+ * 友人サンプルの実測は品質確認として `npm run sample:check`（T-035）で行うが、
+ * 結果文は原典相関から個人結果を予測したように書かない（要件定義書 v1.34）。
  *
  * ②と③は依拠するものが違う。②は「相関があること」に寄りかかるので、原典のrとその限界を必ず添える。
  * ③は「**相関がないこと**」に寄りかかるので、日本語訳や短縮で関係の強さが変わっても揺らがない。
@@ -143,7 +142,7 @@ export function consistencyPairs({ scaleScores, bigFive }) {
     // 揃った＝両側ともはっきり出ている度合い／分かれた＝隔たり。
     // **順番を決めるための目安であって、指標ではない。**値そのものを画面に出さない。
     const strength = aligned ? Math.min(Math.abs(zf), Math.abs(zs)) : Math.abs(zs - zf);
-    candidates.push({ pair, order, aligned, zf, strength });
+    candidates.push({ pair, order, aligned, zf, zs, strength });
   });
   candidates.sort((a, b) => b.strength - a.strength || a.order - b.order);
 
@@ -159,26 +158,34 @@ export function consistencyPairs({ scaleScores, bigFive }) {
     usedScales.add(candidate.pair.scaleId);
   }
 
-  const items = picked.map(({ pair, aligned, zf }) => {
+  const items = picked.map(({ pair, aligned, zf, zs }) => {
     const factorLabel = BIG_FIVE_FACTOR_LABEL[pair.factorId];
     const scaleLabel = ScaleById[pair.scaleId].labelJa;
-    const factorPhrase = positionPhrase(
-      factorPosition.get(pair.factorId), BIG_FIVE_FACTOR_ORDER.length);
-    const scalePhrase = positionPhrase(scalePosition.get(pair.scaleId), scaleScores.length);
-    // 揃っていて位置づけの語まで同じなら、2文目を言い換える。同じ語を2回繰り返さない
-    const second = !aligned
-      ? `いっぽう「${scaleLabel}」は、8領域の中では${scalePhrase}。`
-      : factorPhrase === scalePhrase
-        ? `「${scaleLabel}」は、8領域の中で${echoPhrase(scalePhrase)}。`
-        : `「${scaleLabel}」も、8領域の中で${scalePhrase}。`;
-    const first = `${factorLabel}は、あなたの5因子の中で${factorPhrase}。${second}${pair.note}`;
-    const key = aligned ? (zf > 0 ? "alignedHigh" : "alignedLow") : "crossed";
+    const factorHigh = zf > 0;
+    const scaleHigh = zs > 0;
+    const direction = factorHigh
+      ? (scaleHigh ? "factorHighScaleHigh" : "factorHighScaleLow")
+      : (scaleHigh ? "factorLowScaleHigh" : "factorLowScaleLow");
+    const factorPhrase = pastPositionPhrase(
+      factorPosition.get(pair.factorId), BIG_FIVE_FACTOR_ORDER.length, factorHigh);
+    const scalePhrase = pastPositionPhrase(
+      scalePosition.get(pair.scaleId), scaleScores.length, scaleHigh);
+    const factorLine = `ココロパレアでは、「${factorLabel}」が5因子の中で${factorPhrase}。`
+      + pair.factor[factorHigh ? "high" : "low"];
+    const scaleLine = `シゴトソケットでは、「${scaleLabel}」が8領域の中で${scalePhrase}。`
+      + pair.scale[scaleHigh ? "high" : "low"];
     return Object.freeze({
       factorId: pair.factorId,
       scaleId: pair.scaleId,
       aligned,
-      heading: `${factorLabel} × ${scaleLabel} ― ${aligned ? "向きが揃いました" : "向きが分かれました"}`,
-      lines: Object.freeze([first, pair.text[key]]),
+      direction,
+      heading: `${pair.factor[factorHigh ? "headingHigh" : "headingLow"]}。`
+        + pair.scale[scaleHigh ? "headingHigh" : "headingLow"],
+      lines: Object.freeze([factorLine, scaleLine, pair.interpretation[direction]]),
+      research: Object.freeze({
+        summary: "研究上の根拠を見る",
+        lines: Object.freeze([pair.research.lines[0], CORRELATION_GUIDE, pair.research.lines[1]]),
+      }),
     });
   });
 

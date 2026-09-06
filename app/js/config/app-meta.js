@@ -4,7 +4,7 @@ const diagnosticVersions = Object.freeze({
   itemSetVersion: "orvis-ja-45-item-set-v1",
   scoringVersion: "orvis-ja-45-scoring-v1",
   typeRuleVersion: "type-rule-v1",
-  resultTextVersion: "result-text-v1",
+  resultTextVersion: "result-text-v2",
 });
 
 /** 画面とカードで使うブランドの文言。**1か所で持つ**（ココロパレアの appMeta.brand に倣う）。 */
@@ -22,7 +22,7 @@ const brand = Object.freeze({
 export const appMeta = Object.freeze({
   brand,
   appId: "sigotosocket",
-  appVersion: "v0.2.6",
+  appVersion: "v0.2.7",
   // 公開URL（2026-09-05 確定・要確認21を解消）。index.html の canonical / og:url と一致させること。
   siteOrigin: "https://sigotosocket.sikumilab.com",
   storageSchemaVersion: 1,

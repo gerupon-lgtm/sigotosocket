@@ -76,6 +76,11 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
         linkage.push(el("div", { class: "consistency-item" }, [
           el("h3", { class: "consistency-head", text: item.heading }),
           ...item.lines.map((line) => el("p", { class: "consistency-body", text: line })),
+          el("details", { class: "consistency-research" }, [
+            el("summary", { text: item.research.summary }),
+            el("div", { class: "consistency-research-body" },
+              item.research.lines.map((line) => el("p", { text: line }))),
+          ]),
         ]));
       }
     }

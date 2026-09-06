@@ -257,6 +257,30 @@ test("連携済みなら予告は消え、本文に入れ替わる", async () =>
   assert.ok(text.includes("予測できるものではありません"), "本文が出ていない");
 });
 
+test("T-047 組み合わせ結果は平易な本文を先に示し、研究上の根拠は閉じておく", async () => {
+  const { parseBigFiveCode } = await import("../js/domain/big-five-link.js");
+  const snapshot = snapshotFor(answersByScale({
+    leadership: 1, creativity: 3, erudition: 3, analysis: 5,
+  }, 3));
+  const node = renderResultScreen({
+    snapshot,
+    bigFive: parseBigFiveCode("v1-480300300300120"),
+    onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
+  });
+  const item = node.querySelectorAll(".consistency-item")[0];
+  assert.ok(item, "組み合わせ結果が無い");
+  assert.ok(item.textContent.includes("ココロパレアでは"));
+  assert.ok(item.textContent.includes("シゴトソケットでは"));
+  assert.ok(item.textContent.includes("この2つを合わせると"));
+  const details = item.querySelectorAll(".consistency-research")[0];
+  assert.ok(details, "研究上の根拠が開閉パネルになっていない");
+  assert.equal(details.tagName, "DETAILS");
+  assert.equal(details.getAttribute("open"), null, "研究補足が初めから開いている");
+  assert.equal(details.querySelectorAll("summary")[0].textContent, "研究上の根拠を見る");
+  assert.ok(details.textContent.includes("−1に近いほど反対方向"));
+  assert.ok(details.textContent.includes("r=.29"));
+});
+
 test("全画面にヘッダーがあり、見出しは本文側が持つ（ココロパレア踏襲）", () => {
   const snapshot = snapshotFor(answersWith((_, i) => (i % 5) + 1));
   const screens = [

@@ -1,120 +1,201 @@
 /**
- * ②整合／不整合の文言（F-012・processing-design §8-3）。
+ * ココロパレアとシゴトソケットを組み合わせた説明（F-012・T-047）。
  *
- * **並置型。**「特性からはこう予想されるが実際は違った」とは書かない。
- * 本人の2つの事実と、原典で報告された結びつきの強さを別々に書き、
- * 両者を結ぶ推論は読み手に返す。§10-2 の検証ゲートの置き換えがこれである。
- *
- * **LLMを使わない**（決めごとB-5）。ここの定型文がそのまま画面に出る。
+ * 2アプリの結果を同じ一文へ詰め込まず、出どころと意味を分けて説明する。
+ * 研究上の相関は主本文から外し、利用者が開ける補足として返す。
+ * LLMは使わず、ここに置いた定型文をそのまま表示する。
  */
 
-/**
- * 節の前書き。**全員同じ。1回だけ出す。**
- * 後半2文が §10-2 の置き換えなので、**削らない**。
- */
+/** 節の前書き。全員へ1回だけ表示する。 */
 export const CONSISTENCY_PREAMBLE = Object.freeze([
-  "ココロパレアの5因子と、45問の8領域を並べています。"
-  + "ORVISの原典では、下に挙げた組み合わせに結びつきが報告されています。",
-  "ただしその数値は英語の原版のもので、日本語にした45問で同じ強さが出るかは、まだ確かめていません。"
-  + "読み方が当てはまるかどうかは、あなたが決めてください。",
+  "ここでは、ココロパレアの結果から見えた「性格の傾向」と、"
+    + "シゴトソケットの結果から見えた「仕事でやってみたい活動」を見比べます。",
+  "同じ方向に出ることも、別々に出ることもあります。"
+    + "どちらが正しい・間違いということではありません。",
 ]);
 
-/** 6ペアすべてが落ちたとき。**これも正式な結果**（決めごとB-3）。 */
+/** 6ペアすべてが表示条件を満たさない場合も、結果として明示する。 */
 export const CONSISTENCY_NONE = Object.freeze([
-  "6つの組み合わせのどれについても、あなたの中ではっきりした向きが出ませんでした。これも結果のひとつです。",
+  "6つの組み合わせの中に、高め・低めの組み合わせとして今回取り上げるものはありませんでした。"
+    + "これも結果のひとつです。",
 ]);
 
-/**
- * 対象の6ペア。**増やさない**（決めごとB-2）。順序は processing-design §8 の表のまま。
- * 強さが同じときの並び順にも使うので、**並べ替えない。**
- *
- * `r` は原典で報告された相関。**係数として掛けない。**ペアを選ぶ根拠と、
- * `note`（本文に添える但し書き）にのみ使う。
- *
- * `text` は読み方の定型文。**1ペアにつき3本。**「揃った」は両方高いのと
- * 両方低いのを分ける（同じ文では意味が通らない）。「分かれた」は左右対称なので1本でよい。
- */
-export const CONSISTENCY_PAIRS = Object.freeze([
-  Object.freeze({
-    factorId: "intellectImagination", scaleId: "creativity", r: 0.30,
-    note: "原典で報告された結びつきは r=.30 で、強いものではありません。",
-    text: Object.freeze({
-      alignedHigh: "新しいものを考えることへの関心が、仕事に求めるものにもつながっている、と読めます。",
-      alignedLow: "考えを広げることも、仕事の中身に新しさを求めることも、いまのあなたの中では前に出ていないようです。",
-      crossed: "考えることが好きなのと、それを仕事の中身にしたいのとは、別のことかもしれません。",
-    }),
-  }),
-  Object.freeze({
-    factorId: "intellectImagination", scaleId: "erudition", r: 0.34,
-    note: "原典で報告された結びつきは r=.34 で、強いものではありません。",
-    text: Object.freeze({
-      alignedHigh: "知りたい気持ちが、読み書きや調べものへの関心にもそのまま出ている、と読めます。",
-      alignedLow: "知識を広げることも、言葉を扱う活動も、いまのあなたの関心の中心ではないようです。",
-      crossed: "考えることと、それを言葉で扱うこととは、別々に決まるのかもしれません。",
-    }),
-  }),
-  Object.freeze({
-    factorId: "intellectImagination", scaleId: "leadership", r: 0.29,
-    note: "原典で報告された結びつきは r=.29 で、強いものではありません。",
-    text: Object.freeze({
-      alignedHigh: "考えを持つことと、それを人に示して動かすことが、同じ向きに出ている、と読めます。",
-      alignedLow: "考えを広げることも、人をまとめることも、いまのあなたの中では前に出ていないようです。",
-      crossed: "自分で考えることと、人を率いる立場に立つこととは、別のことかもしれません。",
-    }),
-  }),
-  Object.freeze({
-    factorId: "agreeableness", scaleId: "altruism", r: 0.42,
-    note: "原典ではこの2つがもっとも強く結びついていましたが、その強さは r=.42 で、"
-      + "「だいたい一致する」というほどではありません。",
-    text: Object.freeze({
-      alignedHigh: "人に向く気持ちが、仕事に求めるものにもそのまま出ている、と読めます。",
-      alignedLow: "人に合わせることも、人を支えることを仕事の中心に置くことも、いまのあなたの中では前に出ていないようです。",
-      crossed: "人に合わせることと、人を支えること自体を仕事の中身に選ぶことは、別々に決まるのかもしれません。",
-    }),
-  }),
-  Object.freeze({
-    factorId: "extraversion", scaleId: "leadership", r: 0.38,
-    note: "原典で報告された結びつきは r=.38 で、強いものではありません。",
-    text: Object.freeze({
-      alignedHigh: "人と関わることへの向きが、まとめ役を引き受けたい気持ちにもつながっている、と読めます。",
-      alignedLow: "人と関わることも、引っぱる立場に立つことも、いまのあなたの中では前に出ていないようです。",
-      crossed: "人と関わるのが好きなことと、引っぱる立場に立ちたいかは、別のことかもしれません。",
-    }),
-  }),
-  Object.freeze({
-    factorId: "conscientiousness", scaleId: "organization", r: 0.20,
-    note: "原典で報告された結びつきは r=.20 で、6つの中でもっとも弱いものです。",
-    text: Object.freeze({
-      alignedHigh: "きちんと進めたい気持ちが、仕事の選び方にも表れている、と読めます。",
-      alignedLow: "きちんと進めることも、段取りを組む活動も、いまのあなたの中では前に出ていないようです。",
-      crossed: "きちんとやることと、段取りそのものを仕事にしたいかは、別々に決まるのかもしれません。",
-    }),
-  }),
-]);
+/** 研究補足に共通で示す、相関係数の最小限の読み方。 */
+export const CORRELATION_GUIDE = "相関係数の r は、−1から＋1までの数字で、2つの項目の関係を表します。"
+  + "0に近いほど関係が弱く、＋1に近いほど同じ方向に、−1に近いほど反対方向に出やすいことを示します。";
 
-/**
- * 本人の中での位置づけ。**個人内比較しか書かない**（決めごとB-1）。
- * @param {number} position 1始まりの順位
- * @param {number} total 母数（5因子なら5、8領域なら8）
- */
-export function positionPhrase(position, total) {
-  if (position === 1) return "いちばん高く出ています";
-  if (position === total) return "いちばん低く出ています";
-  return position * 2 <= total ? "高いほうです" : "低いほうです";
+function freezePair(pair) {
+  return Object.freeze({
+    ...pair,
+    factor: Object.freeze(pair.factor),
+    scale: Object.freeze(pair.scale),
+    interpretation: Object.freeze(pair.interpretation),
+    research: Object.freeze({ ...pair.research, lines: Object.freeze(pair.research.lines) }),
+  });
 }
 
-/**
- * 向きが揃ったときの2文目。**1文目と同じ語を繰り返さない。**
- * 「いちばん高く出ています」が2回続くと単調に読める（2026-09-05 本人指摘）。
- * 言い換えるだけで、意味は `positionPhrase` と同じ。
- */
-const ECHO_PHRASE = Object.freeze({
-  "いちばん高く出ています": "同じくいちばん上に来ています",
-  "いちばん低く出ています": "同じくいちばん下に来ています",
-  "高いほうです": "同じく高いほうです",
-  "低いほうです": "同じく低いほうです",
+/** 同じ因子・尺度が複数ペアへ出ても、説明文の正典は1か所に保つ。 */
+const FACTOR_COPY = Object.freeze({
+  intellectImagination: Object.freeze({
+    headingHigh: "考えや発想を広げる傾向は強め",
+    headingLow: "考えや発想を広げる傾向は控えめ",
+    high: "考えや発想を広げることを好む傾向が、あなたの中で強く出ています。",
+    low: "具体的で身近な事柄を好む傾向が、あなたの中で強く出ています。",
+  }),
+  agreeableness: Object.freeze({
+    headingHigh: "相手の気持ちや協力を重視する傾向は強め",
+    headingLow: "相手の気持ちや協力を重視する傾向は控えめ",
+    high: "相手の気持ちや協力を重視する傾向が、あなたの中で強く出ています。",
+    low: "率直に意見を伝える傾向が、あなたの中で強く出ています。",
+  }),
+  extraversion: Object.freeze({
+    headingHigh: "人との交流を好む傾向は強め",
+    headingLow: "人との交流を好む傾向は控えめ",
+    high: "人との交流を好む傾向が、あなたの中で強く出ています。",
+    low: "一人で過ごす場面を好む傾向が、あなたの中で強く出ています。",
+  }),
+  conscientiousness: Object.freeze({
+    headingHigh: "計画や整理を重視する傾向は強め",
+    headingLow: "計画や整理を重視する傾向は控えめ",
+    high: "計画や整理を重視する傾向が、あなたの中で強く出ています。",
+    low: "進め方をその都度柔軟に変える傾向が、あなたの中で強く出ています。",
+  }),
 });
 
-export function echoPhrase(phrase) {
-  return ECHO_PHRASE[phrase] ?? phrase;
+const SCALE_COPY = Object.freeze({
+  creativity: Object.freeze({
+    headingHigh: "新しいものを形にする活動への関心は高め",
+    headingLow: "新しいものを形にする活動への関心は低め",
+    high: "新しいものを考え、形にする活動への関心が、強く出ています。",
+    low: "新しいものを考え、形にする活動への関心は、強く出ていません。",
+  }),
+  erudition: Object.freeze({
+    headingHigh: "言葉や知識を扱う活動への関心は高め",
+    headingLow: "言葉や知識を扱う活動への関心は低め",
+    high: "言葉や知識を扱い、読み書きしたり調べたりする活動への関心が、強く出ています。",
+    low: "言葉や知識を扱い、読み書きしたり調べたりする活動への関心は、強く出ていません。",
+  }),
+  leadership: Object.freeze({
+    headingHigh: "人を率いる活動への関心は高め",
+    headingLow: "人を率いる活動への関心は低め",
+    high: "人をまとめたり、先頭に立って方向を決めたりする活動への関心が、強く出ています。",
+    low: "人をまとめたり、先頭に立って方向を決めたりする活動への関心は、強く出ていません。",
+  }),
+  altruism: Object.freeze({
+    headingHigh: "人を支える活動への関心は高め",
+    headingLow: "人を支える活動への関心は低め",
+    high: "人を支え、その人の力になる活動への関心が、強く出ています。",
+    low: "人を支え、その人の力になる活動への関心は、強く出ていません。",
+  }),
+  organization: Object.freeze({
+    headingHigh: "数字や手順を整える活動への関心は高め",
+    headingLow: "数字や手順を整える活動への関心は低め",
+    high: "数字や手順を整え、滞りなく回す活動への関心が、強く出ています。",
+    low: "数字や手順を整え、滞りなく回す活動への関心は、強く出ていません。",
+  }),
+});
+
+/** 対象の6ペア。順序とrは processing-design §8 の表を維持する。 */
+export const CONSISTENCY_PAIRS = Object.freeze([
+  freezePair({
+    factorId: "intellectImagination", scaleId: "creativity", r: 0.30,
+    factor: FACTOR_COPY.intellectImagination,
+    scale: SCALE_COPY.creativity,
+    interpretation: {
+      factorHighScaleHigh: "この2つを合わせると、考えや発想を広げながら、新しいものを形にする活動がしっくりくるのかもしれません。",
+      factorLowScaleLow: "この2つを合わせると、新しいものを考えて形にするより、具体的なものを扱うほうがしっくりくるのかもしれません。",
+      factorHighScaleLow: "この2つを合わせると、考えや発想を広げることは好きでも、それを新しい形にする活動は別なのかもしれません。",
+      factorLowScaleHigh: "この2つを合わせると、考えを広げること自体より、必要なものを実際の形にする活動に惹かれるのかもしれません。",
+    },
+    research: { lines: [
+      "参考として、英語原版の調査では、「知性・想像力」と「創造」の間に弱い正の相関（r=.30）が報告されています。",
+      "この2つは同じ方向に出ることが少し多いものの、強い関係ではありません。",
+    ] },
+  }),
+  freezePair({
+    factorId: "intellectImagination", scaleId: "erudition", r: 0.34,
+    factor: FACTOR_COPY.intellectImagination,
+    scale: SCALE_COPY.erudition,
+    interpretation: {
+      factorHighScaleHigh: "この2つを合わせると、考えや発想を広げ、それを言葉や知識で掘り下げる活動がしっくりくるのかもしれません。",
+      factorLowScaleLow: "この2つを合わせると、言葉や知識を広げるより、具体的で身近なことを扱うほうがしっくりくるのかもしれません。",
+      factorHighScaleLow: "この2つを合わせると、自分で考えを広げることは好きでも、言葉や知識を扱う活動は別なのかもしれません。",
+      factorLowScaleHigh: "この2つを合わせると、発想を広げること自体より、言葉や知識を扱う活動に惹かれるのかもしれません。",
+    },
+    research: { lines: [
+      "参考として、英語原版の調査では、「知性・想像力」と「言葉」の間に弱い正の相関（r=.34）が報告されています。",
+      "この2つは同じ方向に出ることが少し多いものの、強い関係ではありません。",
+    ] },
+  }),
+  freezePair({
+    factorId: "intellectImagination", scaleId: "leadership", r: 0.29,
+    factor: FACTOR_COPY.intellectImagination,
+    scale: SCALE_COPY.leadership,
+    interpretation: {
+      factorHighScaleHigh: "この2つを合わせると、自分の考えを広げ、それを周りに示しながら進める活動がしっくりくるのかもしれません。",
+      factorLowScaleLow: "この2つを合わせると、考えを広げたり人を率いたりするより、具体的なことに自分の持ち場で取り組むほうがしっくりくるのかもしれません。",
+      factorHighScaleLow: "この2つを合わせると、人を率いるよりも、自分で考え、自分の持ち場で動くほうがしっくりくるのかもしれません。",
+      factorLowScaleHigh: "この2つを合わせると、新しい発想を広げることよりも、目の前の人や状況をまとめて進める活動に惹かれるのかもしれません。",
+    },
+    research: { lines: [
+      "参考として、英語原版の調査では、「知性・想像力」と「統率」の間に弱い正の相関（r=.29）が報告されています。",
+      "この2つは同じ方向に出ることが少し多いものの、強い関係ではありません。",
+    ] },
+  }),
+  freezePair({
+    factorId: "agreeableness", scaleId: "altruism", r: 0.42,
+    factor: FACTOR_COPY.agreeableness,
+    scale: SCALE_COPY.altruism,
+    interpretation: {
+      factorHighScaleHigh: "この2つを合わせると、相手と協力しながら、人を支える活動がしっくりくるのかもしれません。",
+      factorLowScaleLow: "この2つを合わせると、人に合わせたり支援役になったりするより、別の関わり方がしっくりくるのかもしれません。",
+      factorHighScaleLow: "この2つを合わせると、相手の気持ちは大切にする一方で、人を支えること自体を仕事の中心にするかは別なのかもしれません。",
+      factorLowScaleHigh: "この2つを合わせると、率直に意見を伝えながら、必要な人を支える活動がしっくりくるのかもしれません。",
+    },
+    research: { lines: [
+      "参考として、英語原版の調査では、「協調性」と「支援」の間に正の相関（r=.42）が報告されています。",
+      "この2つは同じ方向に出る傾向がありますが、いつも一致するほど強い関係ではありません。",
+    ] },
+  }),
+  freezePair({
+    factorId: "extraversion", scaleId: "leadership", r: 0.38,
+    factor: FACTOR_COPY.extraversion,
+    scale: SCALE_COPY.leadership,
+    interpretation: {
+      factorHighScaleHigh: "この2つを合わせると、人と関わりながら、周りをまとめて進める活動がしっくりくるのかもしれません。",
+      factorLowScaleLow: "この2つを合わせると、大勢と関わったり先頭に立ったりするより、一人で自分の持ち場を進めるほうがしっくりくるのかもしれません。",
+      factorHighScaleLow: "この2つを合わせると、人と関わることは好きでも、先頭に立ってまとめる役割は別なのかもしれません。",
+      factorLowScaleHigh: "この2つを合わせると、普段は一人で過ごす場面を好んでも、必要な場面では周りをまとめる活動に惹かれるのかもしれません。",
+    },
+    research: { lines: [
+      "参考として、英語原版の調査では、「外向性」と「統率」の間に正の相関（r=.38）が報告されています。",
+      "この2つは同じ方向に出る傾向がありますが、いつも一致するほど強い関係ではありません。",
+    ] },
+  }),
+  freezePair({
+    factorId: "conscientiousness", scaleId: "organization", r: 0.20,
+    factor: FACTOR_COPY.conscientiousness,
+    scale: SCALE_COPY.organization,
+    interpretation: {
+      factorHighScaleHigh: "この2つを合わせると、計画を立て、数字や手順を整えて進める活動がしっくりくるのかもしれません。",
+      factorLowScaleLow: "この2つを合わせると、決まった計画や手順を整えるより、その都度やり方を変えて進めるほうがしっくりくるのかもしれません。",
+      factorHighScaleLow: "この2つを合わせると、計画や整理は大切にしても、数字や手順を整えること自体を仕事の中心にするかは別なのかもしれません。",
+      factorLowScaleHigh: "この2つを合わせると、進め方は柔軟に変えながらも、仕事では数字や手順を整える活動に惹かれるのかもしれません。",
+    },
+    research: { lines: [
+      "参考として、英語原版の調査では、「勤勉性」と「段取り」の間に弱い正の相関（r=.20）が報告されています。",
+      "この2つは同じ方向に出ることが少し多いものの、強い関係ではありません。",
+    ] },
+  }),
+]);
+
+/** 本人内の順位とzの向きを言葉へ変換する。集団比較には使わない。 */
+export function positionPhrase(position, total, high = position * 2 <= total) {
+  if (high) return position === 1 ? "いちばん高く出ています" : "高いほうです";
+  return position === total ? "いちばん低く出ています" : "低いほうです";
+}
+
+export function pastPositionPhrase(position, total, high = position * 2 <= total) {
+  if (high) return position === 1 ? "いちばん高く出ました" : "高いほうでした";
+  return position === total ? "いちばん低く出ました" : "低いほうでした";
 }
