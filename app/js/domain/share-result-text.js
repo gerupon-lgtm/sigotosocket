@@ -1,13 +1,18 @@
 import { ScaleById } from "../data/scale-definitions.js";
+import { appMeta } from "../config/app-meta.js";
 import { composeResultText } from "./result-composer.js";
 import { hollandResultLines } from "./holland.js";
 import { consistencyPairs, lockPreview, uniqueInterest } from "./cross-analysis.js";
 
 /**
  * S-003の結果を、そのまま他のアプリへ貼れるプレーンテキストへ組み立てる。
- * 生回答・連携コード・URLは含めず、画面に出している結果だけを対象にする。
+ * 冒頭にアプリ名と共有先URLを置き、生回答・連携コードは含めない。
  */
-export function composeShareResultText({ snapshot, bigFive = snapshot?.bigFive ?? null }) {
+export function composeShareResultText({
+  snapshot,
+  bigFive = snapshot?.bigFive ?? null,
+  shareUrl = `${appMeta.siteOrigin}/`,
+}) {
   if (!snapshot || typeof snapshot !== "object") throw new TypeError("SHARE_RESULT_INPUT_INVALID");
 
   const result = composeResultText({
@@ -18,6 +23,7 @@ export function composeShareResultText({ snapshot, bigFive = snapshot?.bigFive ?
   });
   const lines = [
     "シゴトソケット｜45問の詳細結果",
+    shareUrl,
     "",
     "あなたの称号",
     result.title,

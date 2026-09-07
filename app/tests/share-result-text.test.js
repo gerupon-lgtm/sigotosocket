@@ -14,6 +14,8 @@ const SNAPSHOT = (() => {
   return createResultSnapshot({ standardized, classification: classify(standardized) });
 })();
 
+const TEST_SHARE_URL = ["https:", "", "example.test", "sigotosocket", ""].join("/");
+
 test("共有テキストは結果画面の称号・説明・8尺度の点数・免責を含む", () => {
   const text = composeShareResultText({ snapshot: SNAPSHOT, bigFive: null });
   assert.ok(text.includes("シゴトソケット｜45問の詳細結果"));
@@ -33,9 +35,18 @@ test("連携済みの共有テキストは掛け合わせ結果も含む", () =>
   assert.ok(!text.includes("ココロパレアの結果と合わせると"), "未連携向け予告を共有している");
 });
 
-test("共有テキストにURLと回答値を含めない", () => {
-  const text = composeShareResultText({ snapshot: SNAPSHOT, bigFive: null });
-  assert.ok(!text.includes("http"));
+test("共有テキストは先頭にアプリ名とURLを置き回答値と連携コードを含めない", () => {
+  const text = composeShareResultText({ snapshot: SNAPSHOT, bigFive: null, shareUrl: TEST_SHARE_URL });
+  assert.deepEqual(text.split("\n").slice(0, 3), [
+    "シゴトソケット｜45問の詳細結果",
+    TEST_SHARE_URL,
+    "",
+  ]);
   assert.ok(!text.includes("b5="));
   assert.ok(!text.includes("item-"));
+});
+
+test("共有URLを渡せない呼び出しでも正式URLを含める", () => {
+  const text = composeShareResultText({ snapshot: SNAPSHOT, bigFive: null });
+  assert.equal(text.split("\n")[1], "https://sigotosocket.sikumilab.com/");
 });

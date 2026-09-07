@@ -117,6 +117,8 @@ T-046は回答中ヘッダーの外枠classと余白を開始・回答完了画�
 
 受領直後にトップへ出す「受け取りました／更新しました」は永続データではない。現在の画面遷移中だけメモリ上に持ち、再読込後は表示しない。
 
+T-048の共有URLは、共有操作時に現在のHTTPS URLまたは `appMeta.siteOrigin` から生成する一時値である。`ResultSnapshot` や `localStorage` へ保存せず、`schemaVersion` は変更しない。クエリ、ハッシュ、結果ID、連携コードを共有用データへ持ち込まない。
+
 ## 5. タイプ命名表（`app/js/data/type-definitions.js`）
 
 `typeId` は**28件**（8尺度から2つを選ぶ組み合わせ）。

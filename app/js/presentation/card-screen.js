@@ -3,12 +3,37 @@ import { appHeader } from "./app-header.js";
 import { screenHeading } from "./screen-heading.js";
 import { renderCard } from "../infrastructure/card-renderer.js";
 import { composeShareResultText } from "../domain/share-result-text.js";
+import { appMeta } from "../config/app-meta.js";
 
-export function renderCardScreen({ snapshot, onBack, onHome }) {
+function resolveShareUrl(currentUrl) {
+  const fallbackUrl = `${appMeta.siteOrigin}/`;
+  try {
+    const url = new URL(currentUrl);
+    if (url.protocol !== "https:") return fallbackUrl;
+    url.search = "";
+    url.hash = "";
+    if (!url.pathname.endsWith("/")) {
+      url.pathname = url.pathname.replace(/[^/]*$/, "");
+    }
+    return url.href;
+  } catch {
+    return fallbackUrl;
+  }
+}
+
+export function renderCardScreen({
+  snapshot,
+  onBack,
+  onHome,
+  currentUrl = globalThis.location?.href,
+}) {
   const status = el("p", { class: "meta", text: "カードを生成しています…" });
   const holder = el("div", { class: "card-holder" });
   const actions = el("div", { class: "actions" });
-  const shareText = composeShareResultText({ snapshot });
+  const shareText = composeShareResultText({
+    snapshot,
+    shareUrl: resolveShareUrl(currentUrl),
+  });
   let cardCanvas = null;
 
   const toBlob = () => new Promise((resolve) => {

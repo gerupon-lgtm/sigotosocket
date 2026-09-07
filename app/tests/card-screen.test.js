@@ -16,6 +16,8 @@ const { appMeta } = await import("../js/config/app-meta.js");
 // URLの文字列そのものは書かない。app/ 配下に外部URLの literal があると
 // npm run check（外部通信ゼロの静的検査）に引っかかるため。
 const ORIGIN = `${appMeta.siteOrigin}/`;
+const TEST_HTTPS_ORIGIN = ["https:", "", "example.test", "sigotosocket", ""].join("/");
+const TEST_LOCAL_URL = ["http:", "", "localhost:4173", "#/card?resultId=local-only"].join("/");
 
 const SNAPSHOT = (() => {
   const standardized = standardize(scoreScales({ items: ItemMaster, answers: answersWith((_, i) => (i % 5) + 1) }));
@@ -49,7 +51,7 @@ test("結果画面の内容をコピーする操作がある", () => {
   assert.ok(labels.includes("テキストをコピー"), `テキスト共有が無い: ${labels.join("/")}`);
 });
 
-test("テキストをコピーすると結果画面の内容がクリップボードへ渡る", async () => {
+test("テキストをコピーするとアクセスしたアプリURLを先頭付近に含める", async () => {
   const written = [];
   const previous = globalThis.navigator;
   Object.defineProperty(globalThis, "navigator", {
@@ -57,7 +59,9 @@ test("テキストをコピーすると結果画面の内容がクリップボ�
     value: { clipboard: { writeText: async (text) => written.push(text) } },
   });
   try {
-    const node = render();
+    const node = render({
+      currentUrl: `${TEST_HTTPS_ORIGIN}#/card?resultId=local-only`,
+    });
     const button = [...node.querySelectorAll("button")].find((item) => item.textContent === "テキストをコピー");
     button.click();
     await Promise.resolve();
@@ -65,7 +69,26 @@ test("テキストをコピーすると結果画面の内容がクリップボ�
     assert.equal(written.length, 1);
     assert.ok(written[0].includes("シゴトソケット｜45問の詳細結果"));
     assert.ok(written[0].includes("8つの領域の点数"));
-    assert.ok(!written[0].includes("http"));
+    assert.equal(written[0].split("\n")[1], TEST_HTTPS_ORIGIN);
+  } finally {
+    Object.defineProperty(globalThis, "navigator", { configurable: true, value: previous });
+  }
+});
+
+test("共有できないローカルURLでは正式URLを共有テキストに使う", async () => {
+  const written = [];
+  const previous = globalThis.navigator;
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: { clipboard: { writeText: async (text) => written.push(text) } },
+  });
+  try {
+    const node = render({ currentUrl: TEST_LOCAL_URL });
+    const button = [...node.querySelectorAll("button")].find((item) => item.textContent === "テキストをコピー");
+    button.click();
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.equal(written[0].split("\n")[1], ORIGIN);
   } finally {
     Object.defineProperty(globalThis, "navigator", { configurable: true, value: previous });
   }
