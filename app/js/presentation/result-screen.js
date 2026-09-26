@@ -56,7 +56,7 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
   const holland = hollandResultLines(snapshot.rank);
   // ②整合／不整合（F-012）。連携していれば必ず何か返る（該当なしも正式な結果）。
   const consistency = consistencyPairs({ scaleScores: snapshot.scaleScores, bigFive });
-  // ③固有性（F-013）。連携していない・該当が無いときは null が返り、見出しごと出ない。
+  // ③性格とは別の角度から見えた興味（F-013）。連携していない・該当が無いときは null が返り、見出しごと出ない。
   const unique = uniqueInterest({ rank: snapshot.rank, bigFive });
   // ロック予告（F-014）。連携済みなら null になり、上の本文と入れ替わる。
   const preview = lockPreview({ rank: snapshot.rank, bigFive });
@@ -85,7 +85,7 @@ export function renderResultScreen({ snapshot, bigFive = null, onCard, onRestart
       }
     }
     if (unique) {
-      linkage.push(el("h3", { class: "consistency-head", text: "性格からは予測できない興味" }));
+      linkage.push(el("h3", { class: "consistency-head", text: "性格とは別の角度から見えた興味" }));
       linkage.push(el("div", { class: "prose unique-interest" },
         unique.lines.map((line) => el("p", { text: line }))));
     }

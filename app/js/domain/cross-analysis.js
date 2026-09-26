@@ -6,21 +6,22 @@ import {
 } from "./cross-analysis-text.js";
 
 /**
- * 掛け合わせの層（第2フェーズ）。②組み合わせの読み方（F-012）と③固有性（F-013）を持つ。
+ * 掛け合わせの層（第2フェーズ）。②組み合わせの読み方（F-012）と③性格とは別の角度から見えた興味（F-013）を持つ。
  *
  * ②は2アプリの結果を出どころごとに説明し、その後で断定を避けた組み合わせの読み方を示す。
  * 原典で報告された相関は主本文へ混ぜず、開閉できる研究補足へ分ける。
  *
  * 友人サンプルの実測は品質確認として `npm run sample:check`（T-035）で行うが、
- * 結果文は原典相関から個人結果を予測したように書かない（要件定義書 v1.34）。
+ * 結果文は原典相関から個人結果を予測したように書かない（要件定義書 v1.36）。
  *
  * ②と③は依拠するものが違う。②は「相関があること」に寄りかかるので、原典のrとその限界を必ず添える。
- * ③は「**相関がないこと**」に寄りかかるので、日本語訳や短縮で関係の強さが変わっても揺らがない。
+ * ③は原版研究で5因子との関連が全体に小さかった領域を、性格とは別の角度で振り返る。
+ * 個人についての予測不能性や固有性を証明したものとは扱わない。
  */
 
 /**
- * ビッグファイブの5因子とほとんど関係が見られない尺度（processing-design §9）。
- * **増やさない。**ここを広げると③の根拠（無相関）が薄い尺度まで混ざる。
+ * ORVIS原版研究で、測定したビッグファイブ5因子との関連が全体に小さかった尺度（processing-design §9）。
+ * **増やさない。**ここを広げると③の根拠（関連の小ささ）が薄い尺度まで混ざる。
  */
 export const UNIQUE_INTEREST_SCALES = Object.freeze(["production", "adventure"]);
 
@@ -32,7 +33,7 @@ export const UNIQUE_INTEREST_SCALES = Object.freeze(["production", "adventure"])
 export const UNIQUE_INTEREST_TOP_N = 2;
 
 /**
- * ③固有性。**該当が無ければ null。**無理に何かを見つけない（決めごとB-3と同じ姿勢）。
+ * ③性格とは別の角度から見えた興味。**該当が無ければ null。**無理に何かを見つけない（決めごとB-3と同じ姿勢）。
  *
  * @param {{rank: string[]|null, bigFive: object|null}} input
  * @returns {{scaleIds: string[], lines: string[]}|null}
@@ -46,7 +47,7 @@ function targetsInTop(rank) {
 }
 
 export function uniqueInterest({ rank, bigFive }) {
-  // 連携していない人に「性格特性からは予測できない」と言っても意味が通らない。
+  // 連携していない人には、性格結果とは別の角度という比較が成立しない。
   if (!bigFive) return null;
 
   const scaleIds = targetsInTop(rank);
@@ -56,9 +57,9 @@ export function uniqueInterest({ rank, bigFive }) {
   return Object.freeze({
     scaleIds: Object.freeze(scaleIds),
     lines: Object.freeze([
-      `${labels}は、ビッグファイブの5因子とはほとんど関係が見られない領域です。`,
-      "あなたの上位に入ったこの興味は、性格特性から予測できるものではありません。"
-      + "予測できないという事実そのものが、ここでの手がかりになります。",
+      `ORVIS原版の研究では、「${labels}」と、その研究で測定したビッグファイブの5因子との関連は全体に小さく報告されています。`,
+      `今回の回答では、「${labels}」があなたの8領域の中で上位に入りました。`
+      + "性格の結果とは別に、どのような活動に惹かれるかを振り返る手がかりになります。",
     ]),
   });
 }
@@ -90,8 +91,8 @@ export function lockPreview({ rank, bigFive }) {
     const phrase = scaleIds
       .map((scaleId) => `${rank.indexOf(scaleId) + 1}位の「${ScaleById[scaleId].labelJa}」`)
       .join("と");
-    lines.push(`${phrase}は、ビッグファイブの5因子とはほとんど関係が見られない領域です。`
-      + "性格特性からは予測できない興味として、ここも結果に加えられます。");
+    lines.push(`${phrase}は、ORVIS原版の研究で、その研究で測定したビッグファイブの5因子との関連が全体に小さく報告された領域です。`
+      + "性格とは別の角度から見えた興味として、ここも結果に加えられます。");
   }
 
   return Object.freeze({ scaleIds: Object.freeze(scaleIds), lines: Object.freeze(lines) });

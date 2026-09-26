@@ -205,7 +205,7 @@ test("判定不能ならホランド型の節を出さない", () => {
   assert.ok(!text.includes("ホランド"), "順位が無いのにホランド型が出ている");
 });
 
-test("連携済みで手仕事・挑戦が上位なら、結果画面に固有の興味が出る（F-013）", async () => {
+test("連携済みで手仕事・挑戦が上位なら、性格とは別の角度から見えた興味が出る（F-013）", async () => {
   const { parseBigFiveCode } = await import("../js/domain/big-five-link.js");
   const snapshot = snapshotFor(answersByScale({ production: 5, adventure: 4 }));
   assert.deepEqual(snapshot.rank.slice(0, 2), ["production", "adventure"]);
@@ -215,16 +215,18 @@ test("連携済みで手仕事・挑戦が上位なら、結果画面に固有�
   });
   const text = node.textContent;
   assert.ok(text.includes("手仕事") && text.includes("挑戦"));
-  assert.ok(text.includes("予測できるものではありません"), "③の根拠が出ていない");
+  assert.ok(text.includes("性格とは別の角度から見えた興味"));
+  assert.ok(text.includes("ORVIS原版の研究"));
+  assert.ok(!text.includes("予測できない"));
 });
 
-test("連携していなければ固有の興味は出さない", () => {
+test("連携していなければ性格とは別の角度から見えた興味は出さない", () => {
   const snapshot = snapshotFor(answersByScale({ production: 5, adventure: 4 }));
-  const text = renderResultScreen({
+  const node = renderResultScreen({
     snapshot, bigFive: null, onCard() {}, onRestart() {}, onAbout() {},
-  }).textContent;
-  assert.ok(!text.includes("予測できるものではありません"),
-    "連携していないのに固有の興味を出している");
+  });
+  assert.equal(node.querySelectorAll(".unique-interest").length, 0,
+    "連携していないのに追加の興味説明を出している");
 });
 
 test("連携済みでも対象の領域が上位でなければ出さない", async () => {
@@ -234,7 +236,7 @@ test("連携済みでも対象の領域が上位でなければ出さない", as
     snapshot, bigFive: parseBigFiveCode("v1-342288401195267"),
     onCard() {}, onRestart() {}, onAbout() {},
   }).textContent;
-  assert.ok(!text.includes("予測できるものではありません"));
+  assert.ok(!text.includes("性格とは別の角度から見えた興味"));
 });
 
 test("未連携で対象が上位なら、連携の予告を出す（F-014）", () => {
@@ -254,7 +256,7 @@ test("連携済みなら予告は消え、本文に入れ替わる", async () =>
     onCard() {}, onRestart() {}, onAbout() {},
   }).textContent;
   assert.ok(!text.includes("連携すると"), "連携済みなのに予告が残っている");
-  assert.ok(text.includes("予測できるものではありません"), "本文が出ていない");
+  assert.ok(text.includes("性格とは別の角度から見えた興味"), "本文が出ていない");
 });
 
 test("T-047 組み合わせ結果は平易な本文を先に示し、研究上の根拠は閉じておく", async () => {
@@ -493,6 +495,8 @@ test("出典・免責画面に出典とデータ削除がある", () => {
   const text = node.textContent;
   assert.ok(text.includes("ORVIS"));
   assert.ok(text.includes("パブリックドメイン"));
+  assert.ok(text.includes("本アプリ用に項目を選び、日本語化した短縮版（45問）"));
+  assert.ok(text.includes("設問への回答値（1〜5）の平均"));
   assert.ok(text.includes("削除"));
 });
 
@@ -506,14 +510,17 @@ test("結果画面の③は、結果に紐づいた連携を見る（カード�
   const withLink = renderResultScreen({
     snapshot: linked, bigFive: linked.bigFive,
     onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
-  }).textContent;
-  assert.ok(withLink.includes("予測できるものではありません"));
+  });
+  const withLinkText = withLink.textContent;
+  assert.equal(withLink.querySelectorAll(".unique-interest").length, 1);
+  assert.ok(withLinkText.includes("性格とは別の角度から見えた興味"));
+  assert.ok(!withLinkText.includes("予測できない"));
 
   const without = renderResultScreen({
     snapshot: base, bigFive: base.bigFive,
     onCard() {}, onRestart() {}, onHome() {}, onAbout() {},
-  }).textContent;
-  assert.ok(!without.includes("予測できるものではありません"));
+  });
+  assert.equal(without.querySelectorAll(".unique-interest").length, 0);
 });
 
 test("トップの見出しは「やってみたいことを知る」（2026-09-05 本人決定）", () => {

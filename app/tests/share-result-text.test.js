@@ -7,7 +7,7 @@ import { classify } from "../js/domain/type-classifier.js";
 import { createResultSnapshot } from "../js/domain/result-snapshot.js";
 import { composeShareResultText } from "../js/domain/share-result-text.js";
 import { parseBigFiveCode } from "../js/domain/big-five-link.js";
-import { answersWith } from "./helpers.js";
+import { answersByScale, answersWith } from "./helpers.js";
 
 const SNAPSHOT = (() => {
   const standardized = standardize(scoreScales({ items: ItemMaster, answers: answersWith((_, i) => (i % 5) + 1) }));
@@ -33,6 +33,19 @@ test("連携済みの共有テキストは掛け合わせ結果も含む", () =>
   const text = composeShareResultText({ snapshot: SNAPSHOT, bigFive });
   assert.ok(text.includes("ココロパレアと合わせて見えたこと"));
   assert.ok(!text.includes("ココロパレアの結果と合わせると"), "未連携向け予告を共有している");
+});
+
+test("共有テキストも性格から個人の興味を予測できないとは断定しない", () => {
+  const answers = answersByScale({ production: 5, adventure: 4 }, 1);
+  const standardized = standardize(scoreScales({ items: ItemMaster, answers }));
+  const snapshot = createResultSnapshot({ standardized, classification: classify(standardized) });
+  const bigFive = parseBigFiveCode("v1-342288401195267");
+  const text = composeShareResultText({ snapshot, bigFive });
+
+  assert.ok(text.includes("性格とは別の角度から見えた興味"));
+  assert.ok(text.includes("ORVIS原版の研究"));
+  assert.ok(text.includes("関連は全体に小さく"));
+  assert.ok(!text.includes("予測できない"));
 });
 
 test("共有テキストは先頭にアプリ名とURLを置き回答値と連携コードを含めない", () => {

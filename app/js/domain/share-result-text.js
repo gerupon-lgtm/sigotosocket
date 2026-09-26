@@ -49,7 +49,7 @@ export function composeShareResultText({
     lines.push("", "ココロパレアと合わせて見えたこと", ...consistency.preamble);
     if (consistency.noneLines) lines.push(...consistency.noneLines);
     else for (const item of consistency.items) lines.push(item.heading, ...item.lines);
-    if (unique) lines.push("性格からは予測できない興味", ...unique.lines);
+    if (unique) lines.push("性格とは別の角度から見えた興味", ...unique.lines);
   } else if (preview) {
     lines.push("", "ココロパレアの結果と合わせると", ...preview.lines);
   }

@@ -459,7 +459,7 @@ a { color: var(--accent); }
 /* display を持つので、hidden 属性だけでは消えない */
 .character-fallback[hidden] { display: none; }
 
-/* 連携の節（②整合／不整合・③固有性）。観察ブロックと同じ見た目にそろえる */
+/* 連携の節（②組み合わせの読み方・③性格とは別の角度から見えた興味）。観察ブロックと同じ見た目にそろえる */
 h3 { font-size: 1rem; margin: 20px 0 6px; }
 .linkage-preamble p { color: var(--sub); font-size: 0.9rem; }
 .consistency-item { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; margin: 0 0 18px; }

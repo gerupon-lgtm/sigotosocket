@@ -8,7 +8,7 @@ import { parseBigFiveCode } from "../js/domain/big-five-link.js";
 
 const LINK = parseBigFiveCode("v1-342288401195267");
 
-test("対象はビッグファイブとほぼ無相関の2尺度だけ（processing-design §9）", () => {
+test("対象は原版研究で5因子との関連が全体に小さい2尺度だけ（processing-design §9）", () => {
   assert.deepEqual([...UNIQUE_INTEREST_SCALES], ["production", "adventure"]);
   assert.equal(UNIQUE_INTEREST_TOP_N, 2);
 });
@@ -21,7 +21,7 @@ test("判定不能なら何も出さない", () => {
   assert.equal(uniqueInterest({ rank: null, bigFive: LINK }), null);
 });
 
-test("手仕事が上位に入っていれば、固有の興味として出す", () => {
+test("手仕事が上位に入っていれば、性格とは別の角度から見えた興味として出す", () => {
   const result = uniqueInterest({ rank: ["production", "analysis", "adventure"], bigFive: LINK });
   assert.deepEqual(result.scaleIds, ["production"]);
   assert.ok(result.lines.join("").includes("手仕事"));
@@ -48,9 +48,12 @@ test("対象外の尺度だけが上位なら出さない。無理に何かを�
   assert.equal(uniqueInterest({ rank: ["analysis", "erudition", "leadership"], bigFive: LINK }), null);
 });
 
-test("予測できないことを根拠にする。性格から導いたと書かない", () => {
+test("原版研究の関連の小ささを根拠にし、個人の予測不能性を断定しない", () => {
   const text = uniqueInterest({ rank: ["production", "adventure"], bigFive: LINK }).lines.join("");
-  assert.ok(text.includes("予測"), "予測できないという根拠が書かれていない");
+  assert.ok(text.includes("ORVIS原版の研究"), "研究の範囲が書かれていない");
+  assert.ok(text.includes("関連は全体に小さく"), "関連の小ささが書かれていない");
+  assert.ok(text.includes("性格の結果とは別に"), "振り返り方が書かれていない");
+  assert.ok(!text.includes("予測できない"), "個人について予測不能と断定している");
   assert.ok(!text.includes("だから"), "因果でつないでいる");
 });
 
@@ -85,6 +88,8 @@ test("予告は本人の順位と領域名を名指しする（F-014）", async 
   assert.ok(text.includes("手仕事"), `領域名が無い: ${text}`);
   assert.ok(text.includes("1位"), `順位が無い: ${text}`);
   assert.ok(text.includes("連携"), "連携への導線になっていない");
+  assert.ok(text.includes("性格とは別の角度から見えた興味"));
+  assert.ok(!text.includes("予測できない"));
 });
 
 test("2位が対象でも予告を出し、順位を正しく言う", async () => {

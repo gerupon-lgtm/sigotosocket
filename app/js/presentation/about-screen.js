@@ -12,7 +12,7 @@ export function renderAboutScreen({ onBack, onClearAll }) {
     el("p", { text: "結果は自己理解の手がかりであり、能力や適性を判定するものではありません。診断名や適職を示すものでもありません。" }),
 
     el("h2", { text: "使っている尺度" }),
-    el("p", { text: "ORVIS（Oregon Vocational Interest Scales）の日本語短縮版45問を使用しています。ORVISはIPIP（International Personality Item Pool）に収録されたパブリックドメインの尺度です。" }),
+    el("p", { text: "ORVIS（Oregon Vocational Interest Scales）をもとに、本アプリ用に項目を選び、日本語化した短縮版（45問）を使用しています。ORVISはIPIP（International Personality Item Pool）に収録されたパブリックドメインの尺度です。" }),
     el("ul", {}, [
       el("li", {}, [el("a", { href: "https://projects.ori.org/lrg/PDFs_papers/Pozzebon_etal_2009_ORVIS_JPA.pdf", target: "_blank", rel: "noopener noreferrer" }, "Pozzebon et al. (2010) ORVIS 原論文")]),
       el("li", {}, [el("a", { href: "https://ipip.ori.org/", target: "_blank", rel: "noopener noreferrer" }, "International Personality Item Pool")]),
@@ -20,6 +20,7 @@ export function renderAboutScreen({ onBack, onClearAll }) {
     el("p", { class: "meta", text: "項目は日本語へ翻訳し、日本の文脈に合わせて一部を調整しています。この日本語版は独立した妥当性の検証を受けていません。" }),
 
     el("h2", { text: "得点の読み方" }),
+    el("p", { text: "各領域の点数は、その領域に含まれる設問への回答値（1〜5）の平均です。" }),
     el("p", { text: "高い・低いは、あなたの8領域どうしを比べた結果です。ほかの人と比べたものではありません。日本語版の規範データが存在しないため、集団との比較は行いません。" }),
 
     el("h2", { text: "使っているフォント" }),
