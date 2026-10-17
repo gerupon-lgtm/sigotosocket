@@ -16,6 +16,21 @@ test("canonical と og:url が siteOrigin と一致する", () => {
   assert.equal(ogUrl, `${appMeta.siteOrigin}/`);
 });
 
+test("T-050 F-009 フッターに屋号の著作権表示がある", () => {
+  assert.match(
+    html,
+    /<span class="app-footer-copyright">© 2026 SIKUMI LAB<\/span>/,
+  );
+});
+
+test("T-050 更新対象の入口資産はアプリ版でキャッシュ識別する", () => {
+  const stylesheetVersion = html.match(/css\/style\.css\?v=([^"]+)/)?.[1];
+  const scriptVersion = html.match(/js\/main\.js\?v=([^"]+)/)?.[1];
+
+  assert.equal(stylesheetVersion, appMeta.appVersion);
+  assert.equal(scriptVersion, appMeta.appVersion);
+});
+
 test("HTMLが参照するブランド資産が実在する", () => {
   const refs = [
     "app/manifest/app.webmanifest",

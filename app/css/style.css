@@ -421,10 +421,27 @@ table.scores .num { text-align: right; width: 4em; }
 .card-canvas { width: 100%; max-width: 420px; height: auto; border: 1px solid var(--line); border-radius: 12px; }
 
 .app-footer {
-  display: flex; justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   max-width: 640px; width: 100%; margin: 0 auto; padding: 12px 20px 20px;
   color: var(--sub); font-size: 0.8rem; border-top: 1px solid var(--line);
 }
+
+.app-footer-brand,
+.app-footer-copyright,
+#app-version {
+  white-space: nowrap;
+}
+
+.app-footer-copyright {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+#app-version { text-align: right; }
 
 a { color: var(--accent); }
 
